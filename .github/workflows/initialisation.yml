@@ -1,0 +1,65 @@
+name: Initialiser le projet 7.20 validé
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Saisir INITIALISER pour restaurer les sources validées'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  importer:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'INITIALISER'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Restaurer uniquement le paquet validé
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, zipfile
+          from pathlib import Path, PurePosixPath
+          root=Path('.')
+          marker=root/'.initialisation-7.20-effectuee'
+          if marker.exists():
+              print('Initialisation déjà effectuée, sources inchangées.')
+              raise SystemExit(0)
+          chunks=[root/'bootstrap/package-7.20.b64']+[root/f'bootstrap/parts-7.20/{i:03}.b64' for i in range(2,27)]
+          data=base64.b64decode(''.join(p.read_text().strip() for p in chunks),validate=True)
+          digest=hashlib.sha256(data).hexdigest()
+          if digest!='51c3d84cb389dfe4600a7cffa0155f659e0f365723f5777ec70d5691b4554764':
+              raise SystemExit('Archive incomplète ou modifiée : arrêt sans écriture.')
+          with zipfile.ZipFile(io.BytesIO(data)) as z:
+              for member in z.infolist():
+                  path=PurePosixPath(member.filename)
+                  if path.is_absolute() or '..' in path.parts or not path.parts or path.parts[0]!='accueil2008':
+                      raise SystemExit('Chemin ZIP interdit')
+                  rel=PurePosixPath(*path.parts[1:])
+                  if rel.suffix.lower() in ('.p12','.jks','.keystore'):
+                      raise SystemExit('Clé privée interdite')
+                  if member.is_dir() or not rel.parts or rel.parts[0]=='.github':
+                      continue
+                  target=root/str(rel)
+                  target.parent.mkdir(parents=True,exist_ok=True)
+                  target.write_bytes(z.read(member))
+          marker.write_text(digest+'\n')
+          PY
+      - run: npm install --prefix tests --ignore-scripts
+      - run: npm test --prefix tests
+      - run: sha256sum --check distribution/SHA256SUMS
+      - run: python3 outils/validate_release.py
+      - name: Enregistrer les sources et l’APK vérifiés
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f README.md GITHUB.md LISEZMOI.txt .gitignore version.json sources_assets module_GPS_java outils tests distribution .initialisation-7.20-effectuee
+          if ! git diff --cached --quiet; then
+            git commit -m 'Initialiser les sources et la distribution vérifiées 7.20'
+            git push origin HEAD:main
+          fi
