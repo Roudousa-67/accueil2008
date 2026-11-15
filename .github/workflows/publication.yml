@@ -12,7 +12,7 @@ jobs:
   publier:
     if: github.ref == 'refs/heads/main' && inputs.confirmation == 'PUBLIER'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: write
     steps:
@@ -23,12 +23,31 @@ jobs:
       - run: npm install --prefix tests --ignore-scripts
       - run: npm test --prefix tests
       - run: sha256sum --check distribution/SHA256SUMS
-      - name: Valider les métadonnées
-        run: python3 outils/validate_release.py
-      - name: Publier l’APK déjà signé
+      - name: Valider la proposition de version
+        run: python3 outils/validate_release.py distribution/release.json
+      - name: Publier ou vérifier l’APK déjà signé
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          version=$(python3 -c 'import json; print(json.load(open("version.json"))["version"])')
-          apk="distribution/Accueil2008GT_v${version}.apk"
-          gh release create "v${version}" "$apk" distribution/SHA256SUMS --target "$GITHUB_SHA" --title "Accueil 2008 GT ${version}" --notes-file distribution/NOTES.md
+          set -euo pipefail
+          version=$(python3 -c 'import json; print(json.load(open("distribution/release.json"))["version"])')
+          apk="Accueil2008GT_v${version}.apk"
+          if gh release view "v${version}" >/dev/null 2>&1; then
+            test "$(gh release view "v${version}" --json isDraft --jq '.isDraft')" = false
+            mkdir -p "$RUNNER_TEMP/release-verify"
+            gh release download "v${version}" --pattern "$apk" --dir "$RUNNER_TEMP/release-verify"
+            cmp "distribution/$apk" "$RUNNER_TEMP/release-verify/$apk"
+          else
+            gh release create "v${version}" "distribution/$apk" distribution/SHA256SUMS --target "$GITHUB_SHA" --title "Accueil 2008 GT ${version}" --notes-file distribution/NOTES.md
+          fi
+      - name: Annoncer la version seulement après disponibilité de l’APK
+        run: |
+          set -euo pipefail
+          cp distribution/release.json version.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add version.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Annoncer la version publiée aux autoradios'
+            git push origin HEAD:main
+          fi
