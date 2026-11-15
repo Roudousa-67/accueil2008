@@ -18,3 +18,5 @@ jobs:
       - run: npm test --prefix tests
       - name: Contrôler l’APK livré
         run: sha256sum --check distribution/SHA256SUMS
+      - name: Valider la version préparée
+        run: python3 outils/validate_release.py distribution/release.json
