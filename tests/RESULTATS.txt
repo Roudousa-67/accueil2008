@@ -1,0 +1,115 @@
+OK chargement complet sans erreur
+OK version
+OK délai initial une minute
+OK ville à la position GPS
+OK panneau ville permanent
+OK une seule requête par service malgré appels concurrents
+OK pas de doublons dans la minute
+OK autoroute choisit le plus proche, même village derrière à moins de 500 m
+OK panneau bleu autoroute
+OK distance indiquée
+OK village précis au lieu de la commune englobante
+OK panneau village blanc rouge
+OK panneau village visible
+OK cache à l’arrêt évite les requêtes répétées
+OK réglage 30 secondes enregistré
+OK valeur de délai invalide ignorée
+OK nouvelle position au nouveau délai
+OK hors réseau les noms éloignés sont masqués
+OK indisponibilité annoncée
+OK échec réseau libère le verrou
+OK reprise réseau
+OK GPS périmé masqué
+OK priorité village à la ville administrative
+OK géométrie choisit la rue proche plutôt que l’autoroute voisine
+OK origine réelle WebView et bordure
+OK réglage descend réellement le rectangle
+OK écran haute densité
+OK intégration native appelée
+OK GPS natif suit un déplacement de 40 pixels
+OK GPS natif masqué dans les réglages
+OK GPS natif masqué pendant modification
+OK refus natif ne force pas une ouverture plein écran
+OK fenêtre existante reçoit une nouvelle position après déplacement
+OK coordonnées transmises à Android
+OK aucune requête avec une position GPS périmée
+OK options d’actualisation présentes dans les réglages
+OK aucune erreur de script après scénarios
+OK panneau unique par tuile route
+OK panneau sur le côté droit
+OK panneau fixe à la même hauteur
+OK aucun panneau en bas
+OK largeur du panneau limitée au bas-côté
+OK la vitesse et le temps ne déplacent pas le panneau
+OK barre Accueil descendue au démarrage
+OK espace réservé appliqué
+OK descendre la barre dans les réglages
+OK remonter la barre dans les réglages
+OK hauteur de barre non cumulée
+OK grande barre du poste prise en compte
+OK limite basse de l’écran respectée
+OK limite supérieure respectée
+OK retour à la hauteur conseillée
+OK panneau reste hors de la voiture sur trois passages et trois formats
+OK le panneau défile vers le bas-côté
+OK véhicule opposé se rapproche au lieu de s’éloigner
+OK perspective hors de la route et hors de la voiture pour trois formats
+OK panneau choisit un emplacement du même flux que les arbres
+OK panneau grandit et approche vers le bas-côté
+OK panneau réellement rapproché de la route
+OK décor mélangé conservé au fil des passages
+OK obstacles gênants filtrés à chaque passage
+OK alternance bâtiment espace panneau espace prévue dès le départ
+OK emplacements stables sur vingt tours
+OK aucun masquage dynamique dans le décor
+OK rapprochement visible par rapport à la 7.16
+OK espaces réservés divisés par deux
+OK transition rangée dans Décor de la route
+OK réglages panneaux dans Panneaux et localités
+OK durée sauvegardée
+OK taille sauvegardée
+OK écart sauvegardé
+OK fréquence sauvegardée
+OK valeur de taille invalide ignorée
+OK marge voiture pour toutes les tailles et distances
+OK soleil traverse le ciel du matin au soir
+OK soleil plus haut à midi
+OK lune traverse la nuit y compris minuit
+OK pas de soleil en pleine nuit en mode heure
+OK mode horaire local sans GPS
+OK mode GPS calcule localement
+OK soleil visible à midi en été
+OK GPS ancien revient au rythme horaire
+OK position invalide ne produit pas de coordonnées de dessin
+OK mode de ciel sauvegardé
+OK astres désactivables
+OK ciel progressif désactivable
+OK réglages ciel dans la catégorie Navigation
+OK positions des astres bornées dans le ciel
+OK recherche par mot à l’intérieur des réglages
+OK filtre par catégorie
+OK recherche sans sensibilité à la casse
+OK défilement du paramètre conservé après sélection
+OK défilement des catégories conservé
+OK texte de recherche conservé pendant le rendu
+OK focus conservé pendant la frappe
+OK résultat vocal alimente la recherche
+OK GPS étendu à cinq rangées
+OK barre applications ramenée à une rangée
+OK disposition normale restaurable
+OK lien de mise à jour du dépôt accepté
+OK lien externe de mise à jour refusé
+OK proposition avant téléchargement
+OK report de mise à jour sans téléchargement
+OK immeubles du premier plan conservés à gauche
+OK bâtiments rétablis à droite hors du panneau
+OK panneau maintenant dessiné dans le décor animé
+OK rendu Canvas sans erreur : village
+OK rendu Canvas sans erreur : autoroute
+OK début de transition conserve l’ancien décor
+OK fondu intermédiaire mélange les deux décors
+OK fin de transition affiche le nouveau décor
+OK canvas redimensionné quand seule la hauteur change
+OK dessin soleil et lune sans erreur Canvas
+
+113 vérifications réussies.

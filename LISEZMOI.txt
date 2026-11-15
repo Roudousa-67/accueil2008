@@ -1,0 +1,224 @@
+VERSION 7.20 — RECHERCHE, DÉFILEMENT ET GPS AGRANDI
+Paramètres : recherche dans toutes les rubriques, filtrage par catégorie et
+micro de dictée Android. La recherche gère les accents. Le résultat ouvre la
+rubrique correspondante. En absence de dictée, le clavier reste disponible.
+Le défilement de la page et des catégories ainsi que le focus de saisie restent
+en place quand un choix recrée l’interface. Les pages visitées sont mémorisées
+pendant la session.
+Écran d’accueil > Barre d’applications : mode Compacte par défaut. Sur la
+disposition Autoradio standard, le GPS passe de 4 à 5 rangées et la barre de
+2 à 1. Les dispositions personnalisées ne sont ajustées que si le GPS et la
+barre sont adjacents et compatibles ; le placement manuel reste disponible.
+Mises à jour : proposition avant téléchargement, choix Plus tard ou Télécharger
+après sauvegarde. GitHub connecté mais dépôt encore à identifier : lire
+GITHUB.md. Aucun code n’a été publié. preparer_github.py prépare des sources
+sans clé privée ni mot de passe pour la revue avant publication.
+113 vérifications simulées réussies. Signature d’origine conservée, manifeste,
+DEX et correspondance assets/sources contrôlés. Pas de test physique : micro,
+Waze, géolocalisation et firmware restent à confirmer sur l’autoradio.
+
+Historique :
+
+VERSION 7.19 — SOLEIL, LUNE ET AFFICHAGE
+Navigation > Décor de la route : Soleil et lune, Ciel progressif, Position des
+astres. Options activables et sauvegardées. Par défaut : ciel progressif et
+astres activés, mode Automatique GPS.
+Avec GPS récent : positions du soleil et de la lune calculées localement par
+SunCalc 1.9.0 selon date, heure et coordonnées. Aucune requête réseau additionnelle.
+Sans GPS récent ou en mode Heure locale : trajectoires indicatives comme dans
+l’aperçu, soleil 6–20 h et lune 20–6 h. La projection gauche/droite est décorative,
+indépendante du cap de la voiture. En mode GPS, la lune peut être visible le jour
+et absente certaines nuits : elle n’est dessinée qu’au-dessus de l’horizon.
+Le disque lunaire est un visuel stylisé, pas une représentation exacte de sa phase.
+Pluie, orage et brouillard masquent les astres. Les couleurs du ciel évoluent
+progressivement. Le ciel est dessiné derrière le décor.
+
+AFFICHAGE
+Corrections antérieures de la barre Accueil, du cadre GPS et des panneaux
+conservées. Correction supplémentaire du Canvas : sa hauteur est recalculée
+quand la hauteur disponible change sans changement de largeur.
+98 vérifications simulées réussies, dont resize en hauteur, calculs heure/GPS,
+positions jour/nuit, réglages et rendus Canvas. Signature et sources APK vérifiées.
+Aucun essai physique sur autoradio : le fonctionnement réel de Waze et du
+firmware reste à confirmer sur le poste.
+SunCalc est inclus dans sources_assets/lib avec son fichier de licence BSD.
+Source du paquet utilisé : https://github.com/mourner/suncalc (version 1.9.0).
+
+Historique :
+
+VERSION 7.18 — PARAMÈTRES DE TRANSITION ET DE PANNEAUX
+Navigation > Décor de la route : transition désactivée ou fondu de 0,5 / 1 / 1,5 /
+2 secondes. Valeur par défaut : 1 seconde. Le fondu conserve la dernière image
+du décor précédent et fonctionne aussi après reconstruction de la page.
+Navigation > Panneaux et localités : taille 80 / 100 / 120 / 140 %, distance
+Proche / Actuelle / Éloignée / Très éloignée, fréquence Très rapprochés /
+Actuelle / Espacés. Choix sauvegardés. La marge avec la voiture reste protégée.
+Pas de cartouche du numéro de route en bas à gauche : proposition écartée.
+Les paramètres et la transition décrits ici sont inclus dans l’APK ; les autres
+idées montrées dans l’essai des nouveautés ne sont pas annoncées comme intégrées.
+82 vérifications simulées réussies, dont contrôle des pixels au début, au milieu
+et à la fin du fondu. Signature et assets APK vérifiés. Pas de test matériel.
+
+Historique :
+
+VERSION 7.17 — PANNEAUX RAPPROCHÉS ET ESPACES RÉDUITS
+Panneaux rapprochés latéralement du bord de route. Marge avec la voiture
+maintenue et vérifiée pour trois formats d’écran.
+Disposition fixe sur huit emplacements au lieu de dix : panneau, un espace,
+cinq éléments de décor, un espace, puis panneau suivant. Les espaces réservés
+passent de quatre à deux par cycle. Aucun masquage dynamique de bâtiment.
+71 vérifications simulées réussies ; signature et assets APK vérifiés.
+Pas d’essai matériel sur autoradio.
+
+Historique :
+
+VERSION 7.16 — DÉCOR D’ORIGINE AVEC EMPLACEMENTS PRÉVUS
+Les maisons, immeubles et arbres reprennent leur dessin du décor initial.
+Le panneau conserve la position rapprochée et la marge avec la voiture.
+Alternance fixe sur dix emplacements : panneau, deux espaces, cinq éléments
+de décor, deux espaces, puis le panneau suivant. Les emplacements sont décidés
+par l’identité de l’objet dès le lointain et restent identiques jusqu’au passage.
+Le masquage conditionné par la position à l’écran est supprimé du rendu.
+Le panneau est rendu après le décor latéral pour garder son nom et ses poteaux
+visibles, sans effacer les bâtiments en cours de passage.
+69 vérifications simulées réussies dont vingt tours de disposition stable.
+Signature et assets APK vérifiés ; pas d’essai matériel sur autoradio.
+
+Historique (les anciens filtrages dynamiques sont remplacés ci-dessus) :
+
+VERSION 7.15 — DÉCOR MÉLANGÉ AUTOUR DU PANNEAU
+Arbres et maisons rétablis aussi à droite, autour du panneau dont la position
+reste celle de la 7.14. À chaque image et à chaque passage, une enveloppe
+protectrice inclut le panneau et ses poteaux. Seuls les objets dont l’enveloppe
+projetée recouperait cette zone sont écartés ; le reste du décor défile normalement.
+Le déplacement en perspective, la marge avec la voiture et le trafic opposé
+sont conservés. 66 vérifications simulées réussies ; pas de test matériel.
+
+Historique (la suppression globale du premier plan droit est remplacée) :
+
+VERSION 7.14 — PANNEAU RAPPROCHÉ DU BORD DE ROUTE
+Distance latérale réduite ; marge avec le visuel de la voiture maintenue.
+Les arbres à droite plus proches que le panneau sont laissés hors du premier
+plan pour qu'ils ne cachent ni le panneau ni ses poteaux. Les arbres à gauche
+et ceux derrière le panneau restent animés.
+64 vérifications simulées réussies ; signature et sources APK vérifiées.
+Pas d’essai sur autoradio physique.
+
+Historique :
+
+VERSION 7.13 — PANNEAU EN PERSPECTIVE
+Le panneau est dessiné dans le décor avec la même profondeur et le même
+ordonnancement que les arbres. Il remplace un emplacement à droite tous les
+sept éléments du décor. Les deux emplacements voisins restent dégagés.
+Le poteau est ancré au sol, hors de la chaussée. Le panneau grandit en approchant
+puis sort naturellement par le bord droit : aucune position ne le recale vers
+la route. L’écartement tient compte de la taille du visuel de la voiture.
+Le libellé DOM est transparent et conservé pour l’accessibilité : aucun doublon
+visible sous la voiture. La circulation opposée corrigée en 7.12 est conservée.
+63 vérifications simulées réussies ; pas d’essai sur autoradio physique.
+
+Historique (les anciens déplacements du panneau sont remplacés ci-dessus) :
+
+CORRECTIONS 7.12
+Le panneau défile avec la distance parcourue, reste strictement à droite de
+l’emprise de la voiture et s’efface au passage avant de réapparaître au loin.
+La voiture ne recouvre pas le panneau : la position tient compte de la taille
+réelle du visuel de la voiture, avec une marge latérale.
+Les véhicules sur la chaussée opposée de l’autoroute arrivent de face :
+profondeur décroissante, carrosserie et phares visibles de jour comme de nuit.
+60 vérifications simulées réussies, signature et sources APK vérifiées.
+Pas d’essai sur autoradio physique.
+
+Historique 7.11 (la règle de panneau fixe est remplacée par celle ci-dessus) :
+
+ACCUEIL 2008 GT — VERSION 7.12
+Correction d'après la vidéo fournie le 15 novembre 2026.
+
+INSTALLATION
+Installer Accueil2008GT_v7.19.apk par-dessus la version actuelle, sans désinstaller.
+Même paquet et même certificat de signature vérifiés. Version Android : 89.
+Une sauvegarde des réglages depuis l'application est conseillée avant mise à jour.
+
+CORRECTIONS DE LA VIDÉO
+- Barre Accueil / Trajets / Entretien descendue de 64 px logiques par défaut.
+  Le contenu se redimensionne dans la hauteur disponible ; le GPS conserve le
+  suivi de son cadre. L'écran des réglages et le tiroir d'applications gardent
+  aussi cet espace en haut.
+- Réglages > Écran d'accueil > Hauteur de la barre Accueil : remonter ou
+  descendre par pas de 8 px, de 0 à 160 px ; bouton Rétablir pour revenir à 64 px.
+- L'ancien réglage de hauteur de barre du poste n'est pas cumulé : seule la
+  plus grande des deux hauteurs est réservée, pour éviter un double décalage.
+- Un seul panneau de localité, fixe sur le bas-côté droit : à 38 % du haut de
+  la tuile, 3 % du bord droit, largeur 28 %.
+- Le panneau ne grossit pas, n'avance pas et ne descend pas vers la voiture
+  quand la vitesse ou le temps changent.
+- Suppression du panneau sous la voiture et de tous les panneaux supplémentaires
+  dans le décor animé. Le nom n'est affiché qu'une fois par tuile route.
+- Premier plan droit dégagé : les immeubles/maisons qui passaient devant le
+  panneau ne sont plus dessinés de ce côté. Le décor et les bâtiments à gauche
+  sont conservés.
+
+FONCTIONS DE LA 7.10 CONSERVÉES
+Ville ou village à la position GPS ; sur autoroute, localité dont le centre
+est le plus proche. La distance est à vol d'oiseau, pas une distance d'itinéraire.
+Panneau blanc/rouge en ville ou village, bleu sur autoroute, vert sur voie rapide.
+Réglages > Navigation > Panneaux et localités : actualisation 15 s, 30 s, 1 min
+(par défaut), 2 min ou 5 min. À l'arrêt, les réponses réseau sont en cache 5 min.
+Détection de route par proximité de sa géométrie et suivi du cadre GPS.
+
+VÉRIFICATIONS
+57 vérifications réussies avec réponses réseau simulées :
+- chargement des scripts et logique de géolocalisation ;
+- ville, village, localité la plus proche sur autoroute ;
+- délai, cache, perte et reprise réseau, position GPS périmée ;
+- position GPS, densité d'écran, déplacement et masquage du cadre ;
+- panneau unique, position fixe et absence du panneau sous la voiture ;
+- barre descendue, hauteur réglable et absence de décalage cumulé ;
+- rendu Canvas réel de la route : ville, village et autoroute ;
+- absence de bâtiment au premier plan droit et absence de panneau dans le flux animé.
+
+Signature APK, certificat, version, intégrité et correspondance des assets avec
+les sources vérifiés. Les sources natives de la 7.10 restent inchangées.
+Le rapport et les tests sont dans tests/.
+
+L'autoradio physique, Waze réel et le GPS réel ne sont pas disponibles ici :
+leur comportement matériel n'est pas présenté comme testé. Le firmware peut
+continuer à imposer une barre système ; le décalage réglable sert à garder les
+commandes accessibles dans ce cas.
+
+WAZE
+Intégration native ActivityView si Android 10/11 et la permission système
+ACTIVITY_EMBEDDING sont disponibles ; sinon fenêtre Android avec demande de
+redimensionnement, puis launchIn si nécessaire. Une installation APK normale
+ne donne pas la permission d'encastrement système.
+Si le poste conserve l'ancienne position de Waze, fermer sa fenêtre depuis les
+applications récentes puis toucher Ouvrir ici. Ne pas désinstaller Waze.
+
+DONNÉES CARTOGRAPHIQUES
+GPS et Internet nécessaires. Nominatim et Overpass, déjà utilisés par les
+versions précédentes, reçoivent les coordonnées pour rechercher noms et routes.
+Cache à l'arrêt et appels mutualisés pour cet usage personnel.
+Politique : https://operations.osmfoundation.org/policies/nominatim/
+Maximum absolu du géocodage public : 1 requête/s. Les appels périodiques doivent
+rester faibles et utiliser le cache ; pour une diffusion large, utiliser un
+service dédié. Les services en direct n'ont pas été testés pendant ces essais.
+
+CONTENU
+Accueil2008GT_v7.19.apk : application installable signée.
+sources_assets/ : sources exactes des assets, dont v710.js et v711.js.
+module_GPS_java/ : sources natives et scripts d'origine actualisés.
+outils/classes3.dex : module natif compilé.
+outils/AndroidManifest.xml : manifeste binaire 7.11.
+outils/accueil2008gt.p12 : clé de signature d'origine, à garder privée.
+tests/ : tests et compte rendu.
+
+RECONSTRUIRE LES ASSETS
+Depuis ce dossier, avec Python 3 :
+  python outils/build.py Accueil2008GT_v7.19.apk non_signe.apk sources_assets outils/AndroidManifest.xml
+  python outils/align.py non_signe.apk aligne.apk
+Puis signer avec apksigner et la clé PKCS12 d'origine.
+Le module natif est recopié depuis outils/classes3.dex.
+
+EXÉCUTER LES TESTS (Node.js)
+  npm install --prefix tests
+  node tests/regression.cjs

@@ -1,7 +1,5 @@
 # Accueil 2008 GT
 
-> Initialisation en cours : cette documentation est publiée. Les sources, les tests et les APK ne sont pas encore transférés ; leurs liens ci-dessous deviendront actifs après cet envoi. Aucune release téléchargeable n’est encore publiée.
-
 Lanceur Android personnalisé pour l’autoradio d’une Peugeot 2008 GT Line.
 Version actuelle : **7.20** · application `fr.gtline.accueil2008` · Android 7.0+.
 

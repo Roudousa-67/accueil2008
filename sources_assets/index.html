@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Accueil 2008 GT</title>
+<link rel="stylesheet" href="lib/leaflet.css">
+<link rel="stylesheet" href="lib/maplibre-gl.css">
+<style>
+@font-face{font-family:Inter;font-weight:400;src:url(fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:Inter;font-weight:500;src:url(fonts/inter-latin-500-normal.woff2)}
+@font-face{font-family:Inter;font-weight:600;src:url(fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:Inter;font-weight:700;src:url(fonts/inter-latin-700-normal.woff2)}
+@font-face{font-family:Rajdhani;font-weight:500;src:url(fonts/rajdhani-latin-500-normal.woff2)}
+@font-face{font-family:Rajdhani;font-weight:600;src:url(fonts/rajdhani-latin-600-normal.woff2)}
+@font-face{font-family:Rajdhani;font-weight:700;src:url(fonts/rajdhani-latin-700-normal.woff2)}
+@font-face{font-family:Orbitron;font-weight:500;src:url(fonts/orbitron-latin-500-normal.woff2)}
+@font-face{font-family:Orbitron;font-weight:600;src:url(fonts/orbitron-latin-600-normal.woff2)}
+@font-face{font-family:Orbitron;font-weight:700;src:url(fonts/orbitron-latin-700-normal.woff2)}
+@font-face{font-family:'Playfair Display';font-weight:500;src:url(fonts/playfair-display-latin-500-normal.woff2)}
+@font-face{font-family:'Playfair Display';font-weight:600;src:url(fonts/playfair-display-latin-600-normal.woff2)}
+@font-face{font-family:'Playfair Display';font-weight:700;src:url(fonts/playfair-display-latin-700-normal.woff2)}
+@font-face{font-family:'Space Grotesk';font-weight:500;src:url(fonts/space-grotesk-latin-500-normal.woff2)}
+@font-face{font-family:'Space Grotesk';font-weight:600;src:url(fonts/space-grotesk-latin-600-normal.woff2)}
+@font-face{font-family:'Space Grotesk';font-weight:700;src:url(fonts/space-grotesk-latin-700-normal.woff2)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#000}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+#stage{position:absolute;left:0;top:0;width:1280px;transform-origin:0 0;overflow:hidden}
+#screen{position:absolute;inset:0;padding:14px 16px}
+[data-act]{cursor:pointer}
+[data-act]:active{opacity:.75}
+.leaflet-container{background:transparent;font-family:Inter,sans-serif}
+.maplibregl-ctrl-attrib{font-size:10px!important}.maplibregl-ctrl-bottom-right{z-index:400}
+.leaflet-control-attribution{background:#0008!important;color:#bbb!important;font-size:10px!important}
+.leaflet-control-attribution a{color:#ddd!important}
+.scroll{overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{width:6px}.scroll::-webkit-scrollbar-thumb{background:#8884;border-radius:3px}
+input,select,textarea{user-select:text;-webkit-user-select:text;font-family:inherit}
+.ov{position:absolute;inset:0;z-index:2000;display:none;flex-direction:column;padding:22px 26px;gap:14px;background:#08090Cf5;color:#F2F2F4;font-family:Inter,sans-serif}
+.ov.on{display:flex}
+.ovh{display:flex;align-items:center;justify-content:space-between;font-size:22px;font-weight:600}
+.close{background:#1E2027;border-radius:12px;height:48px;padding:0 18px;font-size:15px;font-weight:600}
+#appGrid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:14px;align-content:start;padding-bottom:20px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;text-align:center;padding:8px 4px;border-radius:14px;background:#14151A}
+.app img,.app .ph{width:56px;height:56px;border-radius:12px}.app .ph{background:#1E2027}
+.app span{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#setBody{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-content:start}
+.set{background:#14151A;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.set h3{margin:0;font-size:15px;font-weight:600}
+.set label{font-size:13px;color:#9A9BA3;display:flex;flex-direction:column;gap:4px}
+.fld{background:#1E2027;color:#F2F2F4;border:1px solid #2E3038;border-radius:10px;height:44px;padding:0 12px;font-size:15px;width:100%}
+.sbtn{background:#1E2027;border-radius:10px;min-height:44px;padding:0 14px;font-size:14px;font-weight:600;text-align:left;display:flex;align-items:center;justify-content:space-between}
+#toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);background:#000d;color:#fff;border-radius:12px;padding:12px 18px;font-size:15px;z-index:3000;display:none;font-family:Inter,sans-serif}
+#mapHold{position:absolute;left:-5000px;top:0;width:600px;height:400px}
+#map{position:absolute;inset:0}
+
+@keyframes fslideL{from{transform:translateX(70px);opacity:.25}to{transform:none;opacity:1}}
+@keyframes fslideR{from{transform:translateX(-70px);opacity:.25}to{transform:none;opacity:1}}
+.fslideL{animation:fslideL .22s ease-out}.fslideR{animation:fslideR .22s ease-out}
+@keyframes fjig{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
+.fj{animation:fjig .17s infinite alternate ease-in-out}.fj:nth-child(3n){animation-delay:-.09s}.fj:nth-child(3n+1){animation-duration:.19s}
+.fapp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:100%;height:100%;min-width:0;min-height:0}
+.ficw{position:relative;flex:none}
+.fic{position:relative;width:var(--ics,58px);height:var(--ics,58px);border-radius:24%;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font-size:calc(var(--ics,58px) * .42);font-weight:700;box-shadow:0 2px 8px #0005}
+.fic>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+img[data-icon]:not([src]){visibility:hidden}
+.flb{font-size:12.5px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 3px #0009;line-height:1.2}
+.ffold{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;padding:12%;align-items:stretch;justify-items:stretch}
+.ffold i{position:relative;border-radius:24%;overflow:hidden}.ffold i img{position:absolute;inset:0;width:100%;height:100%}
+.fdel{position:absolute;top:-9px;left:-9px;z-index:760;width:30px;height:30px;border-radius:50%;background:#3A3B40;color:#fff;font-size:22px;line-height:28px;font-weight:700;text-align:center;box-shadow:0 1px 5px #000a;font-style:normal;display:block}
+.fhandle{position:absolute;right:0;bottom:0;z-index:760;width:52px;height:52px;touch-action:none}
+.fhandle::after{content:"";position:absolute;right:7px;bottom:7px;width:22px;height:22px;border-right:5px solid #fff;border-bottom:5px solid #fff;border-radius:0 0 8px 0;filter:drop-shadow(0 0 3px #000)}
+.fmerge{outline:4px solid #fff;outline-offset:2px;transform:scale(1.06);transition:transform .12s}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="screen"></div>
+  <div id="mapHold"><div id="map"></div></div>
+
+  <div id="drawer" class="ov">
+    <div class="ovh"><span id="drawerTitle">Applications</span><button class="close" data-act="close">Fermer</button></div>
+    <div id="appGrid" class="scroll"></div>
+  </div>
+
+  <div id="settings" class="ov">
+    <div class="ovh"><span>Réglages</span><div style="display:flex;gap:10px"><button class="close" data-act="saveSettings" style="background:#1F6FD1;color:#fff">Enregistrer</button><button class="close" data-act="close">Fermer</button></div></div>
+    <div id="setBody" class="scroll">
+      <div class="set">
+        <h3>Écran et autorisations</h3>
+        <div id="homeState" style="font-size:13px;font-weight:600"></div>
+        <button class="sbtn" data-act="open:home">Écran d'accueil Android <span>›</span></button>
+        <button class="sbtn" data-act="open:qflauncher">Écran d'accueil de l'autoradio (menu usine) <span>›</span></button>
+        <button class="sbtn" data-act="open:overlay">Démarrage automatique <span id="autoState">›</span></button>
+        <button class="sbtn" data-act="toggleImmersive">Masquer la barre du haut <span id="immState">›</span></button>
+        <button class="sbtn" data-act="open:notif">Musique et pochettes <span id="notifState">›</span></button>
+        <button class="sbtn" data-act="open:location">Localisation (GPS) <span>›</span></button>
+        <button class="sbtn" data-act="open:app">Autorisations de l'appli <span>›</span></button>
+        <button class="sbtn" data-act="calib" style="background:#4A3FA8">Corriger les voyants (ceinture, coffre…) <span>›</span></button>
+        <div id="carInfo" style="font-size:12px;color:#9A9BA3"></div>
+      </div>
+      <div class="set">
+        <h3>Profils</h3>
+        <label>Profil 1<input class="fld" id="p0" maxlength="16"></label>
+        <label>Profil 2<input class="fld" id="p1" maxlength="16"></label>
+        <label>Profil 3<input class="fld" id="p2" maxlength="16"></label>
+      </div>
+      <div class="set">
+        <h3>Navigation et vitesse</h3>
+        <label>Adresse Maison<input class="fld" id="aHome" placeholder="12 rue des Lilas, Strasbourg"></label>
+        <label>Adresse Travail<input class="fld" id="aWork" placeholder="Adresse du travail"></label>
+        <label>Alerte au-delà de la limite de<select class="fld" id="tol"><option value="0">+0 km/h</option><option value="3">+3 km/h</option><option value="5">+5 km/h</option><option value="10">+10 km/h</option></select></label>
+      </div>
+      <div class="set">
+        <h3>Carburant</h3>
+        <label>Carburant de ma 2008<select class="fld" id="fuel"><option>E10</option><option>SP95</option><option>SP98</option><option>Gazole</option><option>E85</option><option>GPLc</option></select></label>
+        <label>Consommation si la voiture ne la donne pas (L/100 km)<input class="fld" id="consFallback" type="number" step="0.1" placeholder="6,0"></label>
+      </div>
+      <div class="set">
+        <h3>Rappels d'entretien</h3>
+        <label>Prochaine vidange à (km compteur)<input class="fld" id="oilKm" type="number" placeholder="95000"></label>
+        <label>ou à la date<input class="fld" id="oilDate" type="date"></label>
+        <label>Intervalle entre vidanges (km)<input class="fld" id="oilInt" type="number" placeholder="20000"></label>
+      </div>
+      <div class="set">
+        <h3>Contrôle technique</h3>
+        <label>Date du prochain CT<input class="fld" id="ctDate" type="date"></label>
+        <div style="font-size:12px;color:#9A9BA3">Appui long sur un raccourci du bas pour choisir une autre appli.</div>
+      </div>
+    </div>
+  </div>
+  <div id="toast"></div>
+</div>
+<script src="lib/leaflet.js"></script>
+<script src="lib/maplibre-gl.js"></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.js"></script>
+<script src="lib/RoomEnvironment.js"></script>
+<script src="car3d.js"></script>
+<script src="app.js"></script>
+<script src="v4.js"></script>
+<script src="home5.js"></script>
+<script src="v47.js"></script>
+<script src="v710.js"></script>
+<script src="v711.js"></script>
+<script src="v712.js"></script>
+<script src="v713.js"></script>
+<script src="v718.js"></script>
+<script src="lib/suncalc-1.9.0.js"></script>
+<script src="v719.js"></script>
+<script src="v720.js"></script>
+</body>
+</html>

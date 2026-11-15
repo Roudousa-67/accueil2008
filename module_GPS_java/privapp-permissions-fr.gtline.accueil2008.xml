@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- À copier dans /system/etc/permissions/ (ou /product/etc/permissions/ si l'APK est dans /product/priv-app).
+     OBLIGATOIRE : sans ce fichier, si ro.control_privapp_permissions=enforce, l'autoradio peut refuser de démarrer. -->
+<permissions>
+    <privapp-permissions package="fr.gtline.accueil2008">
+        <permission name="android.permission.ACTIVITY_EMBEDDING"/>
+        <permission name="android.permission.MANAGE_ACTIVITY_STACKS"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+    </privapp-permissions>
+</permissions>

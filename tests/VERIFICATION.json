@@ -1,0 +1,13 @@
+{
+  "version": "7.20",
+  "versionCode": 90,
+  "checks_passed": 113,
+  "hardware_tested": false,
+  "microphone_hardware_tested": false,
+  "signature_verified": true,
+  "assets_match_sources": true,
+  "native_voice_in_dex": true,
+  "voice_activity_in_manifest": true,
+  "github_published": false,
+  "apk_sha256": "27efcaa391cb8b9303110f2b75b38209c574d4cb60b094be5654d90d80243b34"
+}

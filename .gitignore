@@ -1,0 +1,9 @@
+*.p12
+*.jks
+*.keystore
+*.apk
+.env*
+node_modules/
+**/work/
+__pycache__/
+!distribution/Accueil2008GT_v*.apk
