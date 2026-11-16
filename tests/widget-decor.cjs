@@ -50,7 +50,7 @@ assert.equal(r('RoadDecor721.places.get(widgetCv.parentNode).old'),'Ancienne com
 assert.equal(r('Place710.here().name'),'Nouvelle commune');checks++;
 assert.deepEqual(t.errors,[]);if(out)fs.writeFileSync(path.join(out,'jour-nuit.png'),sheet.toBuffer('image/png'));
 // Géométrie et orientation correspondant à la référence approuvée.
-r("Decor721.preview='normal';Decor721.previewScene='foret';Decor721.previewHour=14;Decor721.defs.forEach(d=>store.set('decor721_D'+d[0],true));RoadDecor721.draw(widgetCv,3,120,60)");
+r("widgetCv.parentNode.setAttribute('data-decor721-preview','');Decor721.preview='normal';Decor721.previewScene='foret';Decor721.previewHour=14;Decor721.defs.forEach(d=>store.set('decor721_D'+d[0],true));RoadDecor721.draw(widgetCv,3,120,60)");
 const car=cv.parentNode.querySelector('[data-car360]');
 assert(car);assert.equal(car.style.width,'29.2%');assert.equal(car.style.bottom,'28%');assert(car.style.backgroundPosition.startsWith('52.174%'));checks++;
 r("store.set('decor721_D67',false);RoadDecor721.draw(widgetCv,3,120,60)");
