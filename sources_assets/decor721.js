@@ -125,11 +125,11 @@ window.RoadDecor721={
   const pt=(q,k)=>({x:P.center(q)+P.half(q)*k,y:hz+(H-hz)*q});
   const band=(a,b,col)=>{c.fillStyle=col;c.beginPath();for(let i=0;i<=32;i++){const p=pt(i/32,a);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);}for(let i=32;i>=0;i--){const p=pt(i/32,b);c.lineTo(p.x,p.y);}c.closePath();c.fill();};
   if(on(13)){band(-1.25,-1.02,night?'#283e39':'#7f8b69');band(1.02,1.25,night?'#283e39':'#7f8b69');}
-  g=c.createLinearGradient(0,hz,0,H);g.addColorStop(0,night?'#14234f':'#2a4896');g.addColorStop(1,night?'#0a1436':'#1a2f70');
+  g=c.createLinearGradient(0,hz,0,H);g.addColorStop(0,night?'#303a3c':'#80847d');g.addColorStop(1,night?'#182629':'#626b67');
   band(-1,1,g);
-  const motorway=scene==='autoroute';if(motorway){band(-3.4,-1.3,night?'#101c40':'#253f86');band(-1.3,-1.08,night?'#34415d':'#8196ae');}
+  const motorway=scene==='autoroute';if(motorway){band(-3.4,-1.3,night?'#202d30':'#69716d');band(-1.3,-1.08,night?'#414b40':'#839174');}
   const stroke=(k,color,width)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();for(let i=0;i<=32;i++){const p=pt(i/32,k);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);}c.stroke();};
-  stroke(-1,'#61dcff',2);stroke(1,'#61dcff',2);if(motorway){stroke(-3.4,'#9ac8ee',1);stroke(-1.3,'#b5c6d8',2);}
+  stroke(-1,'#dedfce',2);stroke(1,'#dedfce',2);if(motorway){stroke(-3.4,'#dadcca',1);stroke(-1.3,'#c4cbbd',2);}
   const offset=this.mod(distance*.12,1);
   for(let z=.4-offset;z<40;z+=1){if(z<=.3)continue;const q0=Math.min(1,1/z),q1=Math.min(1,1/(z+.48));if(q0===q1)continue;
    const lanes=motorway?[-.15,-2.35]:[0];for(const lane of lanes){const a=pt(q0,lane),b=pt(q1,lane),w0=Math.max(.4,P.half(q0)*.025),w1=Math.max(.3,P.half(q1)*.025);c.fillStyle=night&&on(18)?'#fff9d9':'#eef3ff';c.beginPath();c.moveTo(a.x-w0,a.y);c.lineTo(a.x+w0,a.y);c.lineTo(b.x+w1,b.y);c.lineTo(b.x-w1,b.y);c.fill();}}
