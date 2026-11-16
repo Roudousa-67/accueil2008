@@ -2,8 +2,8 @@ const {make}=require('./regression.cjs');
 const assert=require('assert/strict'),fs=require('fs'),path=require('path'),crypto=require('crypto');
 let count=0;function ok(name,test){assert(test,name);count++;console.log('OK '+name);}
 const t=make({canvas:true}),r=t.run;
-const ids=[4,...Array.from({length:38},(_,i)=>i+13)];
-ok('39 options correspondent exactement à la sélection',JSON.stringify(r('Decor721.defs.map(d=>d[0])'))===JSON.stringify(ids));
+const ids=[4,...Array.from({length:65},(_,i)=>i+13)];
+ok('66 options de décor indépendantes',JSON.stringify(r('Decor721.defs.map(d=>d[0])'))===JSON.stringify(ids));
 ok('aucune option activée sans choix utilisateur',r('Decor721.enabled()')===false);
 for(const id of ids){r(`act('decor721:toggle:${id}')`);ok('D'+id+' activable et persisté',r(`Decor721.on(${id})&&store.get('decor721_D${id}')===true`));r(`act('decor721:toggle:${id}')`);ok('D'+id+' désactivable',!r(`Decor721.on(${id})`));}
 const nav=r('SETCATS.find(c=>c[0]==="Navigation")[1]');

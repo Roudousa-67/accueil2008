@@ -250,3 +250,7 @@ npm test --prefix tests
 La clé privée et son mot de passe ne sont pas publiés dans ce dépôt. Les bibliothèques et ressources conservent leurs licences respectives ; aucune nouvelle licence globale n’est attribuée aux sources du lanceur.
 
 
+
+## Proposition de décors illustratifs du widget
+
+La branche de travail ajoute 27 options de décor, avec paramètres et aide, sans publication automatique. [Fonctions, rendus jour/nuit et bilan de vérification](docs/WIDGET-DECORS.md). Aucun nouvel APK signé n’est fourni tant que la clé d’origine n’est pas disponible.

@@ -7,6 +7,33 @@ window.Decor721 = {
  [21,2,'Arbres plus variés','Feuillus et conifères alternés.'],[22,2,'Végétation en profondeur','Herbe, arbres proches et forêt lointaine.'],[23,2,'Densité du décor réglable','Choix peu, moyen ou beaucoup de végétation.'],[24,2,'Maisons de village','Façades, toits et détails variés.'],[25,2,'Ville plus vivante','Immeubles de hauteurs et couleurs différentes.'],[26,2,'Fenêtres allumées','Quelques fenêtres chaleureuses la nuit.'],[27,2,'Petites places et jardins','Espaces aménagés entre les bâtiments.'],[28,2,'Paysages de campagne','Champs et haies au-delà de l’accotement.'],[29,2,'Montagnes au loin','Silhouettes sur plusieurs plans.'],[30,2,'Décor saisonnier','Saison automatique ou choisie ; effet purement décoratif.'],
  [31,3,'Nuages en plusieurs plans','Mouvements lents à différentes profondeurs.'],[32,3,'Aube rosée','Teintes douces autour du lever du jour.'],[33,3,'Coucher de soleil doré','Teintes chaudes à la fin du jour.'],[34,3,'Nuit étoilée discrète','Étoiles fixes, sans clignotement.'],[35,3,'Halo de lune léger','Lueur fine autour de la lune.'],[36,3,'Rayons de soleil subtils','Rayons discrets quand le soleil est visible.'],[37,3,'Brume lointaine','Voile limité à l’horizon ; panneaux lisibles.'],[38,3,'Pluie fine latérale','Pluie sur les côtés quand la météo indique pluie ou orage.'],[39,3,'Neige légère','Flocons latéraux quand la météo indique neige.'],[40,3,'Vent dans la végétation','Faible balancement des feuillages.'],
  [41,4,'Défilement en profondeur','Plans proches plus rapides, plans éloignés plus lents.'],[42,4,'Apparition progressive','Arbres et bâtiments apparaissent depuis l’horizon.'],[43,4,'Sortie fluide de l’écran','Le décor sort par les bords.'],[44,4,'Panneaux près de la route','Rapproche le panneau avec marge protégée autour de la voiture.'],[45,4,'Petit espace pour le panneau','Réduit l’espace réservé entre panneau et bâtiments.'],[46,4,'Panneaux bien dégagés','Texte et poteaux restent devant la végétation.'],[47,4,'Passage naturel du panneau','Perspective commune avec les arbres, sortie latérale.'],[48,4,'Circulation inverse détaillée','Voitures de face sur la chaussée opposée de l’autoroute.'],[49,4,'Transitions progressives','Fondu entre les différents paysages.'],[50,4,'Niveaux d’animation','Calme, normal ou riche, avec aperçu avant application.']
+ ,[51, 2, 'Tournesols', 'Rangées de tournesols illustratifs sur autoroute.'],
+ [52, 2, 'Blé', 'Épis dorés au-delà des accotements sur autoroute.'],
+ [53, 2, 'Terres cultivées', 'Parcelles de terre et sillons décoratifs sur autoroute.'],
+ [54, 2, 'Prairies et vaches', 'Prairies clôturées avec quelques vaches sur autoroute.'],
+ [55, 1, 'Portiques autoroutiers', 'Structures sans consigne routière passant au-dessus de la voiture.'],
+ [56, 2, 'Parcs clôturés', 'Parcs urbains entourés de grilles.'],
+ [57, 2, 'Enfants animés', 'Petites silhouettes en mouvement dans les parcs urbains.'],
+ [58, 2, 'Toboggans', 'Jeux colorés dans les parcs urbains.'],
+ [59, 2, 'Balançoires', 'Sièges oscillant doucement dans les parcs urbains.'],
+ [60, 2, 'Écoles grillagées', 'Écoles illustratives et cours entourées de grillages.'],
+ [61, 2, 'Commerces', 'Devantures de commerces imaginaires en ville.'],
+ [62, 2, 'Mobilier urbain', 'Bancs, poubelles et bornes sur les trottoirs.'],
+ [63, 2, 'Mairie du village', 'Bâtiment municipal illustratif, sans lien avec votre position.'],
+ [64, 2, 'Jardins fleuris', 'Massifs colorés devant les maisons du village.'],
+ [65, 2, 'Détails des maisons', 'Volets, portes, cheminées et clôtures dans les villages.'],
+ [66, 2, 'Gros rochers', 'Rochers sur les côtés de la forêt.'],
+ [67, 2, 'Relief forestier', 'Talus et collines illustratifs dans la forêt.'],
+ [68, 2, 'Lac', 'Plan d’eau illustratif dans le paysage forestier.'],
+ [69, 2, 'Rivière', 'Cours d’eau décoratif sur le côté de la forêt.'],
+ [70, 2, 'Cascade', 'Cascade animée au loin dans la forêt.'],
+ [71, 2, 'Cabanes', 'Petites cabanes en bois dans la forêt.'],
+ [72, 2, 'Animaux forestiers', 'Cerfs, lapins, renards et oiseaux illustratifs.'],
+ [73, 0, 'Faisceaux des phares', 'Lumière diffuse sur la route devant la voiture, uniquement la nuit.'],
+ [74, 1, 'Lampadaires hauts', 'Lampadaires urbains avec lumière douce au sol la nuit.'],
+ [75, 3, 'Reflets dans les yeux', 'Reflets nocturnes discrets sur les animaux activés.'],
+ [76, 4, 'Limitations espacées', 'Panneau séparé : uniquement une limitation GPS récente et vérifiée ; aucune valeur inventée.'],
+ [77, 4, 'Ancien nom barré', 'À un changement de localité confirmé par le GPS, montre brièvement le nom précédent barré. Aucune sortie supposée.']
  ],
  on(id){return store.get('decor721_D'+id,false)===true;},
  enabled(){return this.defs.some(d=>this.on(d[0]));},
@@ -18,7 +45,7 @@ window.Decor721 = {
  preview:null,previewScene:'ville',previewWx:'soleil',previewHour:14,
  config(){const out={};this.defs.forEach(d=>out[d[0]]=this.on(d[0]));return out;},
  settings(p,group){
-  let html='<div style="font-size:14px;margin-bottom:12px;color:'+p.mut+'">Options indépendantes, désactivées au départ pour conserver ton décor. Les protections des panneaux restent actives. Effets météo selon la météo reçue ; aucune reconnaissance de la route réelle.</div>';
+  let html='<div style="font-size:14px;margin-bottom:12px;color:'+p.mut+'">Options indépendantes, désactivées au départ pour conserver ton décor. Les protections des panneaux restent actives. Effets météo selon la météo reçue ; les décors restent illustratifs et ne décrivent pas les lieux réels. Aucune signalisation inventée ne sert de donnée de navigation.</div>';
   html+=this.defs.filter(d=>d[1]===group).map(d=>setRow(p,'D'+String(d[0]).padStart(2,'0')+' · '+d[2],d[3],chipBtn(p,'decor721:toggle:'+d[0],this.on(d[0])?'Activé':'Désactivé',this.on(d[0])))).join('');
   if(group===2)html+=setRow(p,'D23 · Quantité de végétation','Utilisée quand D23 est activé.',[0.6,1,1.5].map((v,i)=>chipBtn(p,'decor721:density:'+v,['Peu','Moyen','Beaucoup'][i],this.density()===v)).join(''))+setRow(p,'D30 · Saison','Choisis la saison ou suis le calendrier du poste.',['auto','printemps','ete','automne','hiver'].map((v,i)=>chipBtn(p,'decor721:season:'+v,['Automatique','Printemps','Été','Automne','Hiver'][i],store.get('decor721Season','auto')===v)).join(''));
   if(group===4)html+=setRow(p,'D50 · Niveau','Ce choix ne modifie pas les interrupteurs des autres effets.',['calme','normal','riche'].map(v=>chipBtn(p,'decor721:preview:'+v,v.charAt(0).toUpperCase()+v.slice(1),this.quality()===v)).join(''));

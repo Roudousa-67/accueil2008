@@ -113,7 +113,10 @@ window.PanelText723={
  },
  draw(c,p,text){
   const lines=this.lines(text),size=Math.min(p.height*(lines.length>1?.37:.6),...lines.map(line=>p.width*.85/Math.max(5,line.length*.58)));
-  c.font='700 '+size+'px Inter,sans-serif';c.textAlign='center';c.textBaseline='middle';
+  c.font='700 '+size+'px Inter,sans-serif';
+  const measured=Math.max(...lines.map(line=>c.measureText(line).width));
+  const fit=size*Math.min(1,p.width*.84/Math.max(1,measured));
+  c.font='700 '+fit+'px Inter,sans-serif';c.textAlign='center';c.textBaseline='middle';
   lines.forEach((line,i)=>c.fillText(line,p.left+p.width*.5,p.top+p.height*.5+(i-(lines.length-1)/2)*size*1.15,p.width*.85));
  }
 };
@@ -162,7 +165,7 @@ window.Help723={
  },
  visual(item){
   const match=item.name.match(/^D(\d+)/),panel=/taille des panneaux|distance du bord|frequence de passage/.test(Settings720.norm(item.name));
-  if(match||panel){const id=match?Number(match[1]):0,scene=[16,17,48].includes(id)?'autoroute':[24,27].includes(id)?'village':'ville',wx=id===38?'pluie':id===39?'neige':'soleil',hour=[26,34,35].includes(id)?23:id===32?6:id===33?19:14;
+  if(match||panel){const id=match?Number(match[1]):0,scene=[16,17,48,51,52,53,54,55].includes(id)?'autoroute':[24,27,63,64,65].includes(id)?'village':[29,66,67,68,69,70,71,72,75].includes(id)?'foret':'ville',wx=id===38?'pluie':id===39?'neige':'soleil',hour=[26,34,35,73,74,75].includes(id)?23:id===32?6:id===33?19:14;
    return `<div style="margin:12px 0;font-size:13px">Exemple animé fictif · réglages et GPS inchangés</div><div data-roadbox data-decor721-preview data-help-decor723="${id}" data-help-scene723="${scene}" data-help-wx723="${wx}" data-help-hour723="${hour}" style="position:relative;height:220px;overflow:hidden;border-radius:12px"><canvas data-road="v" style="position:absolute;inset:0;width:100%;height:100%"></canvas><div data-car360 style="position:absolute;left:50%;bottom:4%;height:60%;aspect-ratio:503/300;transform:translateX(-50%);background:url(car/route-360.webp) 52.1739% 0/2400% 100% no-repeat"></div></div>`;
   }
   if(/gps|cadre/.test(Settings720.norm(item.name)))return '<div style="display:flex;gap:10px;margin:12px 0"><div style="flex:1;padding:18px;background:#205e86;color:white;border-radius:12px">Accueil<br><b>GPS affiché</b></div><div style="flex:1;padding:18px;background:#35435e;color:white;border-radius:12px">Autres sections<br><b>GPS masqué</b></div></div>';
