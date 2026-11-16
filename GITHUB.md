@@ -100,3 +100,25 @@ celui de l’APK 7.23. Une signature différente bloque la sortie. Il affiche le
 SHA-256 et laisse `version.json` inchangé. Aucune publication ni annonce aux
 autoradios n’a lieu à ce stade. L’installation et les performances sur le poste,
 l’examen visuel et la préparation de la release restent à faire.
+
+## Fabrication automatique de l’APK sur GitHub
+
+Le workflow `Construire l’APK des décors` est maintenant disponible dans Actions.
+Il a été lancé ; la fabrication reste bloquée tant que les deux secrets suivants
+ne sont pas configurés dans les secrets GitHub Actions du dépôt :
+
+- `ACCUEIL_KEYSTORE_BASE64` : contenu de la clé originale PKCS12 (.p12), encodé en base64.
+- `ACCUEIL_SIGNING_PASSWORD` : mot de passe de cette clé.
+- `ACCUEIL_KEY_PASSWORD` : facultatif, seulement si le mot de passe de la clé privée est distinct.
+
+Ces éléments doivent être saisis dans les secrets, jamais dans les fichiers
+versionnés, les commentaires, les journaux ou les captures. Le fichier APK signé
+ne permet pas de retrouver sa clé privée. La clé est normalement conservée
+dans le projet ou l’archive d’origine sur le poste qui a signé les APK précédents.
+
+Une fois les secrets configurés, relancer l’exécution échouée dans Actions.
+La chaîne exécute les tests, construit la version 7.24, compare son certificat
+à celui de l’APK 7.23 puis joint l’APK signé et son SHA-256 dans l’artefact
+`Accueil2008GT-v7.24-signe`. Elle crée aussi un brouillon de release, sans
+remplacer un APK déjà publié et sans annoncer prématurément une mise à jour
+sur l’autoradio. La clé temporaire est supprimée à la fin, même en cas d’échec.
