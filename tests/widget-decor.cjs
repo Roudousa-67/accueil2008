@@ -57,5 +57,12 @@ r("store.set('decor721_D67',false);RoadDecor721.draw(widgetCv,3,120,60)");
 const flat=t.canvasMap.get(cv).canvas.toBuffer('image/png');r("store.set('decor721_D67',true);RoadDecor721.draw(widgetCv,3,120,60)");
 assert(!flat.equals(t.canvasMap.get(cv).canvas.toBuffer('image/png')));checks++;
 assert.equal(typeof r('RoadDecor721.forest'),'function');checks++;
+// Le moteur forêt conserve aussi la limitation réelle, et rejette son cache périmé.
+t.pos();r("Decor721.preview=null;widgetCv.parentNode.removeAttribute('data-decor721-preview');roadScene=()=> 'foret';store.set('decor721_D66',true);store.set('decor721_D76',true);Road723.cache=[{id:99,tags:{highway:'secondary',maxspeed:'90'},geometry:[{lat:loc.lat,lon:loc.lon-.01},{lat:loc.lat,lon:loc.lon+.01}]}];Road723.pos={...loc};Road723.at=Date.now();Road723.apply()");
+let forestLimit=false;
+for(const distance of [0,90,360,800]){t.drawings.length=0;r('RoadDecor721.draw(widgetCv,3,'+distance+',60)');forestLimit ||= t.drawings.some(d=>d.text==='90');}
+assert(forestLimit,'limitation GPS présente dans le moteur forêt');checks++;
+r('Road723.at=Date.now()-61000');t.drawings.length=0;r('RoadDecor721.draw(widgetCv,3,0,60)');
+assert(!t.drawings.some(d=>d.text==='90'),'limitation périmée absente en forêt');checks++;
 t.dom.window.close();console.log(checks+' contrôles du widget enrichi réussis.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
