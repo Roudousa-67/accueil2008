@@ -1,7 +1,7 @@
 # Dépôt et mises à jour
 
 Dépôt : https://github.com/Roudousa-67/accueil2008
-Branche principale : `main`. Version actuelle : `7.20`, code Android `90`.
+Branche principale : `main`. Version publiée : `7.23`, code Android `93`.
 Dans l’application : Paramètres > Mises à jour > Dépôt GitHub =
 `Roudousa-67/accueil2008`. Activer « Vérifier automatiquement » : recherche au
 démarrage puis toutes les six heures pendant que l’application fonctionne.
@@ -74,3 +74,29 @@ initial n’est pas nécessaire pour les mises à jour suivantes.
 - Dictée indisponible : vérifier le service vocal Android ou utiliser le clavier.
 - Waze hors cadre : vérifier permissions et firmware du poste. Aucun test
   physique sur autoradio n’est annoncé dans cette livraison.
+
+## Préparer l’APK des décors validés (branche de travail)
+
+Le code des décors et les captures de contrôle sont dans la branche
+`feat/widget-decors-illustres`. L’artefact `widget-jour-nuit` du workflow de
+vérification contient les captures produites par le moteur Canvas avec la
+voiture vue de dos ; ce ne sont pas des maquettes générées par IA.
+
+La préparation de l’APK demande la clé de signature originale, absente du dépôt,
+et les Android SDK Build Tools (`apksigner`, `zipalign`).
+Sur le poste qui possède cette clé, après les tests :
+
+```sh
+python outils/preparer_apk_decors.py --keystore CHEMIN_VERS_LA_CLE_ORIGINALE
+```
+
+Le mot de passe est demandé sans affichage. Il peut aussi être fourni dans
+`ACCUEIL_SIGNING_PASSWORD` et, si le mot de passe de clé est distinct,
+`ACCUEIL_KEY_PASSWORD`. Ne jamais enregistrer ces valeurs ou la clé dans Git.
+
+L’outil prépare une copie des assets en version 7.24 et le manifeste Android
+avec le code 94, construit et signe l’APK, puis compare son certificat avec
+celui de l’APK 7.23. Une signature différente bloque la sortie. Il affiche le
+SHA-256 et laisse `version.json` inchangé. Aucune publication ni annonce aux
+autoradios n’a lieu à ce stade. L’installation et les performances sur le poste,
+l’examen visuel et la préparation de la release restent à faire.
