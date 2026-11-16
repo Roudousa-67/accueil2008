@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "test": "node regression.cjs && node decor721.cjs && node native721.cjs"
+    "test": "node regression.cjs && node decor721.cjs && node native721.cjs && node address722.cjs"
   },
   "dependencies": {
     "jsdom": "31.0.1",

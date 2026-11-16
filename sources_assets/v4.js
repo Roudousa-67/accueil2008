@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.21';
+const APP_VERSION = '7.22';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+  ['7.22', 'Novembre 2026', ['Adresse, code postal et ville en petit tout en bas de la route', 'Décor et navigation conservés']],
   ['7.21', 'Novembre 2026', ['39 options de décor indépendantes dans Navigation', 'Aperçu animé local avant application', 'Téléchargement vérifié et gestion du cache de cette application']],
   ['7.20', 'Novembre 2026', ['Position de défilement conservée dans les paramètres', 'Recherche des réglages avec filtres et dictée vocale', 'Barre d’applications compacte pour agrandir le GPS', 'Proposition de mise à jour avant téléchargement']],
   ['7.19', 'Novembre 2026', ['Soleil, lune et ciel progressif selon heure et GPS, réglables dans Navigation / Décor de la route', 'Canvas redimensionné aussi lorsque seule la hauteur disponible change']],

@@ -85,11 +85,30 @@ const Place710 = (() => {
     const best = nearest(nearby.filter(x => distance(loc, x) <= 25), loc);
     return best ? { name: best.name, kind: best.kind, km: distance(loc, best), highway: true } : null;
   }
+  // Adresse discrète au bord inférieur de la route, sans modifier le décor.
+  function roadAddress() {
+    if (!fresh()) return 'GPS en attente…';
+    if (!addressPos || !addressAt || distance(loc, addressPos) > 2 ||
+        Date.now() - addressAt > Math.max(every() * 2, distance(loc, addressPos) < 0.03 ? 300000 : 120000)) return 'Adresse indisponible';
+    const g = geoA || {};
+    const street = [g.num, g.road].filter(Boolean).join(' ');
+    const town = [g.cp, g.city].filter(Boolean).join(' ');
+    return [street, town].filter(Boolean).join(' · ') || 'Adresse indisponible';
+  }
   function paintSigns() {
     const pl = roadPlace();
     document.querySelectorAll('#screen [data-roadbox]').forEach(box => {
       let sign = box.querySelector('.place710');
       if (!sign) { sign = document.createElement('div'); sign.className = 'place710'; sign.setAttribute('role', 'status'); box.appendChild(sign); }
+      let address = box.querySelector('.roadAddress722');
+      if (!address) {
+        address = document.createElement('div');
+        address.className = 'roadAddress722';
+        box.appendChild(address);
+      }
+      // textContent empêche une adresse reçue du réseau d'injecter du HTML.
+      address.textContent = roadAddress();
+      address.title = address.textContent;
       const hw = pl && pl.highway;
       sign.classList.toggle('highway710', !!hw);
       sign.classList.toggle('trunk710', !!hw && !!window.__panelGreen);
@@ -99,7 +118,7 @@ const Place710 = (() => {
       box.querySelectorAll('[data-k="roadAddr"], [data-k="adrStreet"]').forEach(el => { el.parentElement.style.visibility = 'hidden'; });
     });
   }
-  return { intervals, every, refresh, roadPlace, here, paintSigns, locality, nearest, valid, status: () => ({ attempt, addressAt, nearbyAt, error, busy: !!pending }) };
+  return { intervals, every, refresh, roadPlace, roadAddress, here, paintSigns, locality, nearest, valid, status: () => ({ attempt, addressAt, nearbyAt, error, busy: !!pending }) };
 })();
 
 // Les anciens appels GPS, vigilance et liste de lieux partagent la même requête.
@@ -117,6 +136,7 @@ window.roadPlace = () => Place710.roadPlace();
 }; }
 
 { const style = document.createElement('style'); style.textContent = `
+  .roadAddress722{position:absolute;left:4px;right:4px;bottom:2px;z-index:8;color:#fff;background:transparent;border:0;padding:0;text-align:center;font:600 clamp(9px,1vw,12px)/1.15 Inter,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #000,0 0 3px #000;pointer-events:none}
   .place710{position:absolute;left:auto;right:3%;top:38%;bottom:auto;width:28%;min-height:28px;padding:4px 6px;display:flex;align-items:center;justify-content:center;background:#fff;color:#161616;border:3px solid #d4202a;outline:2px solid #fff;border-radius:4px;font:700 clamp(11px,1.2vw,17px)/1.15 Inter,sans-serif;text-align:center;overflow-wrap:anywhere;pointer-events:none;z-index:4;box-shadow:0 2px 7px #0006}
   .place710::before,.place710::after{content:"";position:absolute;top:calc(100% + 3px);width:3px;height:22px;background:#d9dee6;box-shadow:0 1px 2px #0005}
   .place710::before{left:14%}.place710::after{right:14%}

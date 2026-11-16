@@ -1,12 +1,11 @@
 {
-  "version": "7.21",
-  "versionCode": 91,
-  "checks_passed": 361,
-  "js_checks": 339,
-  "native_file_policy_checks": 22,
+  "version": "7.22",
+  "versionCode": 92,
+  "checks_passed": 370,
   "hardware_tested": false,
-  "native_download_manager_hardware_tested": false,
   "signature_verified": true,
+  "signature_matches_721": true,
   "assets_match_sources": true,
-  "apk_sha256": "d50b9726d4b36281284d3c02ceb8c7286cabce23ac45714ba6eae9314313ce94"
+  "decor_assets_unchanged": true,
+  "apk_sha256": "755ad59b85112bdf7ce53736e9474fae4e44d62543dfe6d84a6e7c20c4fa7c55"
 }

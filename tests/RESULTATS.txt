@@ -1,3 +1,7 @@
+
+> test
+> node regression.cjs && node decor721.cjs && node native721.cjs && node address722.cjs
+
 OK chargement complet sans erreur
 OK version
 OK délai initial une minute
@@ -113,7 +117,6 @@ OK canvas redimensionné quand seule la hauteur change
 OK dessin soleil et lune sans erreur Canvas
 
 113 vérifications réussies.
-
 OK 39 options correspondent exactement à la sélection
 OK aucune option activée sans choix utilisateur
 OK D4 activable et persisté
@@ -342,7 +345,6 @@ OK annulation transmise au gestionnaire Android
 OK tests sans erreur JS
 
 226 vérifications 7.21 réussies.
-
 OK release officielle et empreinte valides
 OK empreinte absente refusée
 OK empreinte non hexadécimale refusée
@@ -366,4 +368,14 @@ OK fichier inconnu conservé
 OK cache choisi supprimé
 OK réglages toujours intacts après nettoyage
 22 vérifications natives réussies.
+OK adresse complète au bord de la route
+OK une seule adresse par route
+OK pas de doublon après recréation et actualisation
+OK position au plus bas avec marge de deux pixels
+OK pas de cartouche opaque
+OK adresse changée au délai configuré
+OK le texte réseau ne crée aucun élément HTML
+OK GPS périmé ne montre pas la dernière adresse
+OK ancienne adresse éloignée masquée
 
+9 vérifications adresse 7.22 réussies.

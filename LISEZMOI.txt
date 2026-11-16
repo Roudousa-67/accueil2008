@@ -1,23 +1,8 @@
-ACCUEIL 2008 GT 7.21 — DÉCOR ANIMÉ À LA CARTE
-Installer l’APK par-dessus la version précédente, sans désinstaller.
-39 options choisies : D04 et D13 à D50. Elles sont désactivées au départ.
-Paramètres > Navigation > Décor · Voiture / Route / Paysages / Ciel et météo /
-Animation et panneaux. Chaque option a son interrupteur. Quantité de végétation,
-saison et niveau d’animation réglables. L’aperçu local animé permet de tester
-ville, village, campagne, forêt, autoroute et plusieurs heures/météos sans
-changer le GPS ni les données de la voiture.
-N35 : Paramètres > Mises à jour > Téléchargement et vérification.
-Progression réelle fournie par Android, annulation, vérification SHA-256,
-paquet/version/signature, puis validation d’installation par l’utilisateur.
-Android peut demander d’autoriser cette application à proposer une installation.
-N46 : Paramètres > Mises à jour > Stockage et nettoyage.
-Mesure et aperçu avant nettoyage d’une seule catégorie. Réglages, parcours,
-photos personnelles, fichiers des autres applis et APK actuel conservés.
-Les thèmes de décor sont des dessins Canvas, pas une reproduction photoréaliste
-des planches de propositions. Route, relief, ponts, saisons et circulation sont
-décoratifs. Pluie/neige utilisent la météo reçue. La version actuelle, Waze,
-les raccourcis et les données CAN restent conservés.
-361 contrôles automatisés réussis, dont 22 vérifications avec de vrais fichiers.
-APK signé avec le même certificat que la 7.20. Rendu Canvas et options contrôlés.
-Pas de test physique sur autoradio : compatibilité et performances du poste,
-GPS/Waze/micro, téléchargement Android et installation restent à essayer dessus.
+ACCUEIL 2008 GT 7.22 — ADRESSE EN BAS DE LA ROUTE
+Adresse, code postal et ville sur une petite ligne centrée au bord inférieur de la route.
+Actualisation selon le délai existant dans Navigation > Panneaux et localités (une minute par défaut).
+Décor, routes, Waze et réglages conservés. Aucun nouveau rendu de route réelle ou de relief.
+La vérification des mises à jour reste automatique si elle est activée : démarrage puis toutes les six heures.
+Android demande de valider l’installation.
+Installer par-dessus la version précédente sans désinstaller.
+Aucun essai physique sur autoradio.

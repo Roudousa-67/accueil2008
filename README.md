@@ -1,14 +1,19 @@
 # Accueil 2008 GT
 
-**Lanceur Android personnel · Version 7.21 · Peugeot 2008 GT Line**
+**Lanceur Android personnel · Version 7.22 · Peugeot 2008 GT Line**
 
-[Télécharger l’APK 7.21](https://github.com/Roudousa-67/accueil2008/releases/download/v7.21/Accueil2008GT_v7.21.apk) · [Notes de version](https://github.com/Roudousa-67/accueil2008/releases/tag/v7.21)
+[Télécharger l’APK 7.22](https://github.com/Roudousa-67/accueil2008/releases/download/v7.22/Accueil2008GT_v7.22.apk) · [Notes de version](https://github.com/Roudousa-67/accueil2008/releases/tag/v7.21)
 
 Accueil 2008 GT est un lanceur Android personnalisé développé pour le projet Peugeot 2008 GT Line. Il réunit l’accès au GPS, la musique, un décor de route animé, les informations disponibles du véhicule et les réglages sur un même écran.
 
 L’application est un projet personnel. Ce n’est pas une application officielle Peugeot, Waze ou Google.
 
 **Version présentée : 7.21.** Les photos d’utilisation proviennent des images et de la vidéo envoyées avant cette version. Les illustrations du décor 7.21 ci-dessous sont des rendus du code et du sprite d’origine, avec des options de démonstration activées. Ce ne sont pas des captures Android de l’autoradio, ni des images générées par IA.
+
+## Mise à jour 7.22 — adresse au bas de la route
+
+Adresse, code postal et ville sur une ligne discrète au bord inférieur de la route, sans encadré. Le décor et les fonctions existantes restent conservés. Actualisation selon le délai choisi dans Navigation → Panneaux et localités. 370 contrôles automatisés réussis ; essai sur autoradio à effectuer.
+
 
 ## 1. Installation et équipement
 
@@ -236,3 +241,4 @@ npm test --prefix tests
 [Résultats des contrôles](tests/RESULTATS.txt) · [Bilan de vérification](tests/VERIFICATION.json) · [Publication des versions](GITHUB.md).
 
 La clé privée et son mot de passe ne sont pas publiés dans ce dépôt. Les bibliothèques et ressources conservent leurs licences respectives ; aucune nouvelle licence globale n’est attribuée aux sources du lanceur.
+
