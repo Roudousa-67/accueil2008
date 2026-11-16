@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 public final class GpsDockInit extends ContentProvider {
 
     private final Map<Activity, GpsDock> docks = new HashMap<>();
+    private final Map<Activity, AppFiles721> fileServices = new HashMap<>();
 
     @Override
     public boolean onCreate() {
@@ -55,6 +56,7 @@ public final class GpsDockInit extends ContentProvider {
             @Override public void onActivityDestroyed(Activity a) {
                 GpsDock d = docks.remove(a);
                 if (d != null) d.release();
+                AppFiles721 files=fileServices.remove(a); if(files!=null)files.release();
             }
         });
         return true;
@@ -70,6 +72,7 @@ public final class GpsDockInit extends ContentProvider {
         GpsDock dock = new GpsDock(a, root);
         docks.put(a, dock);
         web.addJavascriptInterface(new Js(a, dock, web, root), "GpsDock");
+        AppFiles721 files=new AppFiles721(a);fileServices.put(a,files);web.addJavascriptInterface(files,"AppFiles721");
         // Le JavaScript décide quand ouvrir : pas de lancement concurrent au démarrage.
     }
 

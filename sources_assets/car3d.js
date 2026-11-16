@@ -166,7 +166,7 @@
     } else busy = live = true;
     if (speed >= 2) {
       const w = speed / 3.6 / 0.335; // rayon de roue ~0,335 m
-      wheels.forEach((m) => { m.rotation.x += w * dt; });
+      if(window.Decor721 && Decor721.on(4)) wheels.forEach((m) => { m.rotation.x += w * dt; });
       bob += dt * (speed > 60 ? 18 : 11); root.position.y = Math.sin(bob) * 0.006; busy = true;
     } else if (root.position.y) root.position.y = 0;
     root.rotation.y = yaw;

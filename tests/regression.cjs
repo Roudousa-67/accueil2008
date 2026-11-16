@@ -33,7 +33,7 @@ function make(options={}){
  w.Android={setImmersive(){},immersive:()=>true,apps:()=> '[]',media:()=> '{}',qfStatus:()=> '{}',sysStatus:()=> '{}',ready(){},launch:()=>true,launchIn:(...r)=>{moves.push(r);return true;},http:(url,id)=>{calls.push(url);queueMicrotask(()=>w.__httpCb(id,!offline,JSON.stringify(offline?{}:url.includes('nominatim')?{address:city}:{elements})));}};
  let vp={x:0,y:50,width:1280,height:670};
  w.GpsDock={gpsCanEmbed:()=>embedded,gpsViewport:()=>JSON.stringify(vp),gpsVisible:v=>nativeCalls.push(['visible',v]),gpsBounds:(...a)=>nativeCalls.push(['bounds',...a]),gpsOpen:p=>nativeCalls.push(['open',p]),gpsLast:()=>'',gpsResize:()=>false,gpsImmersive(){}};
- for(const f of ['app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
+ for(const f of ['app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
  const run=s=>vm.runInContext(s,ctx);
  run("tab='home'; render();");
  w.document.elementFromPoint=()=>w.document.querySelector('.gpsbox');
@@ -47,10 +47,11 @@ function make(options={}){
  }
  return {w,dom,run,errors,calls,moves,nativeCalls,timers,pos,drawings,drawFrame,canvasMap,setcity:a=>city=a,setels:a=>elements=a,setoffline:a=>offline=a,setembed:a=>embedded=a,setvp:a=>vp=a,advance:ms=>{now+=ms;run('if(loc) loc.ts=Date.now();');}};
 }
-(async()=>{
+module.exports={make};
+if(require.main===module)(async()=>{
  const t=make(),{run}=t;
  ok('chargement complet sans erreur',t.errors,[]);
- ok('version',run('APP_VERSION'),'7.20');
+ ok('version',run('APP_VERSION'),'7.21');
  ok('délai initial une minute',run('Place710.every()'),60000);
  t.setels([{type:'node',lat:48.5805,lon:7.74,tags:{name:'Village proche',place:'village'}},{type:'node',lat:48.59,lon:7.74,tags:{name:'Grande ville',place:'city'}}]);
  await run('Place710.refresh()');

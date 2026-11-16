@@ -1,15 +1,15 @@
 # Accueil 2008 GT
 
 Lanceur Android personnalisé pour l’autoradio d’une Peugeot 2008 GT Line.
-Version actuelle : **7.20** · application `fr.gtline.accueil2008` · Android 7.0+.
+Version actuelle : **7.21** · application `fr.gtline.accueil2008` · Android 7.0+.
 
 ## Installer
 
-[Télécharger l’APK 7.20](https://github.com/Roudousa-67/accueil2008/releases/download/v7.20/Accueil2008GT_v7.20.apk)
+[Télécharger l’APK 7.21](https://github.com/Roudousa-67/accueil2008/releases/download/v7.21/Accueil2008GT_v7.21.apk)
 · [Toutes les versions](https://github.com/Roudousa-67/accueil2008/releases)
 
 Si la release n’est pas encore publiée, l’APK signé vérifié est aussi disponible
-dans [distribution](distribution/Accueil2008GT_v7.20.apk). Ouvrir le fichier,
+dans [distribution](distribution/Accueil2008GT_v7.21.apk). Ouvrir le fichier,
 puis utiliser « Download raw file » pour le télécharger.
 
 Sur l’autoradio, ouvrir l’APK et autoriser cette source d’installation si Android
@@ -17,22 +17,24 @@ le demande. Conserver l’application installée pour garder les réglages.
 La signature est la même que sur les livraisons précédentes. Sauvegarder ses
 réglages dans les paramètres avant une mise à jour. Éviter de désinstaller.
 
-## Nouveautés 7.20
+- 39 options de décor : D04 et D13–D50, chacune activable dans Paramètres > Navigation.
+- Cinq rubriques : Voiture, Route, Paysages, Ciel et météo, Animation et panneaux.
+- Aperçu animé local : paysages, heure, météo et niveau, sans modifier le GPS.
+- Quantité de végétation et saison réglables ; protection de la voiture et lisibilité des panneaux conservées.
+- N35 : téléchargement Android suivi, annulation, vérification SHA-256, paquet, version et certificat, puis installation avec validation Android.
+- N46 : mesure et aperçu avant nettoyage du cache, miniatures et anciens APK de cette application. Trajets, réglages et téléchargement actuel conservés.
 
-- Recherche dans le contenu des paramètres, filtre par catégorie et dictée.
-- Position de défilement conservée après modification d’un réglage.
-- Barre d’applications compacte : GPS de 4 à 5 rangées dans la disposition
-  Autoradio standard, choix réversible dans les paramètres.
-- Proposition avant téléchargement : « Plus tard » ou « Télécharger après
-  sauvegarde ». Aucun APK téléchargé automatiquement.
+Les 39 nouveaux effets sont désactivés au départ. Le décor précédent est conservé jusqu'à ton choix. Les rendus Canvas sont des illustrations, pas une copie photoréaliste des planches de propositions. Ponts, relief et circulation sont décoratifs.
 
-Sont aussi conservés : panneaux de ville, village et localité proche sur
-l’autoroute ; actualisation géolocalisée réglable ; panneaux animés dans le décor
-avec marge par rapport à la voiture ; transitions, ciel progressif, soleil et lune.
+361 contrôles automatisés réussis : 113 régressions, 226 contrôles 7.21 et 22 tests de fichiers natifs. Signature identique à la 7.20, versionCode 91, assets et DEX vérifiés. Aucun test physique sur autoradio : GPS, Waze, micro, performances et téléchargement/installation Android restent à confirmer sur le poste.
+
 
 ## Où régler les fonctions
 
 | Fonction | Emplacement |
+| Options D04 et D13–D50 | Navigation > Décor · Voiture / Route / Paysages / Ciel et météo / Animation et panneaux |
+| N35 : téléchargement suivi | Mises à jour > Téléchargement et vérification |
+| N46 : cache et anciens APK | Mises à jour > Stockage et nettoyage |
 | --- | --- |
 | Recherche et dictée | En haut de Paramètres |
 | Barre d’applications compacte | Écran d’accueil > Barre d’applications |
@@ -48,7 +50,7 @@ puis toutes les six heures. La publication d’une nouvelle version reste manuel
 
 ## Vérifications et limites
 
-**113 contrôles simulés réussis** pour la version 7.20, dont rendu Canvas,
+**361 contrôles automatisés réussis** pour la version 7.21, dont rendu Canvas,
 géolocalisation simulée, réglages, défilement et liens de mise à jour.
 Voir [les résultats](tests/RESULTATS.txt) et [le bilan](tests/VERIFICATION.json).
 Signature APK, manifeste Android, classe de dictée et correspondance des assets

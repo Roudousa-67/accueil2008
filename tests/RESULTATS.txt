@@ -113,3 +113,257 @@ OK canvas redimensionné quand seule la hauteur change
 OK dessin soleil et lune sans erreur Canvas
 
 113 vérifications réussies.
+
+OK 39 options correspondent exactement à la sélection
+OK aucune option activée sans choix utilisateur
+OK D4 activable et persisté
+OK D4 désactivable
+OK D13 activable et persisté
+OK D13 désactivable
+OK D14 activable et persisté
+OK D14 désactivable
+OK D15 activable et persisté
+OK D15 désactivable
+OK D16 activable et persisté
+OK D16 désactivable
+OK D17 activable et persisté
+OK D17 désactivable
+OK D18 activable et persisté
+OK D18 désactivable
+OK D19 activable et persisté
+OK D19 désactivable
+OK D20 activable et persisté
+OK D20 désactivable
+OK D21 activable et persisté
+OK D21 désactivable
+OK D22 activable et persisté
+OK D22 désactivable
+OK D23 activable et persisté
+OK D23 désactivable
+OK D24 activable et persisté
+OK D24 désactivable
+OK D25 activable et persisté
+OK D25 désactivable
+OK D26 activable et persisté
+OK D26 désactivable
+OK D27 activable et persisté
+OK D27 désactivable
+OK D28 activable et persisté
+OK D28 désactivable
+OK D29 activable et persisté
+OK D29 désactivable
+OK D30 activable et persisté
+OK D30 désactivable
+OK D31 activable et persisté
+OK D31 désactivable
+OK D32 activable et persisté
+OK D32 désactivable
+OK D33 activable et persisté
+OK D33 désactivable
+OK D34 activable et persisté
+OK D34 désactivable
+OK D35 activable et persisté
+OK D35 désactivable
+OK D36 activable et persisté
+OK D36 désactivable
+OK D37 activable et persisté
+OK D37 désactivable
+OK D38 activable et persisté
+OK D38 désactivable
+OK D39 activable et persisté
+OK D39 désactivable
+OK D40 activable et persisté
+OK D40 désactivable
+OK D41 activable et persisté
+OK D41 désactivable
+OK D42 activable et persisté
+OK D42 désactivable
+OK D43 activable et persisté
+OK D43 désactivable
+OK D44 activable et persisté
+OK D44 désactivable
+OK D45 activable et persisté
+OK D45 désactivable
+OK D46 activable et persisté
+OK D46 désactivable
+OK D47 activable et persisté
+OK D47 désactivable
+OK D48 activable et persisté
+OK D48 désactivable
+OK D49 activable et persisté
+OK D49 désactivable
+OK D50 activable et persisté
+OK D50 désactivable
+OK cinq rubriques de décor
+OK options présentes rubrique 0
+OK options présentes rubrique 1
+OK options présentes rubrique 2
+OK options présentes rubrique 3
+OK options présentes rubrique 4
+OK densité élevée sauvegardée
+OK densité invalide ignorée
+OK saison manuelle
+OK saison invalide ignorée
+OK aperçu ne modifie pas niveau sauvegardé
+OK aperçu contient la simulation et son canvas
+OK fermeture conserve ancien niveau
+OK application explicite du niveau
+OK modifications bloquées en roulant
+OK défilement conservé après nouveau réglage
+OK recherche trouve les nouveaux réglages
+OK panneau protégé sur tous les passages et formats
+OK identités des bâtiments stables, pas de suppression dynamique
+OK rendu ville/soleil/6 h
+OK rendu ville/soleil/14 h
+OK rendu ville/soleil/19 h
+OK rendu ville/soleil/23 h
+OK rendu ville/pluie/6 h
+OK rendu ville/pluie/14 h
+OK rendu ville/pluie/19 h
+OK rendu ville/pluie/23 h
+OK rendu ville/neige/6 h
+OK rendu ville/neige/14 h
+OK rendu ville/neige/19 h
+OK rendu ville/neige/23 h
+OK rendu ville/brouillard/6 h
+OK rendu ville/brouillard/14 h
+OK rendu ville/brouillard/19 h
+OK rendu ville/brouillard/23 h
+OK rendu village/soleil/6 h
+OK rendu village/soleil/14 h
+OK rendu village/soleil/19 h
+OK rendu village/soleil/23 h
+OK rendu village/pluie/6 h
+OK rendu village/pluie/14 h
+OK rendu village/pluie/19 h
+OK rendu village/pluie/23 h
+OK rendu village/neige/6 h
+OK rendu village/neige/14 h
+OK rendu village/neige/19 h
+OK rendu village/neige/23 h
+OK rendu village/brouillard/6 h
+OK rendu village/brouillard/14 h
+OK rendu village/brouillard/19 h
+OK rendu village/brouillard/23 h
+OK rendu campagne/soleil/6 h
+OK rendu campagne/soleil/14 h
+OK rendu campagne/soleil/19 h
+OK rendu campagne/soleil/23 h
+OK rendu campagne/pluie/6 h
+OK rendu campagne/pluie/14 h
+OK rendu campagne/pluie/19 h
+OK rendu campagne/pluie/23 h
+OK rendu campagne/neige/6 h
+OK rendu campagne/neige/14 h
+OK rendu campagne/neige/19 h
+OK rendu campagne/neige/23 h
+OK rendu campagne/brouillard/6 h
+OK rendu campagne/brouillard/14 h
+OK rendu campagne/brouillard/19 h
+OK rendu campagne/brouillard/23 h
+OK rendu foret/soleil/6 h
+OK rendu foret/soleil/14 h
+OK rendu foret/soleil/19 h
+OK rendu foret/soleil/23 h
+OK rendu foret/pluie/6 h
+OK rendu foret/pluie/14 h
+OK rendu foret/pluie/19 h
+OK rendu foret/pluie/23 h
+OK rendu foret/neige/6 h
+OK rendu foret/neige/14 h
+OK rendu foret/neige/19 h
+OK rendu foret/neige/23 h
+OK rendu foret/brouillard/6 h
+OK rendu foret/brouillard/14 h
+OK rendu foret/brouillard/19 h
+OK rendu foret/brouillard/23 h
+OK rendu autoroute/soleil/6 h
+OK rendu autoroute/soleil/14 h
+OK rendu autoroute/soleil/19 h
+OK rendu autoroute/soleil/23 h
+OK rendu autoroute/pluie/6 h
+OK rendu autoroute/pluie/14 h
+OK rendu autoroute/pluie/19 h
+OK rendu autoroute/pluie/23 h
+OK rendu autoroute/neige/6 h
+OK rendu autoroute/neige/14 h
+OK rendu autoroute/neige/19 h
+OK rendu autoroute/neige/23 h
+OK rendu autoroute/brouillard/6 h
+OK rendu autoroute/brouillard/14 h
+OK rendu autoroute/brouillard/19 h
+OK rendu autoroute/brouillard/23 h
+OK rendu isolé D4
+OK rendu isolé D13
+OK rendu isolé D14
+OK rendu isolé D15
+OK rendu isolé D16
+OK rendu isolé D17
+OK rendu isolé D18
+OK rendu isolé D19
+OK rendu isolé D20
+OK rendu isolé D21
+OK rendu isolé D22
+OK rendu isolé D23
+OK rendu isolé D24
+OK rendu isolé D25
+OK rendu isolé D26
+OK rendu isolé D27
+OK rendu isolé D28
+OK rendu isolé D29
+OK rendu isolé D30
+OK rendu isolé D31
+OK rendu isolé D32
+OK rendu isolé D33
+OK rendu isolé D34
+OK rendu isolé D35
+OK rendu isolé D36
+OK rendu isolé D37
+OK rendu isolé D38
+OK rendu isolé D39
+OK rendu isolé D40
+OK rendu isolé D41
+OK rendu isolé D42
+OK rendu isolé D43
+OK rendu isolé D44
+OK rendu isolé D45
+OK rendu isolé D46
+OK rendu isolé D47
+OK rendu isolé D48
+OK rendu isolé D49
+OK rendu isolé D50
+OK empreinte absente bloque avant téléchargement
+OK progression réelle du pont Android
+OK téléchargement valide transmis une fois
+OK aperçu nettoyage sans supprimer
+OK autre catégorie ne peut pas être nettoyée sans confirmation
+OK confirmation ne nettoie que la catégorie choisie
+OK annulation transmise au gestionnaire Android
+OK tests sans erreur JS
+
+226 vérifications 7.21 réussies.
+
+OK release officielle et empreinte valides
+OK empreinte absente refusée
+OK empreinte non hexadécimale refusée
+OK HTTP refusé
+OK domaine trompeur refusé
+OK autre dépôt refusé
+OK lien altéré refusé
+OK traversée par version refusée
+OK taille fichier cache réelle
+OK taille récursive réelle
+OK réglages hors cache protégés
+OK traversée hors cache bloquée
+OK lien symbolique ignoré
+OK cible du lien jamais supprimée
+OK boucle de liens sans récursion infinie
+OK aperçu exclut téléchargement actuel
+OK aperçu sans suppression
+OK seul ancien APK effacé
+OK APK actuel protégé
+OK fichier inconnu conservé
+OK cache choisi supprimé
+OK réglages toujours intacts après nettoyage
+22 vérifications natives réussies.
+

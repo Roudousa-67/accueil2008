@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.20';
+const APP_VERSION = '7.21';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+  ['7.21', 'Novembre 2026', ['39 options de décor indépendantes dans Navigation', 'Aperçu animé local avant application', 'Téléchargement vérifié et gestion du cache de cette application']],
   ['7.20', 'Novembre 2026', ['Position de défilement conservée dans les paramètres', 'Recherche des réglages avec filtres et dictée vocale', 'Barre d’applications compacte pour agrandir le GPS', 'Proposition de mise à jour avant téléchargement']],
   ['7.19', 'Novembre 2026', ['Soleil, lune et ciel progressif selon heure et GPS, réglables dans Navigation / Décor de la route', 'Canvas redimensionné aussi lorsque seule la hauteur disponible change']],
   ['7.18', 'Novembre 2026', ['Transition et durée réglables dans Navigation / Décor de la route', 'Taille, écart et fréquence des panneaux dans Navigation / Panneaux et localités']],
@@ -441,6 +442,7 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
     return { yOf };
   }
   function drawV(cv) {
+    if(window.RoadDecor721 && (Decor721.enabled() || cv.parentNode.hasAttribute('data-decor721-preview')))return RoadDecor721.draw(cv,T,cv.parentNode.hasAttribute('data-decor721-preview')?T*60/3.6:travel,v);
     const dpr = Math.min(1.5, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
     if (!W || !H) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }

@@ -1,13 +1,12 @@
 {
-  "version": "7.20",
-  "versionCode": 90,
-  "checks_passed": 113,
+  "version": "7.21",
+  "versionCode": 91,
+  "checks_passed": 361,
+  "js_checks": 339,
+  "native_file_policy_checks": 22,
   "hardware_tested": false,
-  "microphone_hardware_tested": false,
+  "native_download_manager_hardware_tested": false,
   "signature_verified": true,
   "assets_match_sources": true,
-  "native_voice_in_dex": true,
-  "voice_activity_in_manifest": true,
-  "github_published": false,
-  "apk_sha256": "27efcaa391cb8b9303110f2b75b38209c574d4cb60b094be5654d90d80243b34"
+  "apk_sha256": "d50b9726d4b36281284d3c02ceb8c7286cabce23ac45714ba6eae9314313ce94"
 }
