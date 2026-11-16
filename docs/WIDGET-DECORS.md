@@ -31,3 +31,7 @@ L’empreinte de l’APK 7.23 existant et ses métadonnées restent valides. Cet
 APK signé bloqué : aucune clé de signature d’origine (`.jks`, `.keystore`, `.p12`) disponible dans l’espace de travail ni aucun secret de signature configuré dans l’environnement. Les outils Android de signature/alignement ne sont pas installés. Aucun APK modifié n’est présenté comme signé ou installable en remplacement de la version existante.
 
 Aucune release, annonce de mise à jour, fusion sur main ou exécution du workflow de publication n’est effectuée. La proposition reste sur sa branche jusqu’à validation.
+
+## Blocage de l’envoi GitHub
+
+Le push HTTPS et la création de branche par le connecteur GitHub ont tous deux été refusés avec HTTP 403 (`Resource not accessible by integration` pour le connecteur). Les permissions annoncées par les métadonnées du dépôt ne suffisent donc pas à écrire avec les connexions actuelles. Le commit reste conservé localement sur la branche de travail ; réautoriser l’intégration GitHub pour ce dépôt avant de reprendre l’envoi. Aucune branche distante ni demande de fusion n’a pu être créée.
