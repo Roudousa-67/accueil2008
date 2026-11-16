@@ -88,6 +88,7 @@ window.RoadDecor721={
   if(night&&on(73))for(const offset of [-.6,.6]){
    const p=project(...pos(4.4+offset,0,cz+32));if(!p)continue;c.save();c.translate(p.x,p.y);c.scale(W*.12,H*.14);g=c.createRadialGradient(0,0,0,0,0,1);g.addColorStop(0,'#f0efd64a');g.addColorStop(.5,'#f0efd620');g.addColorStop(1,'#f0efd600');c.fillStyle=g;c.fillRect(-1,-1,2,2);c.restore();
   }
+  return {project,pos,cz};
  },
 
  fence(c,x,y,s,night){c.strokeStyle=night?'#506274':'#8b9289';c.lineWidth=Math.max(.6,s*.012);for(let j=-5;j<=5;j++){const a=x+j*s*.055;c.beginPath();c.moveTo(a,y);c.lineTo(a,y-s*.12);c.stroke();}for(const h of [.04,.1]){c.beginPath();c.moveTo(x-s*.28,y-s*h);c.lineTo(x+s*.28,y-s*h);c.stroke();}},
@@ -188,9 +189,16 @@ window.RoadDecor721={
 
   const sky=preview?RoadSky719.sample(new Date(2026,5,21,Number(box.getAttribute('data-help-hour723')||D.previewHour)),null,'clock'):RoadSky719.current(),night=preview?sky.night:kind.night;
   if(scene==='foret'&&[66,67,68,69,70,71,72,75].some(on)){
-   this.forest(c,W,H,T,distance,on,night);
+   const geometry=this.forest(c,W,H,T,distance,on,night);
    const items=this.slots(distance,on),slot=RoadMotion713.slot(items.filter(it=>it[0]>1.05&&it[0]<22)),el=box.querySelector('.place710'),name=preview?'FORÊT — APERÇU':el&&!el.classList.contains('waiting710')?el.textContent:'';
    if(slot&&name){const p=this.panelGeometry(slot[0],W,H,this.carRect(box,W,H),on);p.z=slot[0];this.paintPanel(c,p,name,scene,on);}
+   if(on(76)&&!preview&&!DEMO&&Road723.fresh()&&Road723.match&&Date.now()-Road723.at<60000&&Road723.pos&&hav(Road723.pos.lat,Road723.pos.lon,loc.lat,loc.lon)<.35&&Number.isFinite(limit)&&limit>0&&parseMax(Road723.match.tags.maxspeed)===limit){
+    const z=geometry.cz+30,p=geometry.project(...geometry.pos(12.5,3.2,z)),foot=geometry.project(...geometry.pos(12.5,0,z));
+    const namePanel=slot&&name?this.panelGeometry(slot[0],W,H,this.carRect(box,W,H),on):null;
+    if(p&&foot){const radius=p.k*1.15,clear=!namePanel||p.x+radius<namePanel.left-8||p.x-radius>namePanel.left+namePanel.width+8||p.y+radius<namePanel.top-8||p.y-radius>namePanel.ground+8;
+     if(clear){c.strokeStyle='#a4afa4';c.lineWidth=Math.max(1,p.k*.07);c.beginPath();c.moveTo(foot.x,foot.y);c.lineTo(p.x,p.y);c.stroke();c.fillStyle='#f2efe1';c.beginPath();c.arc(p.x,p.y,radius,0,7);c.fill();c.strokeStyle='#bd4b3f';c.lineWidth=Math.max(1,radius*.16);c.stroke();c.fillStyle='#28382f';c.font='700 '+radius*.78+'px Inter,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(String(limit),p.x,p.y,radius*1.55);}
+    }
+   }
    this.wheels(box,T,preview?60:speed,on(4));box.dataset.wx=wx;return;
   }
   const P=this.projection(W,H,distance,on),hz=P.hz,rnd=i=>this.rnd(i),season=D.season(),wet=['pluie','orage'].includes(wx),snow=wx==='neige';
