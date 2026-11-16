@@ -16,6 +16,16 @@ jobs:
           node-version: '24'
       - run: npm install --prefix tests --ignore-scripts
       - run: npm test --prefix tests
+        env:
+          WIDGET_QA: ${{ runner.temp }}/widget-qa
+      - name: Joindre les captures du rendu réel
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-jour-nuit
+          path: ${{ runner.temp }}/widget-qa
+          if-no-files-found: warn
+          retention-days: 14
       - name: Contrôler l’APK livré
         run: sha256sum --check distribution/SHA256SUMS
       - name: Valider la version préparée
