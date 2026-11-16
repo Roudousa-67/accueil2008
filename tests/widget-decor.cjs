@@ -16,7 +16,7 @@ for(const scene of ['autoroute','ville','village','foret']){
  ctx.drawImage(image, col*800,row*510,800,480);
  // Même sprite original que le widget, posé au-dessus du décor comme dans le DOM.
  const sprite=await loadImage(path.join(__dirname,'../sources_assets/car/route-360.webp'));
- ctx.drawImage(sprite,sprite.width/24*12,0,sprite.width/24,sprite.height,col*800+158,row*510+173,483,288);
+ const spriteW=800*.292,spriteH=spriteW*300/503;ctx.drawImage(sprite,sprite.width/24*12,0,sprite.width/24,sprite.height,col*800+(800-spriteW)/2,row*510+480*.72-spriteH,spriteW,spriteH);
  ctx.fillStyle='#fff';ctx.font='18px sans-serif';ctx.fillText(scene+' · '+hour+' h · décor illustratif',col*800+12,row*510+502);
  assert.equal(t.errors.length,0);checks++;
  }
@@ -49,5 +49,13 @@ t.advance(61000);t.pos(48.6,7.8);t.setcity({city:'Nouvelle commune'});await r('P
 assert.equal(r('RoadDecor721.places.get(widgetCv.parentNode).old'),'Ancienne commune');checks++;
 assert.equal(r('Place710.here().name'),'Nouvelle commune');checks++;
 assert.deepEqual(t.errors,[]);if(out)fs.writeFileSync(path.join(out,'jour-nuit.png'),sheet.toBuffer('image/png'));
+// Géométrie et orientation correspondant à la référence approuvée.
+r("Decor721.preview='normal';Decor721.previewScene='foret';Decor721.previewHour=14;Decor721.defs.forEach(d=>store.set('decor721_D'+d[0],true));RoadDecor721.draw(widgetCv,3,120,60)");
+const car=t.w.document.querySelector('[data-decor721-preview] [data-car360]');
+assert(car);assert.equal(car.style.width,'29.2%');assert.equal(car.style.bottom,'28%');assert.equal(car.style.backgroundPosition,'52.174% 0px');checks++;
+r("store.set('decor721_D67',false)");
+const flat=t.canvasMap.get(cv).canvas.toBuffer('image/png');r("store.set('decor721_D67',true);RoadDecor721.draw(widgetCv,3,170,60)");
+assert(!flat.equals(t.canvasMap.get(cv).canvas.toBuffer('image/png')));checks++;
+assert.equal(typeof r('RoadDecor721.forest'),'function');checks++;
 t.dom.window.close();console.log(checks+' contrôles du widget enrichi réussis.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
