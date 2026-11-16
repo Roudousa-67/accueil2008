@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.22';
+const APP_VERSION = '7.23';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+  ['7.23', 'Novembre 2026', ['GPS masqué hors accueil et restauré au retour', 'Détection routière avec cap et précision', 'Aide par réglage et navigation simplifiée', 'Panneaux et texte agrandis']],
   ['7.22', 'Novembre 2026', ['Adresse, code postal et ville en petit tout en bas de la route', 'Décor et navigation conservés']],
   ['7.21', 'Novembre 2026', ['39 options de décor indépendantes dans Navigation', 'Aperçu animé local avant application', 'Téléchargement vérifié et gestion du cache de cette application']],
   ['7.20', 'Novembre 2026', ['Position de défilement conservée dans les paramètres', 'Recherche des réglages avec filtres et dictée vocale', 'Barre d’applications compacte pour agrandir le GPS', 'Proposition de mise à jour avant téléchargement']],
@@ -74,7 +75,7 @@ const pv = (k, d) => store.get(k + '_' + profIdx(), d);
 const setPv = (k, v) => store.set(k + '_' + profIdx(), v);
 const chipBtn = (p, act, t, on, extra = '') => `<button data-act="${act}" style="height:44px;padding:0 14px;border-radius:10px;font-size:14px;font-weight:600;white-space:nowrap;${on ? `background:${p.acc};color:${p.onAcc}` : `background:${p.card2};color:${p.txt}`};${extra}">${t}</button>`;
 const togBtn = (p, act, on) => `<button data-act="${act}" aria-pressed="${on}" style="width:52px;height:30px;border-radius:15px;background:${on ? p.acc : p.card2};position:relative;flex:none;border:1px solid #8883"><span style="position:absolute;top:3px;${on ? 'right:3px' : 'left:3px'};width:22px;height:22px;border-radius:50%;background:#fff"></span></button>`;
-const setRow = (p, t, d, ctl) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 2px;border-bottom:1px solid ${p.light ? '#0000000f' : '#ffffff0f'}"><div style="min-width:0"><div style="font-size:16px;font-weight:600">${t}</div>${d ? `<div style="font-size:13px;color:${p.mut};margin-top:2px">${d}</div>` : ''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${ctl || ''}</div></div>`;
+const setRow = (p, t, d, ctl) => `<div data-setting-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 2px;border-bottom:1px solid ${p.light ? '#0000000f' : '#ffffff0f'}"><div style="min-width:0"><div style="font-size:16px;font-weight:600">${t}</div>${d ? `<div style="font-size:13px;color:${p.mut};margin-top:2px">${d}</div>` : ''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${ctl || ''}</div></div>`;
 const secT = (p, t) => `<div style="font-size:12px;font-weight:700;letter-spacing:.06em;color:${p.mut};margin:14px 0 4px">${t.toUpperCase()}</div>`;
 
 // ---------- réseau : Internet OK ? ----------
@@ -840,7 +841,7 @@ function pageSettings(p) {
   if(window.Settings720 && Settings720.active()) return pageFrame(p,Settings720.toolbar(p)+Settings720.results(p));
   setCat = Math.min(setCat, SETCATS.length - 1); const [cn, subs] = SETCATS[setCat]; setSub = Math.min(setSub, subs.length - 1);
   const side = SETCATS.map(([n, s], i) => `<button data-act="scat:${i}:0" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;min-height:48px;padding:0 14px;border-radius:12px;font-size:15px;font-weight:600;${i === setCat ? `background:${p.acc};color:${p.onAcc}` : `color:${p.txt}`}">${n}</button>${i === setCat && s.length > 1 ? `<div style="margin:2px 0 6px 18px;border-left:2px solid ${p.card2};padding-left:8px;display:flex;flex-direction:column">${s.map(([sn], j) => `<button data-act="scat:${i}:${j}" style="text-align:left;height:38px;padding:0 10px;border-radius:8px;font-size:14px;${j === setSub ? `background:${p.card2};color:${p.txt};font-weight:600` : `color:${p.mut}`}">${sn}</button>`).join('')}</div>` : ''}`).join('');
-  const tabsRow = subs.length > 1 ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${subs.map(([sn], j) => chipBtn(p, `scat:${setCat}:${j}`, sn, j === setSub)).join('')}</div>` : '';
+  const tabsRow = ''; // Les rubriques sont déjà accessibles dans la colonne de gauche.
   let body = ''; try { body = subs[setSub][1](p); } catch (e) { body = `<div style="color:#FF6B6B">Erreur : ${esc(e.message)}</div>`; }
   return pageFrame(p, `${window.Settings720?Settings720.toolbar(p):''}<div style="display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;flex:1;min-height:0">
     <div class="scroll" data-settings-scroll="side" style="${card(p, 'padding:12px 10px;display:flex;flex-direction:column;gap:2px')}"><div style="font-size:24px;font-weight:700;padding:4px 10px 10px">Paramètres</div>${side}</div>

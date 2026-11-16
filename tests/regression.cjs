@@ -33,7 +33,7 @@ function make(options={}){
  w.Android={setImmersive(){},immersive:()=>true,apps:()=> '[]',media:()=> '{}',qfStatus:()=> '{}',sysStatus:()=> '{}',ready(){},launch:()=>true,launchIn:(...r)=>{moves.push(r);return true;},http:(url,id)=>{calls.push(url);queueMicrotask(()=>w.__httpCb(id,!offline,JSON.stringify(offline?{}:url.includes('nominatim')?{address:city}:{elements})));}};
  let vp={x:0,y:50,width:1280,height:670};
  w.GpsDock={gpsCanEmbed:()=>embedded,gpsViewport:()=>JSON.stringify(vp),gpsVisible:v=>nativeCalls.push(['visible',v]),gpsBounds:(...a)=>nativeCalls.push(['bounds',...a]),gpsOpen:p=>nativeCalls.push(['open',p]),gpsLast:()=>'',gpsResize:()=>false,gpsImmersive(){}};
- for(const f of ['app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
+ for(const f of ['app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js','v723.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
  const run=s=>vm.runInContext(s,ctx);
  run("tab='home'; render();");
  w.document.elementFromPoint=()=>w.document.querySelector('.gpsbox');
@@ -51,7 +51,7 @@ module.exports={make};
 if(require.main===module)(async()=>{
  const t=make(),{run}=t;
  ok('chargement complet sans erreur',t.errors,[]);
- ok('version',run('APP_VERSION'),'7.22');
+ ok('version',run('APP_VERSION'),'7.23');
  ok('délai initial une minute',run('Place710.every()'),60000);
  t.setels([{type:'node',lat:48.5805,lon:7.74,tags:{name:'Village proche',place:'village'}},{type:'node',lat:48.59,lon:7.74,tags:{name:'Grande ville',place:'city'}}]);
  await run('Place710.refresh()');
@@ -60,13 +60,13 @@ if(require.main===module)(async()=>{
  ok('une seule requête par service malgré appels concurrents',t.calls.length,2);
  await Promise.all([run('geoUpdate()'),run('updatePlace()'),run('plFetch()')]);
  ok('pas de doublons dans la minute',t.calls.length,2);
- run("roadHw='motorway';roadHwAt=Date.now();sceneAt=0;");
+ run("Road723.cache=[{id:1,tags:{highway:'motorway'},geometry:[{lat:loc.lat,lon:loc.lon-.01},{lat:loc.lat,lon:loc.lon+.01}]}];Road723.pos={...loc};Road723.at=Date.now();sceneAt=0;");
  ok('autoroute choisit le plus proche, même village derrière à moins de 500 m',run('roadPlace().name'),'Village proche');
  run('Place710.paintSigns()');
  ok('panneau bleu autoroute',t.w.document.querySelector('.place710').classList.contains('highway710'),true);
  ok('distance indiquée',t.w.document.querySelector('.place710').textContent,'Village proche · < 1 km');
  t.advance(61000);t.pos(48.59,7.74);t.setcity({village:'Petit village',city:'Commune englobante'});
- await run('Place710.refresh()');run("roadHw='residential';roadHwAt=Date.now();sceneAt=0;");
+ await run('Place710.refresh()');run("Road723.cache=[{id:2,tags:{highway:'residential'},geometry:[{lat:loc.lat,lon:loc.lon-.01},{lat:loc.lat,lon:loc.lon+.01}]}];Road723.pos={...loc};Road723.at=Date.now();sceneAt=0;");
  ok('village précis au lieu de la commune englobante',run('roadPlace().name'),'Petit village');
  run('Place710.paintSigns()');ok('panneau village blanc rouge',t.w.document.querySelector('.place710').classList.contains('highway710'),false);
  ok('panneau village visible',t.w.document.querySelector('.place710').textContent,'PETIT VILLAGE');
@@ -222,7 +222,7 @@ if(require.main===module)(async()=>{
  t.dom.window.close();
  if(process.env.CANVAS_MODULE || (()=>{try{return !!require.resolve('@napi-rs/canvas')}catch(e){return false}})()){ 
   const c=make({canvas:true});c.setels([]);await c.run('Place710.refresh()');
-  c.run("roadHw='residential';roadHwAt=Date.now();sceneAt=0;loc.spd=40;render();");
+  c.run("Road723.cache=[{id:2,tags:{highway:'residential'},geometry:[{lat:loc.lat,lon:loc.lon-.01},{lat:loc.lat,lon:loc.lon+.01}]}];Road723.pos={...loc};Road723.at=Date.now();sceneAt=0;loc.spd=40;render();");
   for(let i=1;i<=90;i++)c.drawFrame(i*100);
   const buildings=c.drawings.filter(x=>['#6f9be0','#2f4f9a'].includes(x.style));
   ok('immeubles du premier plan conservés à gauche',buildings.length>0,true);

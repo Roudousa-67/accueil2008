@@ -50,8 +50,7 @@ window.RoadMotion713 = {
     c.fillStyle=hw?(green?'#176c40':'#1554b4'):'#fff';c.fillRect(p.left,p.top,p.width,p.height);
     c.strokeStyle=hw?'#fff':'#d4202a';c.lineWidth=Math.max(.7,W*.008/z);c.strokeRect(p.left+p.width*.04,p.top+p.height*.1,p.width*.92,p.height*.8);
     c.fillStyle=hw?'#fff':'#161616';c.textAlign='center';c.textBaseline='middle';
-    c.font='700 '+Math.min(p.height*.5,p.width/Math.max(5,el.textContent.length*.62))+'px Inter,sans-serif';
-    c.fillText(el.textContent,p.left+p.width*.5,p.top+p.height*.5,p.width*.85);c.restore();
+    if(window.PanelText723)PanelText723.draw(c,p,el.textContent);else{c.font='700 '+Math.min(p.height*.6,p.width/Math.max(5,el.textContent.length*.55))+'px Inter,sans-serif';c.fillText(el.textContent,p.left+p.width*.5,p.top+p.height*.5,p.width*.85);}c.restore();
   }
 };
 // Le nom DOM reste disponible au lecteur d'écran ; le panneau visuel est dans le décor.

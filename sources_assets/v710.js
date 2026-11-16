@@ -228,6 +228,7 @@ const Frame710 = (() => {
       n.gpsVisible(true);
       return;
     }
+    if (window.Window723) { Window723.sync(); return; }
     if (!gbLive || gbMode() !== 'cadre' || document.hidden || !rect() || Date.now() < settling) return;
     const r = rect(), prev = store.get('gbLastRect', null);
     if (!prev || prev.pk !== gbPk() || r.some((v, i) => Math.abs(v - prev.r[i]) > 2)) {

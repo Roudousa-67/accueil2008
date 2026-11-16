@@ -1,6 +1,6 @@
 
 > test
-> node regression.cjs && node decor721.cjs && node native721.cjs && node address722.cjs
+> node regression.cjs && node decor721.cjs && node native721.cjs && node address722.cjs && node features723.cjs
 
 OK chargement complet sans erreur
 OK version
@@ -379,3 +379,57 @@ OK GPS périmé ne montre pas la dernière adresse
 OK ancienne adresse éloignée masquée
 
 9 vérifications adresse 7.22 réussies.
+OK GPS masqué hors Accueil : settings
+OK aucun masquage en boucle : settings
+OK GPS rétabli au retour de settings
+OK GPS masqué hors Accueil : trips
+OK aucun masquage en boucle : trips
+OK GPS rétabli au retour de trips
+OK GPS masqué hors Accueil : service
+OK aucun masquage en boucle : service
+OK GPS rétabli au retour de service
+OK GPS masqué hors Accueil : tracks
+OK aucun masquage en boucle : tracks
+OK GPS rétabli au retour de tracks
+OK GPS masqué hors Accueil : eco
+OK aucun masquage en boucle : eco
+OK GPS rétabli au retour de eco
+OK GPS masqué hors Accueil : apps
+OK aucun masquage en boucle : apps
+OK GPS rétabli au retour de apps
+OK GPS non ouvert ne se lance pas seul
+OK aucun retour forcé si application en arrière-plan
+OK refus système signalé sans faux succès
+OK autoroute choisie même à faible vitesse
+OK route urbaine sous la position prioritaire
+OK cap distingue les routes qui se croisent
+OK virage et nouveau cap changent la voie retenue
+OK sens unique distingue les chaussées opposées
+OK routes parallèles indiscernables indiquent une incertitude
+OK GPS imprécis rejeté
+OK GPS ancien rejeté
+OK route trop éloignée rejetée
+OK pas d’autoroute inventée par la seule vitesse
+OK autoroute cartographiée reconnue à l’arrêt
+OK ancienne correspondance routière abandonnée
+OK réponse réseau appliquée
+OK cache évite une seconde recherche au même endroit
+OK verrou réseau libéré
+OK échec réseau ne conserve pas une ancienne autoroute
+OK échec réseau libère le verrou
+OK callback réseau absent libère le verrou après délai
+OK toutes les pages de paramètres parcourues
+OK informations ajoutées à plus de 100 réglages
+OK fenêtre d’aide ouverte
+OK aucune commande active dans l’illustration
+OK focus conservé dans la fenêtre
+OK aide ne change pas les réglages
+OK aide fermée
+OK 39 exemples de décor dessinés sans changer les préférences
+OK noms de panneaux longs répartis sur deux lignes
+OK panneaux 20 % plus grands par défaut
+OK taille personnelle conservée
+OK syntaxe de tous les scripts applicatifs valide
+OK aucune erreur JavaScript pendant les scénarios
+
+52 vérifications 7.23 réussies.

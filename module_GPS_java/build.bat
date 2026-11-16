@@ -7,21 +7,22 @@ set "SDK=C:\Android"
 set "BT=%SDK%\build-tools\34.0.0"
 set "PLAT=%SDK%\platforms\android-30\android.jar"
 set "APKTOOL=%SDK%\apktool\apktool.jar"
-set "IN=..\Accueil2008GT_v7.20.apk"
-set "OUT=..\Accueil2008GT_v7.20_recompile.apk"
+set "IN=..\Accueil2008GT_v7.23.apk"
+set "OUT=..\Accueil2008GT_v7.23_recompile.apk"
 set "KS=..\outils\accueil2008gt.p12"
 
 for %%F in ("%PLAT%" "%BT%\d8.bat" "%BT%\zipalign.exe" "%BT%\apksigner.bat" "%APKTOOL%" "%IN%" "%KS%") do if not exist %%F (echo [ERREUR] Introuvable : %%~F & goto fail)
 where javac >nul 2>nul || (echo [ERREUR] Java JDK 17 non installe ou pas dans le PATH & goto fail)
 
-if not defined KSPASS (echo Definir KSPASS dans votre environnement prive avant compilation & exit /b 1)
+if not defined APK_KEY_PASS (echo Definir APK_KEY_PASS avant la compilation & goto fail)
+set "KSPASS=%APK_KEY_PASS%"
 
 if exist work rmdir /s /q work
 mkdir work\classes work\dex work\dex3
 
 echo.
 echo [1/6] Compilation du code Java...
-javac -encoding UTF-8 --release 8 -cp "%PLAT%" -d work\classes java\fr\gtline\accueil2008\GpsDock.java java\fr\gtline\accueil2008\GpsDockInit.java java\fr\gtline\accueil2008\SettingsVoiceActivity.java || goto fail
+javac -encoding UTF-8 --release 8 -cp "%PLAT%" -d work\classes java\fr\gtline\accueil2008\GpsDock.java java\fr\gtline\accueil2008\GpsDockInit.java java\fr\gtline\accueil2008\SettingsVoiceActivity.java java\fr\gtline\accueil2008\AppFiles721.java java\fr\gtline\accueil2008\FilePolicy721.java || goto fail
 jar --create --file work\gps.jar -C work\classes . || goto fail
 
 echo [2/6] Conversion pour Android (dex)...

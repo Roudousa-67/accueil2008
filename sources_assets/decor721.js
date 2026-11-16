@@ -29,7 +29,7 @@ window.RoadDecor721={
   c.fillStyle='#c9d8eb';for(const k of [.16,.84])c.fillRect(p.left+p.width*k,p.bottom,Math.max(.7,p.width*.012),p.ground-p.bottom);
   const hw=scene==='autoroute';c.fillStyle=hw?'#1554b4':'#fff';c.fillRect(p.left,p.top,p.width,p.height);c.shadowBlur=0;
   c.strokeStyle=hw?'#fff':'#d4202a';c.lineWidth=Math.max(.5,p.height*.065);c.strokeRect(p.left+p.width*.035,p.top+p.height*.1,p.width*.93,p.height*.8);
-  c.fillStyle=hw?'#fff':'#171c27';c.textAlign='center';c.textBaseline='middle';c.font='700 '+Math.min(p.height*.5,p.width/Math.max(5,text.length*.62))+'px Inter,sans-serif';c.fillText(text,p.left+p.width*.5,p.top+p.height*.52,p.width*.86);c.restore();
+  c.fillStyle=hw?'#fff':'#171c27';c.textAlign='center';c.textBaseline='middle';if(window.PanelText723)PanelText723.draw(c,p,text);else{c.font='700 '+Math.min(p.height*.6,p.width/Math.max(5,text.length*.55))+'px Inter,sans-serif';c.fillText(text,p.left+p.width*.5,p.top+p.height*.52,p.width*.86);}c.restore();
  },
  // Le même identifiant conserve sa famille, sa taille et son emplacement pendant tout son passage.
  objectPlan(id,sg,scene,on){
@@ -42,12 +42,12 @@ window.RoadDecor721={
  draw(cv,T,distance,speed){
   const W=cv.clientWidth,H=cv.clientHeight;if(!W||!H)return;
   const box=cv.parentNode,preview=box.hasAttribute('data-decor721-preview'),D=Decor721;
-  const on=id=>D.on(id),quality=preview&&D.preview||D.quality(),level={calme:.65,normal:1,riche:1.3}[quality];
+  const help=box.getAttribute('data-help-decor723'),on=id=>help!==null?Number(help)===id:D.on(id),quality=preview&&D.preview||D.quality(),level={calme:.65,normal:1,riche:1.3}[quality];
   const dpr=Math.min(quality==='calme'?1:1.5,window.devicePixelRatio||1);
   if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);}
   const c=cv.getContext('2d');if(!c)return;c.setTransform(dpr,0,0,dpr,0,0);c.globalAlpha=1;
-  const scene=preview?D.previewScene:roadScene(),kind=roadKind(),wx=preview?D.previewWx:kind.wx;
-  const sky=preview?RoadSky719.sample(new Date(2026,5,21,D.previewHour),null,'clock'):RoadSky719.current(),night=preview?sky.night:kind.night;
+  const scene=preview?(box.getAttribute('data-help-scene723')||D.previewScene):roadScene(),kind=roadKind(),wx=preview?(box.getAttribute('data-help-wx723')||D.previewWx):kind.wx;
+  const sky=preview?RoadSky719.sample(new Date(2026,5,21,Number(box.getAttribute('data-help-hour723')||D.previewHour)),null,'clock'):RoadSky719.current(),night=preview?sky.night:kind.night;
   const P=this.projection(W,H,distance,on),hz=P.hz,rnd=i=>this.rnd(i),season=D.season(),wet=['pluie','orage'].includes(wx),snow=wx==='neige';
   let pal=RoadSky719.palette()||{top:night?'#0d1a45':'#3d62b8',bottom:night?'#081232':'#99c5e6'};
   if(preview)pal=night?{top:'#0a1230',bottom:'#253d69'}:{top:'#3d72b5',bottom:'#acd5ee'};

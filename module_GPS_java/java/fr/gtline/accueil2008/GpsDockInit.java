@@ -121,6 +121,27 @@ public final class GpsDockInit extends ContentProvider {
             return activity.getSharedPreferences("settings_voice",0).getString("result","{}");
         }
 
+        /** Masque une fenêtre GPS libre en remettant le lanceur devant elle, sans arrêter sa tâche.
+         * Au retour, reprend la tâche existante. Ne demande aucune permission système supplémentaire. */
+        @JavascriptInterface public boolean gpsWindowVisible(String pkg, boolean visible) {
+            if (pkg == null || pkg.length() == 0 || pkg.equals(activity.getPackageName())) return false;
+            try {
+                ActivityManager am=(ActivityManager)activity.getSystemService(Activity.ACTIVITY_SERVICE);
+                if (!visible) {
+                    am.moveTaskToFront(activity.getTaskId(), 0);
+                    return true;
+                }
+                for (ActivityManager.RunningTaskInfo task:am.getRunningTasks(50)) {
+                    if ((task.baseActivity!=null && pkg.equals(task.baseActivity.getPackageName())) ||
+                        (task.topActivity!=null && pkg.equals(task.topActivity.getPackageName()))) {
+                        am.moveTaskToFront(task.id, 0);
+                        return true;
+                    }
+                }
+            } catch (Throwable denied) { android.util.Log.w("GpsDock", "Fenêtre GPS : changement de premier plan refusé"); }
+            return false;
+        }
+
         @JavascriptInterface public String gpsViewport() { return viewport; }
 
         @JavascriptInterface public boolean gpsCanEmbed() {

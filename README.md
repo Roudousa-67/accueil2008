@@ -1,14 +1,21 @@
 # Accueil 2008 GT
 
-**Lanceur Android personnel · Version 7.22 · Peugeot 2008 GT Line**
+**Lanceur Android personnel · Version 7.23 · Peugeot 2008 GT Line**
 
-[Télécharger l’APK 7.22](https://github.com/Roudousa-67/accueil2008/releases/download/v7.22/Accueil2008GT_v7.22.apk) · [Notes de version](https://github.com/Roudousa-67/accueil2008/releases/tag/v7.21)
+[Télécharger l’APK 7.23](https://github.com/Roudousa-67/accueil2008/releases/download/v7.23/Accueil2008GT_v7.23.apk) · [Notes de version](https://github.com/Roudousa-67/accueil2008/releases/tag/v7.23)
 
 Accueil 2008 GT est un lanceur Android personnalisé développé pour le projet Peugeot 2008 GT Line. Il réunit l’accès au GPS, la musique, un décor de route animé, les informations disponibles du véhicule et les réglages sur un même écran.
 
 L’application est un projet personnel. Ce n’est pas une application officielle Peugeot, Waze ou Google.
 
 **Version présentée : 7.21.** Les photos d’utilisation proviennent des images et de la vidéo envoyées avant cette version. Les illustrations du décor 7.21 ci-dessous sont des rendus du code et du sprite d’origine, avec des options de démonstration activées. Ce ne sont pas des captures Android de l’autoradio, ni des images générées par IA.
+
+## Mise à jour 7.23 — GPS, routes et aides
+
+GPS masqué hors Accueil puis restauré au retour ; reprise de la tâche existante quand Android l’autorise. Détection routière par géométrie, cap et précision, sans déduire une autoroute de la vitesse seule. Paramètres avec bouton ⓘ, 39 exemples animés et une seule navigation par rubrique. Panneaux agrandis par défaut, préférences de taille conservées et noms longs sur deux lignes. Adresse maintenue au bas de la route.
+
+422 contrôles automatisés réussis ; 53 pages et 188 lignes de paramètres parcourues. Le comportement des fenêtres libres et la détection GPS réelle restent à confirmer sur l’autoradio. [Audit détaillé](tests/AUDIT723.md).
+
 
 ## Mise à jour 7.22 — adresse au bas de la route
 
@@ -241,4 +248,5 @@ npm test --prefix tests
 [Résultats des contrôles](tests/RESULTATS.txt) · [Bilan de vérification](tests/VERIFICATION.json) · [Publication des versions](GITHUB.md).
 
 La clé privée et son mot de passe ne sont pas publiés dans ce dépôt. Les bibliothèques et ressources conservent leurs licences respectives ; aucune nouvelle licence globale n’est attribuée aux sources du lanceur.
+
 

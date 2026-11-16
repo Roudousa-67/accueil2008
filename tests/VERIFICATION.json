@@ -1,11 +1,16 @@
 {
-  "version": "7.22",
-  "versionCode": 92,
-  "checks_passed": 370,
+  "version": "7.23",
+  "versionCode": 93,
+  "checks_passed": 422,
+  "settings_pages_audited": 53,
+  "setting_rows_with_help": 188,
+  "decor_help_examples": 39,
   "hardware_tested": false,
+  "gps_window_hardware_tested": false,
+  "road_matching_live_gps_tested": false,
   "signature_verified": true,
-  "signature_matches_721": true,
+  "signature_matches_722": true,
   "assets_match_sources": true,
-  "decor_assets_unchanged": true,
-  "apk_sha256": "755ad59b85112bdf7ce53736e9474fae4e44d62543dfe6d84a6e7c20c4fa7c55"
+  "native_gps_visibility_in_dex": true,
+  "apk_sha256": "c5c691324d7c369afbcbb7d1e82a8184c179661712f66a3f9441fbf905dbdf0f"
 }

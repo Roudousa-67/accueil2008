@@ -1,7 +1,7 @@
 /* 7.18 : options utilisateur rangées dans Navigation. */
 'use strict';
 window.RoadOptions718={
- size:()=>[80,100,120,140].includes(Number(store.get('panelSize718',100)))?Number(store.get('panelSize718',100))/100:1,
+ size:()=>[80,100,120,140].includes(Number(store.get('panelSize718',120)))?Number(store.get('panelSize718',120))/100:1.2,
  distance:()=>[0,8,16,24].includes(Number(store.get('panelDistance718',8)))?Number(store.get('panelDistance718',8)):8,
  spacing:()=>[6,8,12].includes(Number(store.get('panelSpacing718',8)))?Number(store.get('panelSpacing718',8)):8,
  duration:()=>[0,500,1000,1500,2000].includes(Number(store.get('roadFade718',1000)))?Number(store.get('roadFade718',1000)):1000

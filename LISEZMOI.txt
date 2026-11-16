@@ -1,8 +1,25 @@
-ACCUEIL 2008 GT 7.22 — ADRESSE EN BAS DE LA ROUTE
-Adresse, code postal et ville sur une petite ligne centrée au bord inférieur de la route.
-Actualisation selon le délai existant dans Navigation > Panneaux et localités (une minute par défaut).
-Décor, routes, Waze et réglages conservés. Aucun nouveau rendu de route réelle ou de relief.
-La vérification des mises à jour reste automatique si elle est activée : démarrage puis toutes les six heures.
-Android demande de valider l’installation.
-Installer par-dessus la version précédente sans désinstaller.
-Aucun essai physique sur autoradio.
+ACCUEIL 2008 GT 7.23 — GPS, ROUTES ET PARAMÈTRES
+Le cadre GPS natif est masqué hors Accueil. Pour la fenêtre Android libre, le
+lanceur passe devant la tâche GPS puis la reprend au retour ; si le système
+refuse, un message le signale. Aucune fermeture ni arrêt forcé du GPS.
+Reconnaissance routière : géométrie la plus proche, cap, sens de circulation,
+précision et âge GPS. Cache de routes autour de la position et requêtes avec
+délai maximal. Plus de classification autoroute à partir de la vitesse seule.
+Le mode Automatique est nécessaire. État et relance dans Navigation > Décor
+de la route. Internet et cartographie disponibles nécessaires ; une route
+ambiguë ou une position imprécise ne garantissent pas la reconnaissance.
+Paramètres : une seule navigation par rubrique au lieu des deux barres en
+double. Bouton information à chaque ligne de réglage et aux champs isolés,
+aide de chaque rubrique ; explication, illustration des commandes, et exemples
+animés pour les 39 options D04/D13–D50 sans modifier les préférences.
+Panneaux : taille par défaut 120 %, tailles personnelles conservées. Texte
+agrandi, noms longs sur deux lignes, trajet latéral et marge voiture protégés.
+Adresse conservée en petit tout en bas de la route.
+422 contrôles automatisés réussis ; 53 pages et 188 lignes de paramètres
+parcourues sans erreur. Cinq modules Java compilés, manifeste, DEX, signature
+identique et correspondance APK/sources contrôlés. Aucun essai physique sur
+l’autoradio ; comportement des fenêtres libres et détection GPS réelle à
+confirmer sur le poste.
+Installer par-dessus la version précédente sans désinstaller. La vérification
+automatique est au démarrage puis toutes les six heures si activée et avec
+Internet. L’installation reste à valider dans Android.

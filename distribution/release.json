@@ -1,6 +1,6 @@
 {
-  "version": "7.22",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.22/Accueil2008GT_v7.22.apk",
-  "sha256": "755ad59b85112bdf7ce53736e9474fae4e44d62543dfe6d84a6e7c20c4fa7c55",
-  "notes": "Adresse, code postal et ville en petit tout en bas de la route. Décor conservé. 370 contrôles automatisés réussis ; essai sur autoradio à effectuer."
+  "version": "7.23",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.23/Accueil2008GT_v7.23.apk",
+  "sha256": "c5c691324d7c369afbcbb7d1e82a8184c179661712f66a3f9441fbf905dbdf0f",
+  "notes": "GPS masqué hors Accueil puis restauré ; détection routière avec cap et précision ; aides des paramètres et 39 exemples animés ; panneaux agrandis. 422 contrôles réussis. Fenêtres Android et GPS réel à confirmer sur le poste."
 }
