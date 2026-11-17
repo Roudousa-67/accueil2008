@@ -68,7 +68,7 @@ def main():
         script = assets / "v4.js"
         data = script.read_text(encoding="utf-8")
         marker = "APP_VERSION = '7.23'"
-        if data.count(marker) != 1:
+        if data.count(marker) != 1 and data.count("APP_VERSION = '7.24'") != 1:
             raise SystemExit("Version des sources inattendue ; préparation interrompue.")
         script.write_text(data.replace(marker, "APP_VERSION = '7.24'"), encoding="utf-8")
         manifest = work / "manifest-original.xml"

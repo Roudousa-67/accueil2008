@@ -1,7 +1,7 @@
 # Dépôt et mises à jour
 
 Dépôt : https://github.com/Roudousa-67/accueil2008
-Branche principale : `main`. Version publiée : `7.23`, code Android `93`.
+Branche principale : `main`. Version préparée : `7.24`, code Android `94`. La version annoncée aux appareils est toujours celle de `version.json`.
 Dans l’application : Paramètres > Mises à jour > Dépôt GitHub =
 `Roudousa-67/accueil2008`. Activer « Vérifier automatiquement » : recherche au
 démarrage puis toutes les six heures pendant que l’application fonctionne.
@@ -122,3 +122,11 @@ La chaîne exécute les tests, construit la version 7.24, compare son certificat
 `Accueil2008GT-v7.24-signe`. Elle crée aussi un brouillon de release, sans
 remplacer un APK déjà publié et sans annoncer prématurément une mise à jour
 sur l’autoradio. La clé temporaire est supprimée à la fin, même en cas d’échec.
+
+## Livraison signée 7.24
+
+La clé originale a été retrouvée dans l’archive complète 7.9 et son certificat a été vérifié identique à celui de l’APK 7.23. L’APK 7.24 a ensuite été généré et signé localement ; aucune clé privée ni aucun mot de passe ne sont inclus dans le dépôt.
+
+Le fichier `distribution/patch724-signe.b64` transporte uniquement des octets du paquet APK signé public. `outils/reconstruire_apk724.py` réassemble exactement cet APK à partir de la version 7.23 et vérifie son SHA-256. Ce mécanisme ne signe rien et ne remplace pas la clé privée.
+
+Le workflow de dépôt vérifie également les certificats, exécute les tests et ajoute l’APK signé à la branche. La publication ponctuelle 7.24 s’exécute lors de sa fusion autorisée sur main ; les autres versions conservent la publication manuelle habituelle. L’annonce à l’autoradio intervient seulement après la disponibilité de la release.

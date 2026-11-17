@@ -1,10 +1,5 @@
 name: Construire l’APK des décors
 on:
-  push:
-    branches: [feat/widget-decors-illustres]
-    paths:
-      - '.github/workflows/construire-apk-decors.yml'
-      - 'outils/preparer_apk_decors.py'
   workflow_dispatch:
 permissions:
   contents: read

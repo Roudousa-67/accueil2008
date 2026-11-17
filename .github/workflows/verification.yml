@@ -11,6 +11,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Reconstituer l’APK signé si nécessaire
+        if: hashFiles('distribution/patch724-signe.b64') != ''
+        run: python3 outils/reconstruire_apk724.py
       - uses: actions/setup-node@v4
         with:
           node-version: '24'

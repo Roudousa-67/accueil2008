@@ -9,7 +9,7 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.23';
+const APP_VERSION = '7.24';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
   ['7.23', 'Novembre 2026', ['GPS masqué hors accueil et restauré au retour', 'Détection routière avec cap et précision', 'Aide par réglage et navigation simplifiée', 'Panneaux et texte agrandis']],
