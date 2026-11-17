@@ -16,6 +16,11 @@ let count=0;const ok=(name,a,b=true)=>{assert.deepEqual(a,b,name);count++;consol
  ok('écritures différées',writes,0);ok('valeur mémoire immédiate',r("store.get('perfTest').n"),3);
  r('store.flush()');ok('écritures regroupées par clé',writes,1);
  ok('format a08 conservé',JSON.parse(w.localStorage.getItem('a08_perfTest')),{n:3});
+ r("store.set('perfRestore',1);restoreFrom({data:{a08_perfRestore:'2'}})");
+ ok('restauration invalide le cache des préférences',r("store.get('perfRestore')"),2);
+ r('store.flush()');ok('aucune écriture différée ne remplace la restauration',w.localStorage.getItem('a08_perfRestore'),'2');
+ r("store.set('perfSnapshot','dernier choix')");
+ ok('sauvegarde inclut les choix non encore écrits',r("JSON.parse(snapshot().data.a08_perfSnapshot)"),'dernier choix');
  r("store.set('perfTest',{n:4});onPauseHome()");
  ok('pause force la persistance',JSON.parse(w.localStorage.getItem('a08_perfTest')),{n:4});
  ok('aucune minuterie affichage active en pause',r('Perf725.stats().displayTimers'),0);

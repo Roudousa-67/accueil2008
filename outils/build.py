@@ -1,5 +1,5 @@
 import zipfile, sys, os
-NATIVE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'classes3.dex')
+NATIVE = os.environ.get('ACCUEIL_NATIVE_DEX') or os.path.join(os.path.dirname(os.path.abspath(__file__)), 'classes3.dex')
 orig, out = sys.argv[1], sys.argv[2]
 SRC = sys.argv[3] if len(sys.argv) > 3 else '/home/claude/src'
 zi = zipfile.ZipFile(orig); zo = zipfile.ZipFile(out, 'w'); seen = set()

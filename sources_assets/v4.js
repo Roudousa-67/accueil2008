@@ -713,10 +713,10 @@ function canCheckAtStart() {
 }
 
 // ---------- sauvegarde ----------
-function snapshot() { const d = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('a08_')) d[k] = localStorage.getItem(k); } return { app: 'accueil2008', ver: APP_VERSION, ts: Date.now(), data: d }; }
+function snapshot() { store.flush(); const d = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('a08_')) d[k] = localStorage.getItem(k); } return { app: 'accueil2008', ver: APP_VERSION, ts: Date.now(), data: d }; }
 function saveBackup(silent) { try { localStorage.setItem('a08bak_auto', JSON.stringify(snapshot())); if (!silent) toast('Sauvegarde faite'); } catch (e) { try { const s = snapshot(); delete s.data.a08_wallPhoto; delete s.data.a08_carImg; localStorage.setItem('a08bak_auto', JSON.stringify(s)); if (!silent) toast('Sauvegarde faite (sans les photos)'); } catch (e2) { if (!silent) toast('Pas assez de place pour la sauvegarde'); } } }
 function lastBackup() { try { return JSON.parse(localStorage.getItem('a08bak_auto') || 'null'); } catch (e) { return null; } }
-function restoreFrom(b) { if (!b || !b.data) { toast('Sauvegarde illisible'); return; } Object.keys(b.data).forEach((k) => { if (k.startsWith('a08_')) localStorage.setItem(k, b.data[k]); }); toast('Réglages restaurés'); setTimeout(() => location.reload(), 600); }
+function restoreFrom(b) { if (!b || !b.data) { toast('Sauvegarde illisible'); return; } store.flush(); Object.keys(b.data).forEach((k) => { if (k.startsWith('a08_')) localStorage.setItem(k, b.data[k]); }); store.invalidate(); toast('Réglages restaurés'); setTimeout(() => location.reload(), 600); }
 function autoBackupAtStart() {
   if (!store.get('autoBackup', true)) return;
   const last = lastBackup(), prevVer = store.get('lastVer', '');

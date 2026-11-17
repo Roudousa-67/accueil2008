@@ -64,7 +64,7 @@
 
   function load(onOk, onErr) {
     const x = new XMLHttpRequest(); x.open('GET', 'car/2008.glb'); x.responseType = 'arraybuffer';
-    x.onload = () => { if (!x.response || (x.status && x.status !== 200 && x.status !== 0)) return onErr('http ' + x.status); try { new THREE.GLTFLoader().parse(x.response, '', onOk, onErr); } catch (e) { onErr(e); } };
+    x.onload = () => { if (!x.response || (x.status && x.status !== 200 && x.status !== 0)) return onErr('http ' + x.status); try { const loader=new THREE.GLTFLoader();if(window.MeshoptDecoder)loader.setMeshoptDecoder(MeshoptDecoder);loader.parse(x.response, '', onOk, onErr); } catch (e) { onErr(e); } };
     x.onerror = () => onErr('xhr'); x.send();
   }
 
@@ -216,6 +216,7 @@
   };
   C3.pause = function(){if(raf>0)cancelAnimationFrame(raf);raf=0;lastT=0;};
   C3.resume = function(){kick();};
+  C3.running = () => !!raf;
   C3.state = () => state;
   C3._scene = () => S; C3._cam = () => cam;
   C3.setAccent = (c) => { if (!c || c === accent) return; accent = c; if (ring) { try { ring.material.color.set(c); } catch (e) {} kick(); } };

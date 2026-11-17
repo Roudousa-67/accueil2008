@@ -40,5 +40,5 @@ window.Files721={
  if(op==='cancel'&&b){Files721.state=Files721.decode(b.cancel());Files721.active=false;render();return;}
  if(op==='install'&&b){if(moving()){toast('Installation disponible à l’arrêt.');return;}const r=Files721.decode(b.install());if(r.error)toast(r.error);else toast('Valide l’installation dans Android. Si Android demande une autorisation, reviens ensuite sur Installer.');return;}
 };}
-setInterval(()=>Files721.poll(),750);
+displayEvery725(()=>Files721.poll(),750);
 if(window.Settings720)Settings720.index=null;

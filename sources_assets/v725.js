@@ -29,8 +29,8 @@ window.Performance725=(()=>{
   const s=Perf725.stats(),fmt=v=>v===null?'Indisponible':Number(v).toFixed(1),values={
    startup:s.startupMs===null?'En attente':fmt(s.startupMs)+' ms (premier rendu)',
    fps:fmt(s.fps)+' images/s',draw:fmt(s.drawMs)+' ms',
-   render:fmt(s.renderMs)+' ms',timers:s.intervals+' intervalles JS observés',
-   display:s.displayTimers+' minuteries d’affichage',loops:s.roadLoops+' boucle route programmée',
+   render:fmt(s.renderMs)+' ms',timers:s.intervals+' intervalles · '+s.timeouts+' délais JS observés',
+   display:s.displayTimers+' minuteries d’affichage',loops:s.roadLoops+' route · '+s.carLoops+' voiture 3D',
    memory:s.jsBytes===null?'Non fournie par cette WebView':(s.jsBytes/1048576).toFixed(1)+' Mo',
    pending:store.pending()+' écritures en attente'+(store.error()?' · '+store.error():'')
   };
@@ -41,7 +41,7 @@ window.Performance725=(()=>{
   renderRAF=requestAnimationFrame(()=>{renderRAF=0;render();});
  };
  window.render=function(){
-  if(Perf725.paused()||resuming)return;
+  if(document.hidden||Perf725.paused()||resuming)return;
   if(renderRAF){cancelAnimationFrame(renderRAF);renderRAF=0;}
   const at=performance.now(),result=originalRender.apply(this,arguments);
   Perf725.render(performance.now()-at);

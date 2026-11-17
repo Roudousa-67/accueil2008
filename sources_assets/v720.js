@@ -45,7 +45,7 @@ window.Settings720={
   restore();requestAnimationFrame(restore);s.lastKey=key;s.bind();
  }return out;
 };}
-setInterval(()=>{const s=Settings720;if(!s.voicePending)return;if(Date.now()-s.voicePending>120000){s.voicePending=0;return;}
+displayEvery725(()=>{const s=Settings720;if(!s.voicePending)return;if(Date.now()-s.voicePending>120000){s.voicePending=0;return;}
  try{const b=window.GpsDock;if(b&&b.settingsVoiceResult)s.acceptVoice(JSON.parse(String(b.settingsVoiceResult())));}catch(e){}
 },500);
 
