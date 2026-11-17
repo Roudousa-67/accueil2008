@@ -47,11 +47,11 @@ public final class GpsDockInit extends ContentProvider {
             @Override public void onActivityStarted(Activity a) { }
             @Override public void onActivityResumed(final Activity a) {
                 a.getWindow().getDecorView().postDelayed(new Runnable() {
-                    @Override public void run() { immersive(a); }
+                    @Override public void run() { immersive(a); lifecycle(a,false); }
                 }, 350);
             }
-            @Override public void onActivityPaused(Activity a) { }
-            @Override public void onActivityStopped(Activity a) { }
+            @Override public void onActivityPaused(Activity a) { lifecycle(a,true); }
+            @Override public void onActivityStopped(Activity a) { lifecycle(a,true); }
             @Override public void onActivitySaveInstanceState(Activity a, Bundle b) { }
             @Override public void onActivityDestroyed(Activity a) {
                 GpsDock d = docks.remove(a);
@@ -62,6 +62,15 @@ public final class GpsDockInit extends ContentProvider {
         return true;
     }
 
+    private void lifecycle(Activity a, boolean paused) {
+        if (!a.getClass().getName().endsWith(".MainActivity")) return;
+        WebView web=findWebView(a.findViewById(android.R.id.content));
+        if(web==null)return;
+        if(paused){GpsDock d=docks.get(a);if(d!=null)d.setVisible(false);}
+        String hook=paused?"onPauseHome":"onResumeHome";
+        web.evaluateJavascript("if(window."+hook+")window."+hook+"();",null);
+    }
+
     private void attach(Activity a) {
         if (!a.getClass().getName().endsWith(".MainActivity") || docks.containsKey(a)) return;
         View content = a.findViewById(android.R.id.content);
@@ -69,6 +78,8 @@ public final class GpsDockInit extends ContentProvider {
         FrameLayout root = (FrameLayout) content;
         WebView web = findWebView(root);
         if (web == null) return;
+        if(android.os.Build.VERSION.SDK_INT>=26)web.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT,false);
+        if(android.os.Build.VERSION.SDK_INT>=23)web.getSettings().setOffscreenPreRaster(true);
         GpsDock dock = new GpsDock(a, root);
         docks.put(a, dock);
         web.addJavascriptInterface(new Js(a, dock, web, root), "GpsDock");

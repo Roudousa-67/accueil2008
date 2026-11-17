@@ -145,7 +145,7 @@ window.roadPlace = () => Place710.roadPlace();
   .place710.waiting710{background:#10244bd9;color:#e5edff;border:0;outline:0;font-size:11px;min-height:24px}
   .place710.waiting710::before,.place710.waiting710::after{display:none}
 `; document.head.appendChild(style); }
-setInterval(() => { Place710.refresh(); Place710.paintSigns(); }, 1000);
+displayEvery725(() => { Place710.refresh(); Place710.paintSigns(); }, 1000);
 { const old = render; window.render = function () { const r = old.apply(this, arguments); Place710.paintSigns(); return r; }; }
 
 
@@ -202,7 +202,7 @@ const Frame710 = (() => {
   }
   function rect(loose) {
     const el = document.querySelector('#screen .gpsbox');
-    if (!el || tab !== 'home' || editing || gbMenu) return null;
+    if (!el || tab !== 'home' || editing || gbMenu || (window.Perf725 && Perf725.paused())) return null;
     const r = el.getBoundingClientRect(), v = viewport(), k = v.width / innerWidth;
     if (r.width < 60 || r.height < 60) return null;
     if (!loose) { const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (!top || !el.contains(top)) return null; }
@@ -259,7 +259,7 @@ gbRect = Frame710.rect;
   return old.apply(this, arguments);
 }; }
 // Suivi continu : même un déplacement de quelques pixels ou un redimensionnement de barre compte.
-setInterval(Frame710.sync, 500);
+// La boucle unique de secours est installée par v725.js et stoppée hors Accueil.
 window.addEventListener('resize', () => { fit(); setTimeout(Frame710.sync, 250); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { Frame710.applyImmersive(); setTimeout(Frame710.sync, 350); } });
 

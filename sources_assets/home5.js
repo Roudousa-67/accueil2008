@@ -550,33 +550,13 @@ window.act = function (a, long) {
 // position du cadre envoyée au module natif (s'il existe et si le réglage est activé)
 (function () {
   if (!gpsNative()) return;
-  let last = '';
-  const t0 = Date.now(); let boot = false;   // boot : le module natif va relancer tout seul le dernier GPS (1,5 s après son démarrage)
-  const sync = () => {
-    if (!gpsEmbed()) { gpsShown = false; if (last !== 'off') { last = 'off'; try { GD.gpsVisible(false); } catch (e) { /* rien */ } } return; }
-    const el = document.querySelector('#screen .gpsslot'); let key = 'hide', r = null;
-    if (el && tab === 'home') {
-      r = el.getBoundingClientRect();
-      const top = r.width > 40 && r.height > 40 ? document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) : null;
-      if (top && el.contains(top)) { const k = window.devicePixelRatio || 1; r = [r.left, r.top, r.width, r.height].map((v) => Math.round(v * k)); key = r.join(','); }
-    }
-    if (key !== last) {
-      last = key;
-      if (key === 'hide') { gpsShown = false; GD.gpsVisible(false); }
-      else { GD.gpsBounds(r[0], r[1], r[2], r[3]); GD.gpsVisible(true); gpsShown = true; if (gpsPend) { gpsArm = Date.now(); gpsPend = 0; } }   // c'est à l'affichage du cadre que le module lance vraiment l'appli
-    }
-    // relance automatique du module : elle part dès que le cadre est affiché (donc après l'écran de bienvenue s'il est là)
-    if (gpsShown && boot) { gpsArm = Date.now(); if (Date.now() - t0 >= 1500) boot = false; }
-  };
-  setInterval(sync, 300);
-  // Au démarrage : le module natif relance tout seul le dernier GPS (1,5 s après) ; s'il n'a rien en mémoire, on ouvre nous-mêmes celui choisi.
-  boot = gpsEmbed() && !!gpsNativeLast();
-  setTimeout(() => { if (gpsEmbed() && !gpsNativeLast()) gpsTry(gpsLastPk()); }, 2500);
+  // 7.25 : Frame710 est l'unique propriétaire de la visibilité et des coordonnées.
+  // Pas de boucle concurrente .gpsslot toutes les 300 ms.
   // Refus d'Android (appli pas dans /system/priv-app) : le module ouvre alors le GPS en plein écran, donc notre écran passe
   // derrière juste après l'essai. C'est le signe : on arrête d'essayer et le cadre montre la carte de l'appli à la place.
   const refused = () => {
     if (!gpsEmbed() || !gpsArm || Date.now() - gpsArm > 9000) return;
-    gpsArm = 0; store.set('gpsRefused', true); gpsNote = true; gpsShown = false; last = 'off';
+    gpsArm = 0; store.set('gpsRefused', true); gpsNote = true; gpsShown = false;
     try { const l = gpsNativeLast(); if (l && !store.get('gpsLast', '')) store.set('gpsLast', l); GD.gpsVisible(false); GD.gpsOpen(GPS_OFF); } catch (e) { /* rien */ }
     try { render(); } catch (e) { /* rien */ }
   };

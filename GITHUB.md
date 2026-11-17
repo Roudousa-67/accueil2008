@@ -130,3 +130,8 @@ La clé originale a été retrouvée dans l’archive complète 7.9 et son certi
 Le fichier `distribution/patch724-signe.b64` transporte uniquement des octets du paquet APK signé public. `outils/reconstruire_apk724.py` réassemble exactement cet APK à partir de la version 7.23 et vérifie son SHA-256. Ce mécanisme ne signe rien et ne remplace pas la clé privée.
 
 Le workflow de dépôt vérifie également les certificats, exécute les tests et ajoute l’APK signé à la branche. La publication ponctuelle 7.24 s’exécute lors de sa fusion autorisée sur main ; les autres versions conservent la publication manuelle habituelle. L’annonce à l’autoradio intervient seulement après la disponibilité de la release.
+
+
+## Préparation 7.25
+
+Utiliser `outils/preparer_apk725.py` pour recompiler le pont natif et signer avec la clé originale. Fournir `--android-jar`, `--r8-jar` et, sans javac, `--ecj-jar`. Les mots de passe passent par les variables prévues, jamais par un fichier versionné. La méthode de la 7.24 reste documentée pour cette ancienne livraison. Voir `BILAN725.md` pour les gains, les mesures et les points partiels.

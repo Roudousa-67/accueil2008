@@ -126,7 +126,7 @@ function welShow() {
   welEl.style.cssText = 'position:absolute;inset:0;z-index:4000;background:radial-gradient(ellipse 80% 70% at 50% 30%,#1b2440f2,#07090ef7);display:flex;align-items:center;justify-content:center';
   $('stage').appendChild(welEl);
   welLeft = 20; welKey = ''; welDraw();
-  welT = setInterval(() => { if (!welEl) return; if (moving()) { welClose(); return; } if (welLeft > 0 && --welLeft === 0) { welClose(); return; } welDraw(); }, 1000);
+  welT = displayEvery725(() => { if (!welEl) return; if (moving()) { welClose(); return; } if (welLeft > 0 && --welLeft === 0) { welClose(); return; } welDraw(); }, 1000);
 }
 function welAct(v) {
   const [op, a, b] = v.split(':');
@@ -477,13 +477,7 @@ document.addEventListener('visibilitychange', () => {
 });
 // Une fenêtre ouverte par toi dans le cadre suit le cadre si tu le déplaces ou changes sa taille. Jamais d'ouverture automatique ici,
 // ni en revenant à l'accueil (c'est ce qui rouvrait Waze en plein écran à chaque retour).
-let gbFollowUntil = 0, gbWasEditing = false;
-setInterval(() => {
-  if (editing) { gbWasEditing = true; return; }
-  if (gbWasEditing) { gbWasEditing = false; gbFollowUntil = Date.now() + 10000; }   // tu viens de déplacer / redimensionner le cadre
-  if (document.hidden || !gbLive || gbMode() !== 'cadre' || Date.now() > gbFollowUntil) return;
-  const r = gbRect(); if (!r) return; if (gbPk() + '|' + r.join(',') !== gbKey) gbLaunch(false, 'cadre déplacé');
-}, 700);
+let gbFollowUntil = 0; // compatibilité du choix d'application ; suivi confié à Frame710.
 // Ouverture toute seule au démarrage : seulement si tu l'as activée ET si la petite fenêtre marche vraiment sur ton autoradio.
 { let tries = 0; const go = () => { if (!store.get('gbAuto', false) || gbMode() !== 'cadre') return;
   if (gbFlip()) { dlogAdd('cadre', 'pas d\'ouverture au démarrage : la dernière ouverture est passée en plein écran'); return; }   // v7.3
@@ -906,7 +900,7 @@ function vigParse(txt, dept) {
     }
     return best;
 }
-setInterval(() => { geoUpdate(); vigUpdate(); if (vig && vig.ex && vig.ex < Date.now()) vig = null;
+displayEvery725(() => { geoUpdate(); vigUpdate(); if (vig && vig.ex && vig.ex < Date.now()) vig = null;
   setK('cityName', DEMO ? 'Strasbourg' : geo47.city);
   const v = DEMO && Q47.has('vig') ? { lvl: Q47.get('vig') === 'rouge' ? 2 : 1, typ: 'Orages' } : (store.get('vigOn', true) ? vig : null);
   document.querySelectorAll('#screen [data-show="vig"]').forEach((e) => { e.style.display = v ? 'inline-flex' : 'none'; if (v) e.style.background = v.lvl === 2 ? '#D7191C' : '#F28C00'; });
@@ -1081,7 +1075,7 @@ function alPage(p) {
   if (op === 'start') { if (moving()) { toast('À l\'arrêt de préférence, mais je lance quand même'); } alStart(); return; }
   if (op === 'cap') { alCapStart(x); return; }
   if (op === 'capx') { if (al) al.cap = null; render(); return; }
-  if (op === 'pick') { al = al || { phase: 'done', seen: (store.get('canReport', {}) || {}).seen || {} }; al.pick = x; render(); clearInterval(al.pt); al.pt = setInterval(() => { if (al && al.pick && tab === 'settings') render(); else if (al) clearInterval(al.pt); }, 700); return; }
+  if (op === 'pick') { al = al || { phase: 'done', seen: (store.get('canReport', {}) || {}).seen || {} }; al.pick = x; render(); clearInterval(al.pt); al.pt = displayEvery725(() => { if (al && al.pick && tab === 'settings') render(); else if (al) clearInterval(al.pt); }, 700); return; }
   if (op === 'pickx') { if (al) { al.pick = null; clearInterval(al.pt); } render(); return; }
   if (op === 'set') { const k = al && al.pick; if (k) { alSave(k, { i: +x, b: +y, on: +z }); al.seen[k] = 'appris'; al.pick = null; clearInterval(al.pt); toast('Enregistré pour toujours'); } render(); return; }
   if (op === 'del') { const L = alL(); delete L[x]; store.set('carLearn', L); if (al && al.seen) delete al.seen[x]; toast('Oublié'); render(); return; }
@@ -1250,7 +1244,7 @@ function lumApply() {
   if (!dimEl) { dimEl = document.createElement('div'); dimEl.style.cssText = 'position:fixed;inset:0;background:#000;pointer-events:none;z-index:99999;opacity:0;transition:opacity .4s'; document.body.appendChild(dimEl); }
   dimEl.style.opacity = String(Math.max(0, Math.min(0.8, (100 - eff) / 100 * 0.9)));
 }
-setInterval(lumApply, 5000); setTimeout(lumApply, 500);
+displayEvery725(lumApply, 5000); setTimeout(lumApply, 500);
 // ---------- pause fatigue automatique ----------
 let fatT = 0, fatLast = 0, fatStop = 0, fatWarned = 0;
 setInterval(() => {
@@ -1912,7 +1906,7 @@ function brfShow(src) {
   $('stage').appendChild(brfEl);
   if (!brfTest) store.set('brfDay', dayKey(Date.now()));
   brfLeft = 15; brfKey = ''; brfDraw(rows);
-  brfT = setInterval(() => { if (!brfEl) return; if (moving()) { brfClose(); return; } if (brfLeft > 0 && --brfLeft === 0) { brfClose(); return; } brfDraw(); }, 1000);
+  brfT = displayEvery725(() => { if (!brfEl) return; if (moving()) { brfClose(); return; } if (brfLeft > 0 && --brfLeft === 0) { brfClose(); return; } brfDraw(); }, 1000);
   dlogAdd('point', `le point au démarrage (${src}) : ${rows.length} ligne${rows.length > 1 ? 's' : ''}`);
   return true;
 }
@@ -2175,6 +2169,7 @@ function trkArchDays() {
 // il y est remis en revenant sur l'accueil. Si le système le remet aussitôt en plein écran, on n'insiste pas pendant 10 min.
 function gbRedock(why) {
   gbHidAt = 0;
+  if (window.Perf725 && Perf725.paused()) return;
   if (!store.get('gbRedock', true) || !gbLive || gbMode() !== 'cadre' || !A) return;
   if (gbFlip()) { dlogAdd('cadre', `pas de remise dans le cadre (${why}) : la dernière ouverture est passée en plein écran`); return; }   // v7.3 : pas de rebond
   const now = Date.now(); if (now - gbRedockOff < 10 * 60000 || now - gbRedockAt < 3000) return;
@@ -2498,7 +2493,7 @@ function gbBarApply(on) {
 }
 // juste avant d'ouvrir le GPS dans le cadre : on descend d'abord, pour que la fenêtre soit posée au bon endroit
 { const gl0 = gbLaunch; gbLaunch = function (force, why, loose) { if (store.get('gbBarOn', true) && gbMode() === 'cadre' && A) { gbBarApply(true); gbEver = true; } return gl0.apply(this, arguments); }; }
-setInterval(() => { const want = gbBarWant(); const sc = document.getElementById('screen'); if (!sc) return;
+displayEvery725(() => { const want = gbBarWant(); const sc = document.getElementById('screen'); if (!sc) return;
   if (!want && sc.classList.contains('gbbar') && Date.now() - (gbProbe || 0) > 6000) { gbBarApply(false); if (tab === 'home') render(); }
   else if (want && !sc.classList.contains('gbbar')) gbBarApply(true); }, 1000);
 { const cat = SETCATS.find(([n]) => n === 'Écran d\'accueil') || SETCATS.find(([n]) => n === 'Navigation');
@@ -2558,15 +2553,8 @@ document.addEventListener('pointerup', (e) => {
 }; }
 
 // ================= 37. v7.6 : le cadre change (thème, disposition, taille) → le GPS est replacé tout seul =================
-setInterval(() => {
-  if (!gbLive || tab !== 'home' || !A || gbMode() !== 'cadre' || gbFail || gbFlip() || (typeof editing !== 'undefined' && editing) || !store.get('gbRedock', true) || Date.now() - (gbProbe || 0) < 6000) return;
-  const last = store.get('gbLastRect', null), r = gbRect(true); if (!r || !last || last.pk !== gbPk()) return;
-  const dy = r[1] - last.r[1], bar = gbBarH();
-  // v7.10 : même un décalage de barre doit déplacer réellement le GPS.
-  // L'ancien code mémorisait la nouvelle position sans déplacer la fenêtre.
-   // simple décalage de la barre du poste : rien à replacer
-  if (r.some((v, k) => Math.abs(v - last.r[k]) > 2) && Date.now() - (window.__gbMovT || 0) > 4000) { window.__gbMovT = Date.now(); dlogAdd('cadre', 'cadre déplacé → GPS replacé'); gbLaunch(true, 'cadre déplacé', true); }
-}, 1500);
+// 7.25 : repositionnement périodique remplacé par Frame710.
+
 
 // ================= 38. v7.6 : police de toute l'appli (59 au choix) =================
 const APP_FONTS = [["Roboto", "roboto", [400, 700]], ["Open Sans", "open-sans", [400, 700]], ["Lato", "lato", [400, 700]], ["Montserrat", "montserrat", [400, 700]], ["Poppins", "poppins", [400, 700]], ["Nunito", "nunito", [400, 700]], ["Raleway", "raleway", [400, 700]], ["Ubuntu", "ubuntu", [400, 700]], ["Oswald", "oswald", [400, 700]], ["Source Sans 3", "source-sans-3", [400, 700]], ["Work Sans", "work-sans", [400, 700]], ["Rubik", "rubik", [400, 700]], ["Mulish", "mulish", [400, 700]], ["Barlow", "barlow", [400, 700]], ["Barlow Condensed", "barlow-condensed", [400, 700]], ["Exo 2", "exo-2", [400, 700]], ["Titillium Web", "titillium-web", [400, 700]], ["Quicksand", "quicksand", [400, 700]], ["Josefin Sans", "josefin-sans", [400, 700]], ["Kanit", "kanit", [400, 700]], ["Manrope", "manrope", [400, 700]], ["DM Sans", "dm-sans", [400, 700]], ["Outfit", "outfit", [400, 700]], ["Lexend", "lexend", [400, 700]], ["Urbanist", "urbanist", [400, 700]], ["Sora", "sora", [400, 700]], ["Plus Jakarta Sans", "plus-jakarta-sans", [400, 700]], ["Archivo", "archivo", [400, 700]], ["Fira Sans", "fira-sans", [400, 700]], ["PT Sans", "pt-sans", [400, 700]], ["Noto Sans", "noto-sans", [400, 700]], ["Cabin", "cabin", [400, 700]], ["Karla", "karla", [400, 700]], ["Heebo", "heebo", [400, 700]], ["Saira", "saira", [400, 700]], ["Chakra Petch", "chakra-petch", [400, 700]], ["Audiowide", "audiowide", [400]], ["Electrolize", "electrolize", [400]], ["Michroma", "michroma", [400]], ["Russo One", "russo-one", [400]], ["Teko", "teko", [400, 700]], ["Bebas Neue", "bebas-neue", [400]], ["Anton", "anton", [400]], ["Righteous", "righteous", [400]], ["Comfortaa", "comfortaa", [400, 700]], ["Lobster", "lobster", [400]], ["Pacifico", "pacifico", [400]], ["Dancing Script", "dancing-script", [400, 700]], ["Merriweather", "merriweather", [400, 700]], ["Lora", "lora", [400, 700]], ["Share Tech Mono", "share-tech-mono", [400]], ["JetBrains Mono", "jetbrains-mono", [400, 700]], ["Caveat", "caveat", [400, 700]], ["Permanent Marker", "permanent-marker", [400]]];

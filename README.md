@@ -1,8 +1,10 @@
 # Accueil 2008 GT
 
-**Lanceur Android personnel · Version 7.23 · Peugeot 2008 GT Line**
+**Mise à jour 7.25 : fluidité.** Route suspendue hors écran et au repos, chargements à la demande, modèle 3D de 1,496 Mo, diagnostic dans Système → Diagnostic · Performances. [Bilan détaillé et limites](BILAN725.md). Même signature que la 7.24 ; essai sur autoradio à effectuer.
 
-[Télécharger l’APK 7.23](https://github.com/Roudousa-67/accueil2008/releases/download/v7.23/Accueil2008GT_v7.23.apk) · [Notes de version](https://github.com/Roudousa-67/accueil2008/releases/tag/v7.23)
+**Lanceur Android personnel · Version 7.25 · Peugeot 2008 GT Line**
+
+[Télécharger l’APK 7.25](https://github.com/Roudousa-67/accueil2008/releases/download/v7.25/Accueil2008GT_v7.25.apk) · [Notes de version](https://github.com/Roudousa-67/accueil2008/releases/tag/v7.25)
 
 Accueil 2008 GT est un lanceur Android personnalisé développé pour le projet Peugeot 2008 GT Line. Il réunit l’accès au GPS, la musique, un décor de route animé, les informations disponibles du véhicule et les réglages sur un même écran.
 

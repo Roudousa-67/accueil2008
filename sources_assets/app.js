@@ -9,10 +9,16 @@ const A = window.Android || null;
 const DEMO = !A;
 
 // ================= stockage =================
-const store = {
-  get(k, d) { try { const v = localStorage.getItem('a08_' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('a08_' + k, JSON.stringify(v)); } catch (e) {} }
-};
+const store = (() => {
+ const cache=new Map(),pending=new Map();let timer=null,storageError='';
+ function flush(){if(timer!==null)clearTimeout(timer);timer=null;for(const [k,raw] of Array.from(pending)){try{localStorage.setItem('a08_'+k,raw);pending.delete(k);storageError='';}catch(e){storageError='Enregistrement des réglages impossible';}}return pending.size===0;}
+ function schedule(){if(timer===null)timer=setTimeout(flush,500);}
+ function get(k,d){if(cache.has(k))return cache.get(k);try{const raw=localStorage.getItem('a08_'+k);if(raw===null)return d;const value=JSON.parse(raw);cache.set(k,value);return value;}catch(e){return d;}}
+ function set(k,v){try{const raw=JSON.stringify(v);if(raw===undefined)return;cache.set(k,JSON.parse(raw));pending.set(k,raw);schedule();}catch(e){}}
+ window.addEventListener('storage',e=>{if(e.key===null){cache.clear();return;}if(e.key.startsWith('a08_')&&!pending.has(e.key.slice(4)))cache.delete(e.key.slice(4));});
+ window.addEventListener('pagehide',flush);
+ return {get,set,flush,pending:()=>pending.size,error:()=>storageError,invalidate(){cache.clear();}};
+})();
 
 // ================= réseau =================
 const httpCbs = {}; let httpN = 0;
@@ -858,12 +864,7 @@ function render() {
   scr.innerHTML = html;
   if (window.Car3D) { const cs = scr.querySelector('.car3dslot'); if (cs) { Car3D.setAccent(/^#[0-9a-f]{6}$/i.test(p.acc) ? p.acc : '#3B82F6'); Car3D.attach(cs); } else Car3D.detach(); }
   const slot = scr.querySelector('.mapslot');
-  if (slot) {
-    slot.appendChild($('map'));
-    if (!map) initMap();
-    if (lastLight !== !!p.light) { lastLight = !!p.light; tiles.setUrl(p); }
-    setTimeout(() => { map.invalidateSize(); if (loc && follow) map.setView([loc.lat, loc.lon], map.getZoom(), { animate: false }); }, 30);
-  }
+  if (slot && window.Map725) Map725.mount(slot,p);
   loadIcons();
   if (tab === 'themes') {
     const ap = $('accPick'); if (ap) ap.addEventListener('input', () => { $('accHex').value = ap.value; });
@@ -1023,7 +1024,7 @@ function initMap() {
   const el = $('map'), c0 = [48.5734, 7.7521];
   let ok = false;
   try { const cv = document.createElement('canvas'); ok = !!(window.maplibregl && (cv.getContext('webgl2') || cv.getContext('webgl'))); } catch (e) { ok = false; }
-  if (ok) {
+  if (ok && !(window.Lazy725 && Lazy725.forceLeaflet)) {
     mapEngine = 'maplibre';
     const m = new maplibregl.Map({ container: el, style: STYLE_LIGHT, center: [c0[1], c0[0]], zoom: 15, attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false, fadeDuration: 0, maxZoom: 18 });
     m.touchZoomRotate.disableRotation();
@@ -1253,7 +1254,7 @@ function openDrawer(forItem) {
   grid.innerHTML = apps.length ? apps.map((a) => `<button class="app" data-act="app:${esc(a.p)}"><div class="ph"></div><span>${esc(a.l)}</span></button>`).join('') : '<div style="color:#9A9BA3">Aucune appli trouvée.</div>';
   $('drawer').classList.add('on');
   let i = 0; const btns = grid.querySelectorAll('.app');
-  const step = () => { if (!$('drawer').classList.contains('on')) return; for (let k = 0; k < 6 && i < apps.length; k++, i++) { const src = A ? A.icon(apps[i].p) : ''; if (src) { const img = document.createElement('img'); img.src = src; img.alt = ''; btns[i].replaceChild(img, btns[i].firstChild); } } if (i < apps.length) setTimeout(step, 16); };
+  const step = () => { if (!$('drawer').classList.contains('on')) return; for (let k = 0; k < 6 && i < apps.length; k++, i++) { const src = window.getIcon ? getIcon(apps[i].p) : (A ? A.icon(apps[i].p) : ''); if (src) { const img = document.createElement('img'); img.src = src; img.alt = ''; btns[i].replaceChild(img, btns[i].firstChild); } } if (i < apps.length) setTimeout(step, 16); };
   step();
 }
 
@@ -1369,8 +1370,9 @@ window.onResumeHome = () => { appsCache = null; fit(); };
 
 function start() {
   fit(); setupPress(); render();
-  setInterval(() => { ecoTick(); if (tab === 'calib') { const qi = qfInfo(); setK('qfInfo', qi.txt); setK('qfHex', qi.q.last || ''); } if (tab === 'home') paint(); else if (tab === 'eco' && Date.now() % 10000 < 1000) render(); }, 1000);
-  setInterval(() => { if (store.get('autoStack', false) && tab === 'home' && homePage === 0 && !editing && curP && curP.layout === 'custom' && !fPick && !fFolder) { const pg = fCfg().pages[homePage] || []; let ch = false; pg.forEach((it) => { if (it.t === 'w' && it.b.length > 1) { stackIdx[it.id] = ((stackIdx[it.id] || 0) + 1) % it.b.length; ch = true; } }); if (ch) render(); } if (!editing && !fPick && !fFolder && (tab !== 'home' || homePage !== 0) && tab !== 'calib' && tab !== 'settings' && Date.now() - lastTouch > 60000 && !$('settings').classList.contains('on')) { tab = 'home'; homePage = 0; render(); } if (tab === 'themes' && moving()) render(); if (trip) store.set('trip', trip); updateStation(false); maybeLimit(); if (store.get('autoNight_' + profIdx(), false)) { const p = palette(); if (p.tid !== curP.tid) render(); } }, 10000);
+  setInterval(ecoTick,1000);
+  displayEvery725(() => { if (tab === 'calib') { const qi = qfInfo(); setK('qfInfo', qi.txt); setK('qfHex', qi.q.last || ''); } if (tab === 'home') paint(); else if (tab === 'eco' && Date.now() % 10000 < 1000) requestRender725(); }, 1000);
+  setInterval(() => { if (window.Perf725 && Perf725.paused()) { if(trip)store.set('trip',trip);return; } if (store.get('autoStack', false) && tab === 'home' && homePage === 0 && !editing && curP && curP.layout === 'custom' && !fPick && !fFolder) { const pg = fCfg().pages[homePage] || []; let ch = false; pg.forEach((it) => { if (it.t === 'w' && it.b.length > 1) { stackIdx[it.id] = ((stackIdx[it.id] || 0) + 1) % it.b.length; ch = true; } }); if (ch) render(); } if (!editing && !fPick && !fFolder && (tab !== 'home' || homePage !== 0) && tab !== 'calib' && tab !== 'settings' && Date.now() - lastTouch > 60000 && !$('settings').classList.contains('on')) { tab = 'home'; homePage = 0; render(); } if (tab === 'themes' && moving()) render(); if (trip) store.set('trip', trip); updateStation(false); maybeLimit(); if (store.get('autoNight_' + profIdx(), false)) { const p = palette(); if (p.tid !== curP.tid) render(); } }, 10000);
   if (A) A.ready();
   if (A && A.isDefaultHome && !A.isDefaultHome()) setTimeout(() => toast('Pour en faire ton écran d\'accueil officiel : roue dentée → Système → Écran d\'accueil'), 2500);
   if (DEMO) demo();
