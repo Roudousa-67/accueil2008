@@ -8,6 +8,7 @@ const dir = path.join(__dirname, '../sources_assets');
 let passed=0;
 function ok(name, actual, expected){assert.deepEqual(JSON.parse(JSON.stringify(actual)),expected,name); console.log('OK '+name);passed++;}
 function make(options={}){
+ const dir=options.assetRoot||path.join(__dirname,'../sources_assets');
  const errors=[],calls=[], moves=[], nativeCalls=[], rafs=[], drawings=[];
  const nativeCanvas=options.canvas?require(process.env.CANVAS_MODULE || '@napi-rs/canvas'):null, canvasMap=new Map();
  const vc=new VirtualConsole();vc.on('jsdomError', e=>errors.push(e.message));
@@ -34,7 +35,7 @@ function make(options={}){
  w.Android={setImmersive(){},immersive:()=>true,apps:()=> '[]',media:()=> '{}',qfStatus:()=> '{}',sysStatus:()=> '{}',ready(){},launch:()=>true,launchIn:(...r)=>{moves.push(r);return true;},http:(url,id)=>{calls.push(url);queueMicrotask(()=>w.__httpCb(id,!offline,JSON.stringify(offline?{}:url.includes('nominatim')?{address:city}:{elements})));}};
  let vp={x:0,y:50,width:1280,height:670};
  w.GpsDock={gpsCanEmbed:()=>embedded,gpsViewport:()=>JSON.stringify(vp),gpsVisible:v=>nativeCalls.push(['visible',v]),gpsBounds:(...a)=>nativeCalls.push(['bounds',...a]),gpsOpen:p=>nativeCalls.push(['open',p]),gpsLast:()=>'',gpsResize:()=>false,gpsImmersive(){}};
- for(const f of ['perf725-core.js','app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js','v723.js','v725.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
+ for(const f of ['perf725-core.js','app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js','v723.js','v725.js',...(options.extraScripts||[])])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
  const run=s=>vm.runInContext(s,ctx);
  run("tab='home'; render();");
  w.document.elementFromPoint=()=>w.document.querySelector('.gpsbox');

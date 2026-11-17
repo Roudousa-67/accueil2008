@@ -1,0 +1,9 @@
+{
+  "version": "7.27.1",
+  "channel": "beta",
+  "package": "fr.gtline.accueil2008.beta",
+  "label": "Accueil 2008 GT Bêta 1",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.27.1/Accueil2008GT_v7.27.1.apk",
+  "sha256": "7a085b17cd715958dac2efba91027f71dbfaef99e8a475599274233b034ebc74",
+  "notes": "Bêta 1 séparée de la 7.26 : vue conducteur en démonstration, route GPS cartographiée et suivi de GPX local. Pas de récupération de l’itinéraire Waze. Garder la version stable installée ; désinstaller uniquement la bêta pour arrêter les essais. Test sur autoradio à effectuer."
+}

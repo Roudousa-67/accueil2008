@@ -1,0 +1,32 @@
+'use strict';
+const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs');
+const direct=path.resolve(__dirname,'../../tests/regression.cjs');const fixture=process.env.BETA_FIXTURE||(fs.existsSync(direct)?direct:path.resolve(__dirname,'../../release726/tests/regression.cjs'));
+const assets=process.env.BETA_ASSETS||path.resolve(__dirname,'../sources_assets');
+const {make}=require(fixture);const t=make({canvas:true,assetRoot:assets,extraScripts:['decors726.js','beta727.js']}),r=t.run,w=t.w;
+let checks=0;function check(name,condition){assert(condition,name);checks++;console.log('OK '+name)}
+check('version propre à la bêta',r('APP_VERSION')==='7.27.1');
+check('page d’accueil bêta explicite',w.document.body.textContent.includes('Bêta 1'));
+check('message de séparation et de données Waze',w.document.body.textContent.includes('ne reçoit pas l’itinéraire'));
+check('pas d’accueil de sélection du lanceur',r("store.get('welcome')")===false);
+const before=r('JSON.stringify(loc)');w.BetaRoad.setMode('demo');
+check('la démonstration peut animer au repos',w.BetaRoad.animate());
+const cv=w.document.querySelector('canvas[data-road]');check('canvas présent',!!cv);Object.defineProperty(cv,'clientWidth',{value:640,configurable:true});Object.defineProperty(cv,'clientHeight',{value:330,configurable:true});
+for(const second of [0,5,12,18,29])w.BetaRoad.draw(cv,second,0,0);
+check('la démo ne modifie pas le GPS réel',r('JSON.stringify(loc)')===before);
+check('libellé de démonstration visible',t.drawings.some(x=>String(x.text||'').includes('trajet fictif')));
+w.BetaRoad.setMode('gps');r('loc=null');check('GPS absent : repli explicite',w.BetaRoad.sample(30).fallback);
+r("loc={lat:48.58,lon:7.74,ts:Date.now()-10000,acc:8};");check('GPS ancien refusé',w.BetaRoad.sample(31).fallback);
+r("loc={lat:48.58,lon:7.74,ts:Date.now(),acc:90};");check('GPS imprécis refusé',w.BetaRoad.sample(32).fallback);
+r("loc={lat:48.58,lon:7.74,ts:Date.now(),acc:8,brg:0};Road723.at=Date.now();Road723.match={id:99,tags:{highway:'residential'},geometry:[{lat:48.579,lon:7.74},{lat:48.581,lon:7.74},{lat:48.583,lon:7.741}]};");
+const live=w.BetaRoad.sample(34);check('route cartographiée réellement utilisée',!!live.path&&!live.fallback&&live.kind==='gps');check('absence de bande de guidage sans itinéraire',live.band===false);
+w.BetaRoad.draw(cv,34,0,10);
+for(const bad of ['', '<gpx><trkpt lat="NaN" lon="1"/></gpx>', '<!DOCTYPE gpx><gpx/>', '<gpx><trkpt lon="1"/><trkpt lat="1" lon="2"/></gpx>','<gpx><trkpt lat="" lon="1"/><trkpt lat="1" lon="2"/></gpx>']){assert.throws(()=>w.BetaRoad.parseGPX(bad));checks++;}
+const gpx='<gpx xmlns="http://www.topografix.com/GPX/1/1"><trk><trkseg><trkpt lat="48.579" lon="7.74"/><trkpt lat="48.581" lon="7.74"/><trkpt lat="48.583" lon="7.741"/></trkseg></trk></gpx>';
+check('GPX importé sans réseau',w.BetaRoad.loadGPX(gpx)===3);const g=w.BetaRoad.sample(35);check('bande GPX explicite, indépendante de Waze',g.kind==='gpx'&&g.band&&!g.fallback);w.BetaRoad.draw(cv,35,0,10);
+r("loc={lat:49,lon:8,ts:Date.now(),acc:8};");check('sortie du GPX refusée',w.BetaRoad.sample(36).fallback);
+w.BetaRoad.setMode('classic');check('retour au rendu 7.26',w.BetaRoad.sample(37).fallback);check('arrêt de la boucle de démo',!w.BetaRoad.animate());
+const calls=[];w.Android.launch=pk=>{calls.push(pk);return true};r("act('beta727:stable')");check('bouton retour lance uniquement le paquet stable',calls[0]==='fr.gtline.accueil2008');
+const v4=fs.readFileSync(path.join(assets,'v4.js'),'utf8');check('canal de mise à jour séparé',v4.includes('/main/version-beta.json?t=')&&!v4.includes('/main/version.json?t='));
+check('pas de récupération automatique d’un trajet Waze',!t.calls.some(x=>/waze\.com/.test(x)));
+w.BetaRoad.setMode('demo');r('onPauseHome()');check('la démonstration est suspendue en arrière-plan',!w.RoadLoop725.running());check('aucune erreur JavaScript',t.errors.length===0);
+t.dom.window.close();console.log(checks+' contrôles bêta réussis.');
