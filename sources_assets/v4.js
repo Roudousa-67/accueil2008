@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.24';
+const APP_VERSION = '7.25';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+  ['7.25', 'Novembre 2026', ['Animations de route suspendues hors écran et au repos', 'Préférences en mémoire et chargements à la demande', 'Diagnostic des performances et protection du niveau de décor']],
   ['7.23', 'Novembre 2026', ['GPS masqué hors accueil et restauré au retour', 'Détection routière avec cap et précision', 'Aide par réglage et navigation simplifiée', 'Panneaux et texte agrandis']],
   ['7.22', 'Novembre 2026', ['Adresse, code postal et ville en petit tout en bas de la route', 'Décor et navigation conservés']],
   ['7.21', 'Novembre 2026', ['39 options de décor indépendantes dans Navigation', 'Aperçu animé local avant application', 'Téléchargement vérifié et gestion du cache de cette application']],
@@ -297,18 +298,26 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
   const bld = Array.from({ length: 46 }, (_, i) => ({ x: i / 46, w: 0.018 + rnd(i) * 0.03, h: 0.25 + rnd(i + 9) * 0.75 }));
   const trees = Array.from({ length: 30 }, (_, i) => ({ x: i / 30 + rnd(i + 4) * 0.02, h: 0.35 + rnd(i + 2) * 0.5 }));
   const drops = Array.from({ length: 160 }, (_, i) => ({ x: rnd(i + 3), y: rnd(i + 7), s: 0.6 + rnd(i + 11) * 0.8 }));
+  let cvs=[],raf=0;
+  const eligible=()=>!document.hidden&&!Perf725.paused()&&cvs.length>0&&(tab==='home'||cvs.some(cv=>cv.closest('[data-decor721-preview]')));
+  const animate=()=>!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||/^(pluie|orage|neige)$/.test(roadKind().wx);
+  function queue(){if(!raf&&eligible())raf=requestAnimationFrame(frame);}
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=0;}
+  window.RoadLoop725={refresh(){cvs=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};
   function frame(now) {
-    requestAnimationFrame(frame);
-    const cvs = document.querySelectorAll('#screen canvas[data-road]');
-    if (!cvs.length) { last = now; return; }
-    if (now - lastDraw < 33) return; // ~30 images / s, assez pour l'autoradio
+    raf=0;
+    if(!eligible()){last=0;return;}
+    if (lastDraw&&now-lastDraw<33){queue();return;}
+    const drawStarted=performance.now();
     lastDraw = now;
-    const dt = Math.min(0.1, (now - last) / 1000); last = now; T += dt;
-    const sp = curSpeed(); const tgt = sp ? sp.v : 0; v += (tgt - v) * Math.min(1, dt * 2);
+    const dt = last?Math.min(0.1, (now - last) / 1000):0; last = now; T += dt;
+    const sp = curSpeed(); const tgt = sp ? sp.v : 0; v += (tgt - v) * Math.min(1, dt * 2);if(tgt===0&&v<.1)v=0;
     travel += v / 3.6 * dt;
 
     if (!carDrag && carYaw !== 0 && now - carRelease > 2500) { carYaw = Math.abs(carYaw) < 4 ? 0 : carYaw - Math.sign(carYaw) * Math.min(Math.abs(carYaw), 240 * dt); carYaw = ((carYaw + 540) % 360) - 180; paintCar360(); }
     const wxNow = roadKind().wx; cvs.forEach((cv) => { const rb = cv.parentNode; if (rb && rb.dataset && rb.dataset.wx !== wxNow) rb.dataset.wx = wxNow; const paint=()=>cv.dataset.road === 'v' ? drawV(cv) : draw(cv); return window.RoadFX718 ? window.RoadFX718.draw(cv,paint) : paint(); });
+    Perf725.draw(performance.now()-drawStarted,now);
+    if(animate())queue();else last=0;
   }
   function draw(cv) {
     const dpr = Math.min(1.5, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
@@ -588,7 +597,7 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
     if(panelSlot) window.RoadMotion713.panel(c,panelSlot[0],W,H,box,scene);
     c.globalAlpha = 1;
   }
-  requestAnimationFrame(frame);
+  RoadLoop725.refresh();
 })();
 
 // ---------- météo détaillée et actualisation ----------
@@ -1413,8 +1422,8 @@ window.start = function () {
   [0, 1, 2].forEach((i) => { if (store.get('layout_' + i, null) === null) store.set('layout_' + i, 'custom'); });
   _start();
   setupLongWidget(); setupCar360();
-  learnStart(); checkNet(); setInterval(checkNet, 30000); readSys(); setInterval(() => { readSys(); paint(); }, 3000);
-  setInterval(() => { updateWeather(false); if (tab === 'settings' && SETCATS[setCat][0] === 'Véhicule') setK('qfInfo', qfInfo().txt); if (tab !== 'home') paint(); }, 5000);
+  learnStart(); checkNet(); setInterval(checkNet, 30000); readSys(); displayEvery725(() => { readSys(); paint(); }, 3000);
+  displayEvery725(() => { updateWeather(false); if (tab === 'settings' && SETCATS[setCat][0] === 'Véhicule') setK('qfInfo', qfInfo().txt); if (tab !== 'home') paint(); }, 5000);
   setTimeout(() => updateWeather(true), 4000);
   canCheckAtStart();
   if (store.get('updAuto', true) && !DEMO) { setTimeout(() => checkUpdate(false), 30000); setInterval(() => checkUpdate(false), 6 * 3600e3); }

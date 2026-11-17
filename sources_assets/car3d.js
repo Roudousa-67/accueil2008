@@ -154,7 +154,7 @@
   }
 
   function frame(t) {
-    raf = 0; if (!slot || state !== 'ready') return;
+    raf = 0; if (!slot || document.hidden || (window.Perf725&&Perf725.paused()) || state !== 'ready') return;
     const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
     resize();
     let busy = false, live = false;
@@ -176,7 +176,7 @@
     else if (busy) { raf = -1; setTimeout(() => { if (raf === -1) raf = requestAnimationFrame(frame); }, 28); }
     else lastT = 0;
   }
-  function kick() { if (raf === -1) { raf = requestAnimationFrame(frame); return; } if (!raf && slot && state === 'ready') raf = requestAnimationFrame(frame); }
+  function kick() { if(document.hidden || (window.Perf725&&Perf725.paused()))return; if (raf === -1) { raf = requestAnimationFrame(frame); return; } if (!raf && slot && state === 'ready') raf = requestAnimationFrame(frame); }
 
   function bindTouch() {
     canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, t: performance.now(), lx: e.clientX, tap: performance.now() }; vel = 0; lastUser = Date.now(); try { canvas.setPointerCapture(e.pointerId); } catch (x) {} kick(); });
@@ -197,6 +197,11 @@
 
   // place la voiture 3D dans l'emplacement prévu de l'écran (appelé après chaque rendu)
   C3.attach = function (el) {
+    slot=el;
+    if(!window.THREE||!THREE.GLTFLoader||!THREE.RoomEnvironment){
+      if(state!=='deps'){state='deps';Lazy725.car().then(()=>{state='off';if(slot&&slot.isConnected)C3.attach(slot);}).catch(e=>{console.log('car3d deps',e);state='fail';});}
+      return true;
+    }
     if (state === 'off') C3.init();
     if (state === 'fail') return false;
     slot = el; w0 = h0 = 0; el.appendChild(canvas);
@@ -209,6 +214,8 @@
     const ch = nf !== focus || (ns >= 2) !== (speed >= 2) || (ns >= 5) !== (speed >= 5); focus = nf; speed = ns;
     if (ch) { vel = 0; if (!nf) lastUser = 0; } if (ch || ns >= 2) kick();
   };
+  C3.pause = function(){if(raf>0)cancelAnimationFrame(raf);raf=0;lastT=0;};
+  C3.resume = function(){kick();};
   C3.state = () => state;
   C3._scene = () => S; C3._cam = () => cam;
   C3.setAccent = (c) => { if (!c || c === accent) return; accent = c; if (ring) { try { ring.material.color.set(c); } catch (e) {} kick(); } };

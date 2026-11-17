@@ -36,3 +36,27 @@ jobs:
 
       - name: Vérifier la syntaxe de la préparation APK
         run: python3 -m py_compile outils/preparer_apk_decors.py
+
+      - name: Charger la base 7.24 pour mesurer avant et après
+        if: hashFiles('tests/benchmark725.cjs') != ''
+        uses: actions/checkout@v4
+        with:
+          ref: 54875bf8713abdc0e38befa3caf8bbe119ac90c6
+          path: baseline724
+      - name: Comparer les performances dans le simulateur
+        if: hashFiles('tests/benchmark725.cjs') != ''
+        run: NODE_PATH="$GITHUB_WORKSPACE/tests/node_modules" BASELINE_ROOT="$GITHUB_WORKSPACE/baseline724" PERF_REPORT="$RUNNER_TEMP/mesures-performances725.json" node tests/benchmark725.cjs
+      - name: Conserver les mesures
+        if: always() && hashFiles('tests/benchmark725.cjs') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: mesures-performances-7.25
+          path: ${{ runner.temp }}/mesures-performances725.json
+          if-no-files-found: warn
+      - name: Compiler le pont Android modifié
+        if: hashFiles('sources_assets/v725.js') != ''
+        run: |
+          platform="$(find "$ANDROID_HOME/platforms" -name android.jar | sort -V | tail -n 1)"
+          test -n "$platform"
+          mkdir -p "$RUNNER_TEMP/native725"
+          javac -encoding UTF-8 -source 8 -target 8 -cp "$platform" -d "$RUNNER_TEMP/native725" module_GPS_java/java/fr/gtline/accueil2008/*.java

@@ -16,7 +16,8 @@ function make(options={}){
  let now=1800000000000, city={city:'Strasbourg'}, elements=[], offline=false, embedded=false;
  const RealDate=w.Date;
  w.Date=class extends RealDate {constructor(...args){super(...(args.length?args:[now]));}static now(){return now;}};
- const timers=[];w.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length;}; w.clearTimeout=()=>{};w.setInterval=()=>0;w.requestAnimationFrame=fn=>(rafs.push(fn),rafs.length);
+ const activeIntervals=new Map(),activeRAFs=new Map();let intervalID=0,rafID=0;
+ const timers=[];w.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length;}; w.clearTimeout=()=>{};w.setInterval=(fn,ms)=>{const id=++intervalID;activeIntervals.set(id,{fn,ms});return id;};w.clearInterval=id=>activeIntervals.delete(id);w.requestAnimationFrame=fn=>{const id=++rafID;activeRAFs.set(id,fn);rafs.push(time=>{if(activeRAFs.delete(id))fn(time);});return id;};w.cancelAnimationFrame=id=>activeRAFs.delete(id);
  w.matchMedia=()=>({matches:false,addListener(){},addEventListener(){}});
  w.HTMLCanvasElement.prototype.getContext=function(type){
   if(!nativeCanvas || type!=='2d')return null;
@@ -33,7 +34,7 @@ function make(options={}){
  w.Android={setImmersive(){},immersive:()=>true,apps:()=> '[]',media:()=> '{}',qfStatus:()=> '{}',sysStatus:()=> '{}',ready(){},launch:()=>true,launchIn:(...r)=>{moves.push(r);return true;},http:(url,id)=>{calls.push(url);queueMicrotask(()=>w.__httpCb(id,!offline,JSON.stringify(offline?{}:url.includes('nominatim')?{address:city}:{elements})));}};
  let vp={x:0,y:50,width:1280,height:670};
  w.GpsDock={gpsCanEmbed:()=>embedded,gpsViewport:()=>JSON.stringify(vp),gpsVisible:v=>nativeCalls.push(['visible',v]),gpsBounds:(...a)=>nativeCalls.push(['bounds',...a]),gpsOpen:p=>nativeCalls.push(['open',p]),gpsLast:()=>'',gpsResize:()=>false,gpsImmersive(){}};
- for(const f of ['app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js','v723.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
+ for(const f of ['perf725-core.js','app.js','v4.js','home5.js','v47.js','v710.js','v711.js','v712.js','v713.js','v718.js','lib/suncalc-1.9.0.js','v719.js','v720.js','v721.js','decor721.js','files721.js','v723.js','v725.js'])new vm.Script(fs.readFileSync(path.join(dir,f),'utf8'),{filename:f}).runInContext(ctx);
  const run=s=>vm.runInContext(s,ctx);
  run("tab='home'; render();");
  w.document.elementFromPoint=()=>w.document.querySelector('.gpsbox');
@@ -43,15 +44,15 @@ function make(options={}){
   for(const cv of w.document.querySelectorAll('canvas[data-road]')){
    Object.defineProperty(cv,'clientWidth',{value:480,configurable:true});Object.defineProperty(cv,'clientHeight',{value:frameHeight,configurable:true});
   }
-  const pending=rafs.splice(0);for(const fn of pending)fn(time);
+  run('if(window.RoadLoop725)RoadLoop725.invalidate()');const pending=rafs.splice(0);for(const fn of pending)fn(time);
  }
- return {w,dom,run,errors,calls,moves,nativeCalls,timers,pos,drawings,drawFrame,canvasMap,setcity:a=>city=a,setels:a=>elements=a,setoffline:a=>offline=a,setembed:a=>embedded=a,setvp:a=>vp=a,advance:ms=>{now+=ms;run('if(loc) loc.ts=Date.now();');}};
+ return {w,dom,run,errors,activeIntervals,activeRAFs,rafStep:time=>{const pending=rafs.splice(0);for(const fn of pending)fn(time);},calls,moves,nativeCalls,timers,pos,drawings,drawFrame,canvasMap,setcity:a=>city=a,setels:a=>elements=a,setoffline:a=>offline=a,setembed:a=>embedded=a,setvp:a=>vp=a,advance:ms=>{now+=ms;run('if(loc) loc.ts=Date.now();');}};
 }
 module.exports={make};
 if(require.main===module)(async()=>{
  const t=make(),{run}=t;
  ok('chargement complet sans erreur',t.errors,[]);
- ok('version',run('APP_VERSION'),'7.24');
+ ok('version',run('APP_VERSION'),'7.25');
  ok('délai initial une minute',run('Place710.every()'),60000);
  t.setels([{type:'node',lat:48.5805,lon:7.74,tags:{name:'Village proche',place:'village'}},{type:'node',lat:48.59,lon:7.74,tags:{name:'Grande ville',place:'city'}}]);
  await run('Place710.refresh()');
