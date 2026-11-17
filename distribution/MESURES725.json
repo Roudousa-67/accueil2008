@@ -1,19 +1,19 @@
 {
   "environment": "Environnement cloud Linux, Node/JSDOM et Canvas CPU ; aucune mesure GPU ni UIS7862S",
   "before": {
-    "stationarySimulationMs": 494.62978799999996,
+    "stationarySimulationMs": 608.250605,
     "stationaryRouteQueries": 120,
     "offHomeCallbacks": 121,
     "offHomeRouteQueries": 120,
     "localStorageReadsFor1000Gets": 1000,
-    "renderAverageMs": 67.49291406666667
+    "renderAverageMs": 57.206973799999986
   },
   "after": {
-    "stationarySimulationMs": 0.015593000000080792,
+    "stationarySimulationMs": 0.03440099999988888,
     "stationaryRouteQueries": 0,
     "offHomeCallbacks": 1,
     "offHomeRouteQueries": 0,
     "localStorageReadsFor1000Gets": 0,
-    "renderAverageMs": 60.165497066666646
+    "renderAverageMs": 52.84100539999999
   }
 }

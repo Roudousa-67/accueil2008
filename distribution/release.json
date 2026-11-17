@@ -1,6 +1,6 @@
 {
   "version": "7.25",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.25/Accueil2008GT_v7.25.apk",
-  "sha256": "1455f8ea1e17621129b8eeed245131f301bf7960ceea8169940101112b392995",
-  "notes": "Fluidité : arrêt du dessin de route hors écran et au repos, chargements 3D/cartes à la demande, réglages en mémoire, diagnostic et garde-fou. Modèle 3D réduit de 5,83 à 1,496 Mo. Signature d’origine conservée. 586 contrôles automatiques et validation du modèle réussis ; essai sur autoradio à effectuer."
+  "sha256": "3ea9937181962e0bde6596b0e8eeefe83d37a4b834f89069e685c5577c7ea2e4",
+  "notes": "Fluidité : arrêt du dessin de route hors écran et au repos, chargements 3D/cartes à la demande, réglages en mémoire, diagnostic et garde-fou. Modèle 3D réduit de 5,83 à 1,496 Mo. Signature d’origine conservée. 589 contrôles automatiques et validation du modèle réussis ; essai sur autoradio à effectuer."
 }

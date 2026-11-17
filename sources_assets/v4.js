@@ -291,7 +291,7 @@ function setupCar360() {
   const end = () => { if (carDrag) { carDrag = null; carRelease = performance.now(); } };
   st.addEventListener('pointerup', end, true); st.addEventListener('pointercancel', end, true);
 }
-function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorAll('#screen [data-car360]').forEach((e) => { if (e.style.backgroundPosition !== pos) e.style.backgroundPosition = pos; }); }
+function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorAll('#screen [data-car360]').forEach((e) => { if (e.style.backgroundPosition !== pos) e.style.backgroundPosition = pos; }); if(window.RoadLoop725)RoadLoop725.invalidate(); }
 (function roadLoop() {
   let T = 0, travel = 0, last = performance.now(), v = 0, lastDraw = 0;
   const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
@@ -300,7 +300,8 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
   const drops = Array.from({ length: 160 }, (_, i) => ({ x: rnd(i + 3), y: rnd(i + 7), s: 0.6 + rnd(i + 11) * 0.8 }));
   let cvs=[],raf=0;
   const eligible=()=>!document.hidden&&!Perf725.paused()&&cvs.length>0&&(tab==='home'||cvs.some(cv=>cv.closest('[data-decor721-preview]')));
-  const animate=()=>!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||/^(pluie|orage|neige)$/.test(roadKind().wx);
+  const fading=()=>window.RoadFX718&&cvs.some(cv=>{const item=cv.closest('[data-fitem]'),key=item?item.getAttribute('data-fitem'):'hero',state=RoadFX718.frames.get(key);return !!(state&&state.fade);});
+  const animate=()=>!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||fading()||/^(pluie|orage|neige)$/.test(roadKind().wx);
   function queue(){if(!raf&&eligible())raf=requestAnimationFrame(frame);}
   function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=0;}
   window.RoadLoop725={refresh(){cvs=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};

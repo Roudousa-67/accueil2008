@@ -54,7 +54,7 @@ window.Performance725=(()=>{
  window.paint=function(){
   if(Perf725.paused())return;
   const result=originalPaint.apply(this,arguments);
-  const key=[(curSpeed()||{}).v||0,roadKind().wx,Math.floor(Date.now()/60000)].join('|');
+  const key=[(curSpeed()||{}).v||0,roadKind().wx,roadScene(),Math.floor(Date.now()/60000)].join('|');
   if(key!==refreshKey){refreshKey=key;RoadLoop725.invalidate();}
   return result;
  };

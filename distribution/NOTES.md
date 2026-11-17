@@ -9,7 +9,7 @@
 - Hooks de pause/reprise via le provider Android ; réglages WebView et réutilisation du cache d'icônes.
 - Diagnostic dans Système → Diagnostic · Performances ; garde-fou de niveau de décor, désactivable, sans effacer les choix de l'utilisateur.
 
-586 contrôles automatisés, chargement du modèle par le véritable GLTFLoader et comparaison de sa géométrie réussis localement. La CI vérifie aussi le pont Android. Aucune mesure de FPS sur autoradio et aucun essai physique n'ont été réalisés.
+589 contrôles automatisés, chargement du modèle par le véritable GLTFLoader et comparaison de sa géométrie réussis localement. La CI vérifie aussi le pont Android. Aucune mesure de FPS sur autoradio et aucun essai physique n'ont été réalisés.
 
 La mise en pause des tâches d'affichage est ciblée : certaines anciennes minuteries mixtes de surveillance restent actives pour conserver trajets et alertes. Le regroupement des rendus complets est disponible pour les appels différés ; toutes les anciennes chaînes de rendu n'ont pas été réécrites.
 

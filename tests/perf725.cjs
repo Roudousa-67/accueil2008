@@ -35,6 +35,12 @@ let count=0;const ok=(name,a,b=true)=>{assert.deepEqual(a,b,name);count++;consol
  t.rafStep(1000);t.rafStep(1100);t.rafStep(1200);
  ok('une image au repos sans météo animée',r('Perf725.stats().draws'),started+1);
  ok('route au repos non programmée',r('RoadLoop725.running()'),false);
+ r("window.fade725Clock=0;RoadFX718.now=()=>fade725Clock;window.roadScene=()=> 'ville';RoadFX718.frames.clear();RoadLoop725.invalidate()");t.rafStep(1233);
+ r("window.roadScene=()=> 'village';RoadLoop725.invalidate()");t.rafStep(1266);
+ ok('fondu à l’arrêt termine son animation',r('RoadLoop725.running()'));
+ r('fade725Clock=3000');t.rafStep(1299);
+ ok('fondu terminé sans état résiduel',r('Array.from(RoadFX718.frames.values()).some(s=>!!s.fade)'),false);
+ ok('route statique suspendue après le fondu',r('RoadLoop725.running()'),false);
  r('curSpeed=()=>({v:60});RoadLoop725.invalidate()');t.rafStep(1300);t.rafStep(1400);
  ok('animation reprend quand vitesse change',r('RoadLoop725.running()'));
  // Cache des canvas : ne pas refaire le sélecteur de route dans une image.

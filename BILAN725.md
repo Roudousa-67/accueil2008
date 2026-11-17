@@ -32,7 +32,7 @@ Gains déterministes du scénario : 120 recherches de canvas deviennent 0 au rep
 
 ## Validation et livraison
 
-Les 547 contrôles existants et 39 nouveaux contrôles de performances passent, ainsi que le décodage du GLB par le GLTFLoader livré, la comparaison des triangles et des bornes et la compilation du pont Java.
+Les 547 contrôles existants et 42 nouveaux contrôles de performances passent, ainsi que le décodage du GLB par le GLTFLoader livré, la comparaison des triangles et des bornes et la compilation du pont Java.
 
 Le nouvel APK incorpore un classes3.dex fraîchement compilé à partir des sources de cette branche. La préparation refuse un certificat différent de l'APK de base 7.23 et une source autre que 7.25. Même package, versionCode 95. Les secrets de signature ne sont jamais déposés dans le dépôt.
 
