@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.25';
+const APP_VERSION = '7.26';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+  ['7.25.1', 'Novembre 2026', ['Correction de la géométrie du modèle compressé avant transformation 3D', 'Conserve les optimisations et les réglages de la 7.25']],
   ['7.25', 'Novembre 2026', ['Animations de route suspendues hors écran et au repos', 'Préférences en mémoire et chargements à la demande', 'Diagnostic des performances et protection du niveau de décor']],
   ['7.23', 'Novembre 2026', ['GPS masqué hors accueil et restauré au retour', 'Détection routière avec cap et précision', 'Aide par réglage et navigation simplifiée', 'Panneaux et texte agrandis']],
   ['7.22', 'Novembre 2026', ['Adresse, code postal et ville en petit tout en bas de la route', 'Décor et navigation conservés']],
@@ -454,7 +455,7 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
     return { yOf };
   }
   function drawV(cv) {
-    if(window.RoadDecor721 && (Decor721.enabled() || cv.parentNode.hasAttribute('data-decor721-preview')))return RoadDecor721.draw(cv,T,cv.parentNode.hasAttribute('data-decor721-preview')?T*60/3.6:travel,v);
+    if(window.RoadDecor721 && (window.Decors726 || Decor721.enabled() || cv.parentNode.hasAttribute('data-decor721-preview')))return RoadDecor721.draw(cv,T,cv.parentNode.hasAttribute('data-decor721-preview')?T*60/3.6:travel,v);
     const dpr = Math.min(1.5, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
     if (!W || !H) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }

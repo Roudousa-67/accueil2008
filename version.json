@@ -1,6 +1,6 @@
 {
-  "version": "7.25",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.25/Accueil2008GT_v7.25.apk",
-  "sha256": "3ea9937181962e0bde6596b0e8eeefe83d37a4b834f89069e685c5577c7ea2e4",
-  "notes": "Fluidité : arrêt du dessin de route hors écran et au repos, chargements 3D/cartes à la demande, réglages en mémoire, diagnostic et garde-fou. Modèle 3D réduit de 5,83 à 1,496 Mo. Signature d’origine conservée. 589 contrôles automatiques et validation du modèle réussis ; essai sur autoradio à effectuer."
+  "version": "7.26",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.26/Accueil2008GT_v7.26.apk",
+  "sha256": "b101e50c1e1c0f295ea1b8471f1ee8aa87a9b0a6b2b73abadc7f841f2330f109",
+  "notes": "Décors ville, village, campagne, forêt et autoroute enrichis. Portique abaissé, voiture alignée sur sa voie, feux décoratifs et passages piétons. Signalisation de navigation limitée aux données GPS vérifiées ; circulation, feux et aires explicitement illustratifs. Signature d’origine conservée. Test sur autoradio à effectuer."
 }

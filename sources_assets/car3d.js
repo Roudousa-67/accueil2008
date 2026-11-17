@@ -68,11 +68,23 @@
     x.onerror = () => onErr('xhr'); x.send();
   }
 
+  // Une position quantifiée normalisée ne peut pas stocker des coordonnées
+  // mondiales supérieures à 1 : convertir en Float32 avant l’aplatissement.
+  C3.worldGeometry = function(o) {
+    const g=o.geometry.clone(),p=g.getAttribute('position');
+    if(p && !(p.array instanceof Float32Array)) {
+      const values=new Float32Array(p.count*3);
+      for(let i=0;i<p.count;i++){values[i*3]=p.getX(i);values[i*3+1]=p.getY(i);values[i*3+2]=p.getZ(i);}
+      g.setAttribute('position',new THREE.BufferAttribute(values,3));
+    }
+    g.applyMatrix4(o.matrixWorld);return g;
+  };
+
   function build(gltf) {
     root = new THREE.Group(); const src = gltf.scene; src.updateMatrixWorld(true);
     // on « aplatit » le modèle : chaque pièce dans le repère du monde (Y en haut, avant vers +Z)
     const car = new THREE.Group(); const list = []; src.traverse((o) => { if (o.isMesh) list.push(o); });
-    list.forEach((o) => { const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); const m = new THREE.Mesh(g, o.material); car.add(m); });
+    list.forEach((o) => { const g = C3.worldGeometry(o); const m = new THREE.Mesh(g, o.material); car.add(m); });
     root.add(car); car.updateMatrixWorld(true);
     const mats = {}; const wheelMeshes = [];
     car.traverse((o) => { if (o.isMesh) { const n = o.material.name; mats[n] = o.material; if (/^Carro_(Roda|Roda_1|Pneu|Freio_Disco)$/.test(n)) { o.userData.n = n; wheelMeshes.push(o); } } });
