@@ -1,7 +1,7 @@
 # Dépôt et mises à jour
 
 Dépôt : https://github.com/Roudousa-67/accueil2008
-Branche principale : `main`. Version actuelle : `7.20`, code Android `90`.
+Branche principale : `main`. Version préparée : `7.24`, code Android `94`. La version annoncée aux appareils est toujours celle de `version.json`.
 Dans l’application : Paramètres > Mises à jour > Dépôt GitHub =
 `Roudousa-67/accueil2008`. Activer « Vérifier automatiquement » : recherche au
 démarrage puis toutes les six heures pendant que l’application fonctionne.
@@ -74,3 +74,59 @@ initial n’est pas nécessaire pour les mises à jour suivantes.
 - Dictée indisponible : vérifier le service vocal Android ou utiliser le clavier.
 - Waze hors cadre : vérifier permissions et firmware du poste. Aucun test
   physique sur autoradio n’est annoncé dans cette livraison.
+
+## Préparer l’APK des décors validés (branche de travail)
+
+Le code des décors et les captures de contrôle sont dans la branche
+`feat/widget-decors-illustres`. L’artefact `widget-jour-nuit` du workflow de
+vérification contient les captures produites par le moteur Canvas avec la
+voiture vue de dos ; ce ne sont pas des maquettes générées par IA.
+
+La préparation de l’APK demande la clé de signature originale, absente du dépôt,
+et les Android SDK Build Tools (`apksigner`, `zipalign`).
+Sur le poste qui possède cette clé, après les tests :
+
+```sh
+python outils/preparer_apk_decors.py --keystore CHEMIN_VERS_LA_CLE_ORIGINALE
+```
+
+Le mot de passe est demandé sans affichage. Il peut aussi être fourni dans
+`ACCUEIL_SIGNING_PASSWORD` et, si le mot de passe de clé est distinct,
+`ACCUEIL_KEY_PASSWORD`. Ne jamais enregistrer ces valeurs ou la clé dans Git.
+
+L’outil prépare une copie des assets en version 7.24 et le manifeste Android
+avec le code 94, construit et signe l’APK, puis compare son certificat avec
+celui de l’APK 7.23. Une signature différente bloque la sortie. Il affiche le
+SHA-256 et laisse `version.json` inchangé. Aucune publication ni annonce aux
+autoradios n’a lieu à ce stade. L’installation et les performances sur le poste,
+l’examen visuel et la préparation de la release restent à faire.
+
+## Fabrication automatique de l’APK sur GitHub
+
+Le workflow `Construire l’APK des décors` est maintenant disponible dans Actions.
+Il a été lancé ; la fabrication reste bloquée tant que les deux secrets suivants
+ne sont pas configurés dans les secrets GitHub Actions du dépôt :
+
+- `ACCUEIL_KEYSTORE_BASE64` : contenu de la clé originale PKCS12 (.p12), encodé en base64.
+- `ACCUEIL_SIGNING_PASSWORD` : mot de passe de cette clé.
+- `ACCUEIL_KEY_PASSWORD` : facultatif, seulement si le mot de passe de la clé privée est distinct.
+
+Ces éléments doivent être saisis dans les secrets, jamais dans les fichiers
+versionnés, les commentaires, les journaux ou les captures. Le fichier APK signé
+ne permet pas de retrouver sa clé privée. La clé est normalement conservée
+dans le projet ou l’archive d’origine sur le poste qui a signé les APK précédents.
+
+Une fois les secrets configurés, relancer l’exécution échouée dans Actions.
+La chaîne exécute les tests, construit la version 7.24, compare son certificat
+à celui de l’APK 7.23 puis joint l’APK signé et son SHA-256 dans l’artefact
+`Accueil2008GT-v7.24-signe`. Elle crée aussi un brouillon de release, sans
+remplacer un APK déjà publié et sans annoncer prématurément une mise à jour
+sur l’autoradio. La clé temporaire est supprimée à la fin, même en cas d’échec.
+
+## Livraison signée 7.24
+
+La clé originale a été retrouvée dans l’archive complète 7.9 et son certificat a été vérifié identique à celui de l’APK 7.23. L’APK 7.24 a ensuite été généré et signé localement ; aucune clé privée ni aucun mot de passe ne sont inclus dans le dépôt.
+
+Le fichier `distribution/patch724-signe.b64` transporte uniquement des octets du paquet APK signé public. `outils/reconstruire_apk724.py` réassemble exactement cet APK à partir de la version 7.23 et vérifie son SHA-256. Ce mécanisme ne signe rien et ne remplace pas la clé privée.
+
+Le workflow de dépôt vérifie également les certificats, exécute les tests et ajoute l’APK signé à la branche. La publication ponctuelle 7.24 s’exécute lors de sa fusion autorisée sur main ; les autres versions conservent la publication manuelle habituelle. L’annonce à l’autoradio intervient seulement après la disponibilité de la release.

@@ -53,7 +53,7 @@ let count=0;const ok=(n,a,b=true)=>{assert.deepEqual(a,b,n);count++;console.log(
   const before=run('JSON.stringify(snapshot().data)');run(`act('${button.getAttribute('data-act')}')`);
   const cv=w.document.querySelector('[data-help-decor723="'+id+'"] canvas');assert(cv,'aperçu D'+id);Object.defineProperty(cv,'clientWidth',{value:540,configurable:true});Object.defineProperty(cv,'clientHeight',{value:220,configurable:true});w.helpCanvas723=cv;run('RoadDecor721.draw(helpCanvas723,12,180,60)');assert.equal(run('JSON.stringify(snapshot().data)'),before,'aperçu sans modification D'+id);run("act('help723:close')");
  }
- ok('39 exemples de décor dessinés sans changer les préférences',defs.length,39);
+ ok('66 exemples de décor dessinés sans changer les préférences',defs.length,66);
  ok('noms de panneaux longs répartis sur deux lignes',run("PanelText723.lines('SAINT-MARTIN-LES-BELLEVILLE').length"),2);
  ok('panneaux 20 % plus grands par défaut',run('RoadOptions718.size()'),1.2);run("store.set('panelSize718',80)");ok('taille personnelle conservée',run('RoadOptions718.size()'),.8);
  const root=path.join(__dirname,'..');for(const file of fs.readdirSync(path.join(root,'sources_assets')).filter(n=>n.endsWith('.js')))new vm.Script(fs.readFileSync(path.join(root,'sources_assets',file),'utf8'),{filename:file});ok('syntaxe de tous les scripts applicatifs valide',true);

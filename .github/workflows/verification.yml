@@ -11,12 +11,28 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Reconstituer l’APK signé si nécessaire
+        if: hashFiles('distribution/patch724-signe.b64') != ''
+        run: python3 outils/reconstruire_apk724.py
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
       - run: npm install --prefix tests --ignore-scripts
       - run: npm test --prefix tests
+        env:
+          WIDGET_QA: ${{ runner.temp }}/widget-qa
+      - name: Joindre les captures du rendu réel
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-jour-nuit
+          path: ${{ runner.temp }}/widget-qa
+          if-no-files-found: warn
+          retention-days: 14
       - name: Contrôler l’APK livré
         run: sha256sum --check distribution/SHA256SUMS
       - name: Valider la version préparée
         run: python3 outils/validate_release.py distribution/release.json
+
+      - name: Vérifier la syntaxe de la préparation APK
+        run: python3 -m py_compile outils/preparer_apk_decors.py

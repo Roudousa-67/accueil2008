@@ -1,6 +1,6 @@
 # Audit 7.23
 
-53 pages de paramètres parcourues ; 188 lignes avec information, plus les champs isolés. Aucun groupe vide ni erreur JavaScript observés dans ces scénarios. Les 39 options de décor ont un exemple calculé par le moteur actuel, avec des données fictives et sans modifier les préférences.
+53 pages de paramètres parcourues ; 215 lignes avec information, plus les champs isolés. Aucun groupe vide ni erreur JavaScript observés dans ces scénarios. Les 66 options de décor ont un exemple calculé par le moteur actuel, avec des données fictives et sans modifier les préférences.
 
 Doublon d’interface supprimé : la seconde barre d’onglets dans les paramètres ; les mêmes rubriques restent dans la colonne de gauche et la recherche. Aucune préférence ni fonction utilisateur supprimée. Les modules historiques chargés par index.html restent des couches actives de l’application, ils ne sont pas supprimés en fonction de leur ancien numéro de version.
 

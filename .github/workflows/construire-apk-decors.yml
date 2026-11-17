@@ -1,0 +1,78 @@
+name: Construire l’APK des décors
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: apk-decors-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier la clé de signature disponible
+        env:
+          ACCUEIL_KEYSTORE_BASE64: ${{ secrets.ACCUEIL_KEYSTORE_BASE64 }}
+          ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os
+          missing = [key for key in ("ACCUEIL_KEYSTORE_BASE64", "ACCUEIL_SIGNING_PASSWORD") if not os.environ.get(key)]
+          if missing:
+              message = "Signature impossible : secrets de signature non configurés : " + ", ".join(missing)
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                  summary.write("## APK non généré\n" + message + "\nLa clé d’origine doit être fournie dans les secrets GitHub Actions. Aucun APK de remplacement n’a été créé.\n")
+              raise SystemExit(message)
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --prefix tests --ignore-scripts
+      - run: npm test --prefix tests
+      - name: Préparer la clé dans un dossier temporaire privé
+        env:
+          ACCUEIL_KEYSTORE_BASE64: ${{ secrets.ACCUEIL_KEYSTORE_BASE64 }}
+        run: |
+          python3 - <<'PY'
+          import os, base64
+          from pathlib import Path
+          path = Path(os.environ["RUNNER_TEMP"]) / "accueil-original.p12"
+          path.write_bytes(base64.b64decode(os.environ["ACCUEIL_KEYSTORE_BASE64"], validate=True))
+          path.chmod(0o600)
+          PY
+      - name: Construire, signer et vérifier la compatibilité
+        env:
+          ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
+          ACCUEIL_KEY_PASSWORD: ${{ secrets.ACCUEIL_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "$ACCUEIL_KEY_PASSWORD" ]; then
+            export ACCUEIL_KEY_PASSWORD="$ACCUEIL_SIGNING_PASSWORD"
+          fi
+          python3 outils/preparer_apk_decors.py --keystore "$RUNNER_TEMP/accueil-original.p12" --output "$RUNNER_TEMP/apk/Accueil2008GT_v7.24.apk"
+          cd "$RUNNER_TEMP/apk"
+          sha256sum Accueil2008GT_v7.24.apk > SHA256SUMS
+      - name: Joindre l’APK signé et son empreinte
+        uses: actions/upload-artifact@v4
+        with:
+          name: Accueil2008GT-v7.24-signe
+          path: ${{ runner.temp }}/apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Déposer un brouillon de version sur GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view v7.24 >/dev/null 2>&1; then
+            echo "La version v7.24 existe déjà ; son APK n’est pas remplacé. Le nouvel artefact de cette exécution reste téléchargeable."
+          else
+            gh release create v7.24 "$RUNNER_TEMP/apk/Accueil2008GT_v7.24.apk" "$RUNNER_TEMP/apk/SHA256SUMS" --draft --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.24 — décors" --notes "APK construit à partir des sources testées. Signature vérifiée identique à la version 7.23. Nouveau rendu forêt, chaussée grise, voiture vue de dos et options de décor. Essai sur autoradio non effectué. Brouillon non annoncé automatiquement aux appareils."
+          fi
+      - name: Supprimer la clé temporaire
+        if: always()
+        run: rm -f "$RUNNER_TEMP/accueil-original.p12"
