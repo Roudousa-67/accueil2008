@@ -23,7 +23,7 @@ def main():
     rel=Path(name[7:]);assert not rel.is_absolute() and '..' not in rel.parts
     out=src/rel;out.parent.mkdir(parents=True,exist_ok=True);out.write_bytes(z.read(name))
   prepare(src,w/'assets',Path(__file__).resolve().parent.parent/'sources_assets/beta727.js')
-  run(['python3',a.tools/'axml.py',w/'manifest.xml',w/'version.xml','7.27.1','1001'])
+  run(['python3',a.tools/'axml.py',w/'manifest.xml',w/'version.xml','7.27.2','1002'])
   run(['python3',Path(__file__).with_name('manifest_beta.py'),w/'version.xml',w/'beta.xml'])
   os.environ['ACCUEIL_NATIVE_DEX']=str(w/'native.dex');run(['python3',a.tools/'build.py',a.base,w/'unsigned0.apk',w/'assets',w/'beta.xml'])
   from PIL import Image,ImageDraw,ImageFont
@@ -31,7 +31,7 @@ def main():
    for entry in source.infolist():
     data=source.read(entry.filename)
     if entry.filename.startswith('res/mipmap-') and entry.filename.endswith('/ic_launcher.png'):
-     im=Image.open(io.BytesIO(data)).convert('RGBA');draw=ImageDraw.Draw(im);ww,hh=im.size;draw.rectangle((0,hh*.68,ww,hh),fill='#b66822');font=ImageFont.truetype('/usr/share/fonts/truetype/open-sans/OpenSans-Bold.ttf',max(8,int(ww*.18)));draw.text((ww/2,hh*.82),'BÊTA',font=font,anchor='mm',fill='white');buf=io.BytesIO();im.save(buf,format='PNG');data=buf.getvalue()
+     im=Image.open(io.BytesIO(data)).convert('RGBA');draw=ImageDraw.Draw(im);ww,hh=im.size;draw.rectangle((0,hh*.68,ww,hh),fill='#b66822');font=ImageFont.truetype(next(str(p) for p in [Path('/usr/share/fonts/truetype/open-sans/OpenSans-Bold.ttf'),Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')] if p.exists()),max(8,int(ww*.18)));draw.text((ww/2,hh*.82),'BÊTA',font=font,anchor='mm',fill='white');buf=io.BytesIO();im.save(buf,format='PNG');data=buf.getvalue()
     target.writestr(entry,data)
   run([a.zipalign,'-f','4',w/'unsigned.apk',w/'aligned.apk'])
   cmd=[a.apksigner,'sign','--ks',a.keystore,'--ks-pass','env:ACCUEIL_SIGNING_PASSWORD','--out',w/'signed.apk']

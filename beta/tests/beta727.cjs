@@ -4,8 +4,8 @@ const direct=path.resolve(__dirname,'../../tests/regression.cjs');const fixture=
 const assets=process.env.BETA_ASSETS||path.resolve(__dirname,'../sources_assets');
 const {make}=require(fixture);const t=make({canvas:true,assetRoot:assets,extraScripts:['decors726.js','beta727.js']}),r=t.run,w=t.w;
 let checks=0;function check(name,condition){assert(condition,name);checks++;console.log('OK '+name)}
-check('version propre à la bêta',r('APP_VERSION')==='7.27.1');
-check('page d’accueil bêta explicite',w.document.body.textContent.includes('Bêta 1'));
+check('version propre à la bêta',r('APP_VERSION')==='7.27.2');
+check('page d’accueil bêta explicite',w.document.body.textContent.includes('Bêta 2'));
 check('message de séparation et de données Waze',w.document.body.textContent.includes('ne reçoit pas l’itinéraire'));
 check('pas d’accueil de sélection du lanceur',r("store.get('welcome')")===false);
 const before=r('JSON.stringify(loc)');w.BetaRoad.setMode('demo');
