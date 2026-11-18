@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.26';
+const APP_VERSION = '7.28';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+  ['7.28', 'Novembre 2026', ['Voiture agrandie et bande du décor retirée', 'Vitesse, limitation et météo dans le widget route', 'Cadre GPS réaligné selon la largeur et la hauteur réelles', 'Vue conducteur GPS activable, courbes cartographiées et GPX local', 'Panneaux des localités proches espacés en kilomètres', 'Paramètres de navigation regroupés et anciens réglages inactifs retirés']],
   ['7.25.1', 'Novembre 2026', ['Correction de la géométrie du modèle compressé avant transformation 3D', 'Conserve les optimisations et les réglages de la 7.25']],
   ['7.25', 'Novembre 2026', ['Animations de route suspendues hors écran et au repos', 'Préférences en mémoire et chargements à la demande', 'Diagnostic des performances et protection du niveau de décor']],
   ['7.23', 'Novembre 2026', ['GPS masqué hors accueil et restauré au retour', 'Détection routière avec cap et précision', 'Aide par réglage et navigation simplifiée', 'Panneaux et texte agrandis']],
@@ -302,7 +303,7 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
   let cvs=[],raf=0;
   const eligible=()=>!document.hidden&&!Perf725.paused()&&cvs.length>0&&(tab==='home'||cvs.some(cv=>cv.closest('[data-decor721-preview]')));
   const fading=()=>window.RoadFX718&&cvs.some(cv=>{const item=cv.closest('[data-fitem]'),key=item?item.getAttribute('data-fitem'):'hero',state=RoadFX718.frames.get(key);return !!(state&&state.fade);});
-  const animate=()=>!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||fading()||/^(pluie|orage|neige)$/.test(roadKind().wx);
+  const animate=()=>!!(window.Driver728&&Driver728.preview)||!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||fading()||/^(pluie|orage|neige)$/.test(roadKind().wx);
   function queue(){if(!raf&&eligible())raf=requestAnimationFrame(frame);}
   function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=0;}
   window.RoadLoop725={refresh(){cvs=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};

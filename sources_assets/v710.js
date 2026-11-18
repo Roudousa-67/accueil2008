@@ -197,18 +197,18 @@ const Frame710 = (() => {
   const native = () => window.GpsDock || null;
   const embedded = () => { try { const n = native(); return !!(n && n.gpsCanEmbed && n.gpsCanEmbed()); } catch (e) { return false; } };
   function viewport() {
-    try { const n = native(); const m = n && n.gpsViewport ? JSON.parse(String(n.gpsViewport())) : null; if (m && m.width > 0) return m; } catch (e) { /* ancien module */ }
+    try { const n = native(); const m = n && n.gpsViewport ? JSON.parse(String(n.gpsViewport())) : null; if (m && ['x','y','width','height'].every(k => Number.isFinite(m[k])) && m.width > 0 && m.height > 0) return m; } catch (e) { /* ancien module */ }
     return { x: 0, y: 0, width: innerWidth * (devicePixelRatio || 1), height: innerHeight * (devicePixelRatio || 1) };
   }
   function rect(loose) {
     const el = document.querySelector('#screen .gpsbox');
     if (!el || tab !== 'home' || editing || gbMenu || (window.Perf725 && Perf725.paused())) return null;
-    const r = el.getBoundingClientRect(), v = viewport(), k = v.width / innerWidth;
+    const r = el.getBoundingClientRect(), v = viewport(), kx = v.width / innerWidth, ky = v.height / innerHeight;
     if (r.width < 60 || r.height < 60) return null;
     if (!loose) { const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (!top || !el.contains(top)) return null; }
-    const pad = 4 * k, dx = Number(store.get('gbOffX', 0)) || 0, dy = Number(store.get('gbOffY', 0)) || 0;
+    const padx = 4 * kx, pady = 4 * ky, dx = Number(store.get('gbOffX', 0)) || 0, dy = Number(store.get('gbOffY', 0)) || 0;
     const bottom = v.y + v.height, right = v.x + v.width;
-    const a = [Math.max(v.x, v.x + r.left * k + pad + dx), Math.max(v.y, v.y + r.top * k + pad + dy), Math.min(right, v.x + r.right * k - pad + dx), Math.min(bottom, v.y + r.bottom * k - pad + dy)].map(Math.round);
+    const a = [Math.max(v.x, v.x + r.left * kx + padx + dx), Math.max(v.y, v.y + r.top * ky + pady + dy), Math.min(right, v.x + r.right * kx - padx + dx), Math.min(bottom, v.y + r.bottom * ky - pady + dy)].map(Math.round);
     return a[2] - a[0] >= 60 && a[3] - a[1] >= 60 ? a : null;
   }
   let embedLive = false, last = '', settling = 0;

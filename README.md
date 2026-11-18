@@ -1,3 +1,9 @@
+## Version normale 7.28 préparée
+
+Voiture agrandie, bande du décor retirée, vitesse et limitation côte à côte, météo en haut à droite, cadre GPS réaligné et vue conducteur GPS activable. Les paramètres de navigation sont regroupés. Détails et limites : [MISE_A_JOUR_728.md](MISE_A_JOUR_728.md).
+
+Les sources et le constructeur sont disponibles. La signature de l’APK 7.28 nécessite la configuration privée de la clé d’origine ; `version.json` conserve la version effectivement publiée tant que le nouvel APK signé n’a pas été vérifié et déposé. La clé privée n’est pas stockée dans ce dépôt.
+
 # Accueil 2008 GT
 
 **Mise à jour 7.25 : fluidité.** Route suspendue hors écran et au repos, chargements à la demande, modèle 3D de 1,496 Mo, diagnostic dans Système → Diagnostic · Performances. [Bilan détaillé et limites](BILAN725.md). Même signature que la 7.24 ; essai sur autoradio à effectuer.

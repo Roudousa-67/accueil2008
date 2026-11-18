@@ -18,6 +18,8 @@ jobs:
       - run: npm test --prefix tests
         env:
           WIDGET_QA: ${{ runner.temp }}/widget-qa
+      - name: Contrôler visuellement le widget 7.28
+        run: NODE_PATH="$GITHUB_WORKSPACE/tests/node_modules" WIDGET_QA="$RUNNER_TEMP/widget-qa" node tests/render728.cjs
       - name: Joindre les captures du rendu réel
         if: always()
         uses: actions/upload-artifact@v4
@@ -32,7 +34,7 @@ jobs:
         run: python3 outils/validate_release.py distribution/release.json
 
       - name: Vérifier la syntaxe de la préparation APK
-        run: python3 -m py_compile outils/preparer_apk_decors.py outils/preparer_apk725.py
+        run: python3 -m py_compile outils/preparer_apk_decors.py outils/preparer_apk725.py outils/preparer_apk728.py
 
       - name: Charger la base 7.24 pour mesurer avant et après
         if: hashFiles('tests/benchmark725.cjs') != ''

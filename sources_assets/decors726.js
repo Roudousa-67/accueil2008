@@ -478,7 +478,7 @@ function renderLive(cv,T,metres,speed){
  const car=cv.parentNode.querySelector('[data-car360]');if(car){const q=(301+120*298/300-HZ)/(BOT-HZ),x=P(q,scene==='autoroute'?.815:.5).x;
  car.style.left=(x/W*100)+'%';car.style.width=Math.min(201/W*width,120*height/(BOT-TOP)*503/300)+'px';car.style.height='auto';car.style.aspectRatio='503/300';car.style.bottom=((BOT-(301+120))/(BOT-TOP)*100)+'%';car.style.backgroundPosition='52.174% 0';}
  if(night||dusk){const x=P(.9,scene==='autoroute'?.815:.5).x;c.save();c.translate(x,285);c.scale(1,.42);light(0,0,100,'#fff1bb35');c.restore()}
- c.fillStyle='#112333dc';c.fillRect(0,TOP,W,22);txt(scene==='ville'?'Décor illustratif · feux simulés':scene==='autoroute'?'Décor illustratif · circulation et aires simulées':'Décor illustratif',12,TOP+16,12,'#e3ece8');c.setTransform(1,0,0,1,0,0);
+ c.setTransform(1,0,0,1,0,0);
 }
 window.Decors726={draw:renderLive};
 RoadDecor721.draw=renderLive;
