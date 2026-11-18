@@ -1,0 +1,6 @@
+{
+  "version": "7.28",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.28/Accueil2008GT_v7.28.apk",
+  "sha256": "9b6b97f4cc47153517bebf8a270d34c608267a38d37de3c461bb7f1ec045c3a5",
+  "notes": "Voiture agrandie, bande du décor supprimée, vitesse et limitation côte à côte, météo en haut à droite. Cadre GPS réaligné. Vue conducteur GPS activable, suivi GPX local facultatif, panneaux des localités proches réglables en kilomètres. Paramètres de navigation rangés. L’itinéraire Waze n’est pas récupéré par le widget. Signature d’origine conservée. Essai sur autoradio à effectuer."
+}
