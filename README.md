@@ -1,8 +1,8 @@
-## Version normale 7.28 préparée
+## Version normale 7.28 publiée
 
 Voiture agrandie, bande du décor retirée, vitesse et limitation côte à côte, météo en haut à droite, cadre GPS réaligné et vue conducteur GPS activable. Les paramètres de navigation sont regroupés. Détails et limites : [MISE_A_JOUR_728.md](MISE_A_JOUR_728.md).
 
-Les sources et le constructeur sont disponibles. La signature de l’APK 7.28 nécessite la configuration privée de la clé d’origine ; `version.json` conserve la version effectivement publiée tant que le nouvel APK signé n’a pas été vérifié et déposé. La clé privée n’est pas stockée dans ce dépôt.
+La version normale 7.28 est publiée avec la signature d’origine. Télécharger [Accueil2008GT_v7.28.apk](https://github.com/Roudousa-67/accueil2008/releases/download/v7.28/Accueil2008GT_v7.28.apk) et l’installer par-dessus la version stable existante. Les réglages sont conservés. La clé privée ne figure ni dans ce dépôt ni dans la release.
 
 # Accueil 2008 GT
 

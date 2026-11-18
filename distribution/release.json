@@ -1,6 +1,6 @@
 {
-  "version": "7.26",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.26/Accueil2008GT_v7.26.apk",
-  "sha256": "b101e50c1e1c0f295ea1b8471f1ee8aa87a9b0a6b2b73abadc7f841f2330f109",
-  "notes": "Décors ville, village, campagne, forêt et autoroute enrichis. Portique abaissé, voiture alignée sur sa voie, feux décoratifs et passages piétons. Signalisation de navigation limitée aux données GPS vérifiées ; circulation, feux et aires explicitement illustratifs. Signature d’origine conservée. Test sur autoradio à effectuer."
+  "version": "7.28",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.28/Accueil2008GT_v7.28.apk",
+  "sha256": "9b6b97f4cc47153517bebf8a270d34c608267a38d37de3c461bb7f1ec045c3a5",
+  "notes": "Voiture agrandie, bande du décor supprimée, vitesse et limitation côte à côte, météo en haut à droite. Cadre GPS réaligné. Vue conducteur GPS activable, suivi GPX local facultatif, panneaux des localités proches réglables en kilomètres. Paramètres de navigation rangés. L’itinéraire Waze n’est pas récupéré par le widget. Signature d’origine conservée. Essai sur autoradio à effectuer."
 }
