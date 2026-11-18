@@ -5,7 +5,7 @@ window.Settings720={
  norm:s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),
  active(){return !!(this.query.trim()||this.filter);},
  key(){return [setCat,setSub,this.query,this.filter].join('|');},
- toolbar(p){return `<div data-search720 style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex:none"><input id="settingsSearch720" type="search" autocomplete="off" placeholder="Rechercher un réglage : GPS, panneau, son…" value="${esc(this.query)}" style="${fld(p,'flex:1;min-width:0')}"><select id="settingsFilter720" aria-label="Filtrer les réglages" style="${fld(p,'width:230px')}"><option value="">Toutes les catégories</option>${SETCATS.map(([n])=>`<option value="${esc(n)}" ${this.filter===n?'selected':''}>${esc(n)}</option>`).join('')}</select>${chipBtn(p,'search720:voice','🎙 Dicter')}${chipBtn(p,'search720:clear','Effacer')}</div>`;},
+ toolbar(p){return `<div data-search720 style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex:none"><input id="settingsSearch720" type="search" aria-label="Rechercher un réglage" maxlength="160" autocomplete="off" placeholder="Rechercher un réglage : GPS, panneau, son…" value="${esc(this.query)}" style="${fld(p,'flex:1;min-width:0')}"><select id="settingsFilter720" aria-label="Filtrer les réglages" style="${fld(p,'width:230px')}"><option value="">Toutes les catégories</option>${SETCATS.map(([n])=>`<option value="${esc(n)}" ${this.filter===n?'selected':''}>${esc(n)}</option>`).join('')}</select>${chipBtn(p,'search720:voice','🎙 Dicter')}${chipBtn(p,'search720:clear','Effacer')}</div>`;},
  buildIndex(p){
   if(this.index)return this.index;
   this.index=[];SETCATS.forEach(([category,subs],ci)=>subs.forEach(([name,fn],si)=>{
@@ -13,7 +13,17 @@ window.Settings720={
     this.index.push({ci,si,category,name,text:this.norm(category+' '+name+' '+text)});
   }));return this.index;
  },
- matches(p){const words=this.norm(this.query).trim().split(/\s+/).filter(Boolean);return this.buildIndex(p).filter(it=>(!this.filter||this.filter===it.category)&&words.every(w=>it.text.includes(w)));},
+ matches(p){const words=this.norm(this.query).trim().split(/\s+/).filter(Boolean);const list=this.buildIndex(p).filter(it=>(!this.filter||this.filter===it.category)&&words.every(w=>it.text.includes(w)));
+  if (!words.length) return list;
+  const query=words.join(' ');
+  function rank(it){
+    const title=Settings720.norm(it.name);
+    if(title===query)return 0;
+    if(title.startsWith(query))return 1;
+    return words.every(w=>title.includes(w))?2:3;
+  }
+  return list.sort((a,b)=>rank(a)-rank(b)||a.ci-b.ci||a.si-b.si);
+ },
  results(p){const list=this.matches(p);return `<div class="scroll" data-settings-scroll="body" style="flex:1;min-height:0"><div style="padding:8px;font-size:15px;color:${p.mut}">${list.length} résultat${list.length>1?'s':''}</div>${list.map(it=>`<button data-act="search720:open:${it.ci}:${it.si}" style="display:flex;flex-direction:column;gap:5px;text-align:left;width:100%;padding:14px 18px;border-radius:12px;background:${p.card2};color:${p.txt};margin-bottom:8px"><b style="font-size:18px">${esc(it.name)}</b><span style="font-size:13px;color:${p.mut}">${esc(it.category)} › ${esc(it.name)}</span></button>`).join('')||`<div style="padding:18px;color:${p.mut}">Aucun réglage trouvé. Essaie un autre mot ou une autre catégorie.</div>`}</div>`;},
  bind(){const input=$('settingsSearch720'),filter=$('settingsFilter720');if(input)input.oninput=()=>{this.query=input.value.slice(0,160);render();};if(filter)filter.onchange=()=>{this.filter=filter.value;render();};},
  acceptVoice(payload){

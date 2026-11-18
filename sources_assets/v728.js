@@ -37,7 +37,11 @@
  if(weather&&original.has('Météo et vigilance'))weather[1].push(['Affichage et vigilance',original.get('Météo et vigilance')]);
  if(appCategory)SETCATS.splice(SETCATS.indexOf(appCategory),1);
  // Old links still land on their replacement page, without exposing dead controls.
- const open=window.openSet;window.openSet=function(cat,sub){if(cat==='Appli GPS'){cat='Navigation';sub='Appli GPS';}if(cat==='Navigation'){if(sub==='Décor de la route'||String(sub).startsWith('Décor ·'))sub='Paysages et météo';if(sub==='Cadre GPS'||sub==='Petite fenêtre GPS')sub='Cadre GPS et alignement';}return open(cat,sub);};
+ const open=window.openSet;window.openSet=function(cat,sub){
+  Settings720.query='';Settings720.filter='';
+  if(cat==='Navigation' && sub==='Météo et vigilance'){cat='Météo';sub='Affichage et vigilance';}
+  if(cat==="Écran d'accueil" && ['Alignement GPS et plein écran','Barre du poste (cadre GPS)'].includes(sub)){cat='Navigation';sub='Cadre GPS et alignement';}
+  if(cat==='Appli GPS'){cat='Navigation';sub='Appli GPS';}if(cat==='Navigation'){if(sub==='Décor de la route'||String(sub).startsWith('Décor ·'))sub='Paysages et météo';if(sub==='Cadre GPS'||sub==='Petite fenêtre GPS')sub='Cadre GPS et alignement';}return open(cat,sub);};
  if(!store.get('align728Migrated',false)){store.set('align728Backup',{x:store.get('gbOffX',0),y:store.get('gbOffY',0)});store.set('gbOffX',0);store.set('gbOffY',0);store.set('align728Migrated',true);}
  Settings720.index=null;
  function bind(){const file=$('driverGPXFile');if(!file)return;file.onchange=()=>{const f=file.files&&file.files[0];if(!f)return;if(f.size>2000000){toast('GPX trop volumineux (2 Mo maximum).');return;}const reader=new FileReader();reader.onload=()=>{try{Driver728.loadGPX(String(reader.result));}catch(e){toast(e.message);}};reader.readAsText(f);};}

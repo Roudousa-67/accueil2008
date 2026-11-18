@@ -179,8 +179,13 @@ function trkFinish(boot) {
   if (!boot) toast(`Parcours enregistré : ${fr1(rec.km)} km`);
   if (tab === 'tracks') { trkSel = rec.id; render(); }
 }
+function usableTrackFix(l) {
+  return !!l && Number.isFinite(l.lat) && Math.abs(l.lat) <= 90 &&
+    Number.isFinite(l.lon) && Math.abs(l.lon) <= 180 && Number.isFinite(l.ts) &&
+    (l.acc == null || (Number.isFinite(l.acc) && l.acc <= 60));
+}
 function trkOnLoc(l) {
-  if (!l || !(l.acc == null || l.acc <= 0 || l.acc <= 60)) return;            // position trop imprécise
+  if (!usableTrackFix(l) || (trk && l.ts <= trk.t1)) return;            // position trop imprécise
   const sp = l.spd >= 0 ? l.spd : -1;
   if (!trk) {
     if (!trkAuto()) return;
@@ -214,9 +219,9 @@ window.addEventListener('pagehide', () => { if (trk && trkDirty) trkPersist(); }
 })();
 
 const dur47 = (ms) => { const m = Math.max(0, Math.round(ms / 60000)); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${pad(m % 60)}`; };
-const day47 = (t) => { const d = new Date(t), n = new Date(); const d0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime(); if (t >= d0) return 'Aujourd\'hui'; if (t >= d0 - 86400000) return 'Hier'; return `${['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'][d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}`; };
+const day47 = (t) => { const d = new Date(t), n = new Date(); const d0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime(); if (t >= d0) return 'Aujourd\'hui'; if (t >= new Date(n.getFullYear(), n.getMonth(), n.getDate() - 1).getTime()) return 'Hier'; return `${['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'][d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}`; };
 function trkSums() {
-  const n = new Date(), d0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime(), w0 = d0 - 6 * 86400000, m0 = new Date(n.getFullYear(), n.getMonth(), 1).getTime();
+  const n = new Date(), d0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime(), w0 = new Date(n.getFullYear(), n.getMonth(), n.getDate() - 6).getTime(), m0 = new Date(n.getFullYear(), n.getMonth(), 1).getTime();
   const all = trkIndex().concat(trk ? [trk] : []);
   return [['Aujourd\'hui', d0], ['7 jours', w0], ['Ce mois', m0]].map(([l, s]) => { const f = all.filter((t) => t.t0 >= s); return [l, f.reduce((a, t) => a + kmOf(t), 0), f.length, f.reduce((a, t) => a + costOf(t), 0)]; });
 }
@@ -233,13 +238,13 @@ function pageTracks(p) {
     return `<button data-act="trk:sel:${live ? 'cur' : t.id}" style="display:block;width:100%;text-align:left;padding:9px 12px;border-radius:12px;margin-bottom:6px;${on ? `background:${p.acc};color:${p.onAcc}` : `background:${p.card2};color:${p.txt}`}">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:15px">${live ? '<span style="color:#ff4d4d">●</span> En cours' : day47(t.t0)} · ${fmtTime(t.t0)}${live ? '' : ' → ' + fmtTime(t.t1)}</b><b style="font-size:16px;white-space:nowrap">${live ? '<span data-k="trkKm">' + fr1(t.km) + '</span>' : fr1(t.km)} km</b></div>
       <div style="font-size:12.5px;opacity:.8;${ell}">${esc(t.from || 'Départ')} → ${esc(live ? '…' : t.to || 'Arrivée')}</div></button>`; };
-  const list = (trk ? item(trk, true) : '') + (idx.length ? idx.map((t) => item(t, false)).join('') : (trk ? '' : `<div style="padding:18px 8px;color:${p.mut};font-size:14px;line-height:1.5">Aucun parcours pour l'instant.<br>L'enregistrement démarre tout seul dès que la voiture roule, et s'arrête ${store.get('trkStop', 5)} min après l'arrêt.</div>`));
+  const list = (trk ? item(trk, true) : '') + (idx.length ? idx.map((t) => item(t, false)).join('') : (trk ? '' : `<div style="padding:18px 8px;color:${p.mut};font-size:14px;line-height:1.5">Aucun parcours pour l'instant.<br>${trkAuto() ? `L’enregistrement démarre quand la voiture roule et se termine après ${store.get('trkStop', 5)} min d’arrêt.` : 'Le mode automatique est désactivé. Touche « Démarrer » pour enregistrer ton premier parcours.'}</div>`));
   const stat = (l, v) => `<div><div style="font-size:12px;color:${p.mut}">${l}</div><div style="font-size:22px;font-weight:700;line-height:1.15;white-space:nowrap">${v}</div></div>`;
   let head = `<div style="color:${p.mut};font-size:15px">Choisis un parcours dans la liste.</div>`;
   if (sel) { const live = trkSel === 'cur', ms = (live ? Date.now() : sel.t1) - sel.t0, avg = ms > 60000 ? sel.km / (ms / 3600e3) : 0;
     head = `<div style="display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap">${stat('Distance', `<span ${live ? 'data-k="trkKm"' : ''}>${fr1(sel.km)}</span> km`)}${stat('Durée', `<span ${live ? 'data-k="trkDur"' : ''}>${dur47(ms)}</span>`)}${stat('Moyenne', `${Math.round(avg)} km/h`)}${stat('Vitesse max', `${Math.round(sel.mx || 0)} km/h`)}<span style="flex:1"></span>${live ? chipBtn(p, 'trk:stop', 'Arrêter et enregistrer', true) : chipBtn(p, 'trk:full', 'Détails', true) + chipBtn(p, 'trk:del:' + sel.id, trkDelArm === sel.id ? 'Confirmer ?' : 'Supprimer')}</div>
     <div style="font-size:13.5px;color:${p.mut};${ell}">${day47(sel.t0)} ${fmtDate(sel.t0)} · ${fmtTime(sel.t0)}${live ? '' : ' → ' + fmtTime(sel.t1)} · ${esc(sel.from || 'Départ')} → ${esc(live ? 'en cours…' : sel.to || 'Arrivée')}</div>`; }
-  return pageFrame(p, `<div style="display:grid;grid-template-columns:400px minmax(0,1fr);gap:12px;flex:1;min-height:0">
+  return pageFrame(p, `<div style="display:grid;grid-template-columns:min(400px,43%) minmax(0,1fr);gap:12px;flex:1;min-height:0">
     <div style="${card(p, 'padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0')}">
       <div style="display:flex;gap:8px">${sums}</div>
       <div style="display:flex;gap:6px 8px;align-items:center;flex-wrap:wrap">${chipBtn(p, 'trk:auto', trkAuto() ? 'Auto : oui' : 'Auto : non', trkAuto())}${trk ? '' : chipBtn(p, 'trk:start', 'Démarrer')}${chipBtn(p, 'trk:weeks', 'Semaines & €', true)}${chipBtn(p, 'trk:stopmin', `Arrêt ${store.get('trkStop', 5)} min`)}</div>
@@ -290,14 +295,17 @@ function trkAct(v) {
   if (op === 'mail') { trkMail(parts[1]); return; }
   if (op === 'auto') { store.set('trkAuto', !trkAuto()); toast(trkAuto() ? 'Enregistrement automatique dès que la voiture roule' : 'Enregistrement automatique coupé : utilise « Démarrer »'); render(); return; }
   if (op === 'stopmin') { const o = [3, 5, 10, 15], c = parseInt(store.get('trkStop', 5), 10); store.set('trkStop', o[(o.indexOf(c) + 1) % o.length]); toast(`Le parcours se termine ${store.get('trkStop', 5)} min après l'arrêt`); render(); return; }
-  if (op === 'start') { if (!loc) { toast('Pas encore de position GPS'); return; } if (!trk) { trkStart({ lat: loc.lat, lon: loc.lon, ts: Date.now() }, true); toast('Enregistrement du parcours démarré'); } trkSel = 'cur'; render(); return; }
+  if (op === 'start') { if (!trk) {
+    const age = loc ? Date.now() - loc.ts : Infinity;
+    if (!usableTrackFix(loc) || age < 0 || age > 10000) { toast('En attente d’une position GPS récente et précise.'); return; }
+    trkStart({ lat: loc.lat, lon: loc.lon, ts: loc.ts }, true); toast('Enregistrement du parcours démarré'); } trkSel = 'cur'; render(); return; }
   if (op === 'stop') { if (trk) { trkPersist(); trkFinish(false); } render(); return; }
   if (op === 'del') { const id = parts[1]; if (trkDelArm !== id) { trkDelArm = id; render(); return; } trkDelArm = 0; store.set('trkIndex', trkIndex().filter((t) => t.id !== id)); localStorage.removeItem(trkKey(id)); trkSel = null; toast('Parcours supprimé'); render(); }
 }
 // onglet « Parcours » dans la barre du haut, juste après « Trajets »
 // v7.4 : « Parcours » n'est plus un onglet à part, il est rangé dans « Trajets » (4e choix à côté d'Historique, Graphiques, Éco-conduite)
 { const cat = SETCATS.find(([n]) => n === 'Navigation');
-  if (cat) cat[1].push(['Parcours', (p) => `${setRow(p, 'Enregistrer les parcours', 'Le tracé GPS de chaque trajet, du départ à l\'arrivée. Visible dans l\'onglet Parcours.', togBtn(p, 'tg:trkAuto:1', trkAuto()))}
+  if (cat) cat[1].push(['Parcours', (p) => `${setRow(p, 'Enregistrer les parcours', 'Le tracé GPS de chaque trajet, du départ à l\'arrivée. Ouvre Trajets, puis Parcours pour le retrouver.', togBtn(p, 'tg:trkAuto:1', trkAuto()))}
     ${setRow(p, 'Fin du parcours', `Un parcours se termine ${store.get('trkStop', 5)} min après l'arrêt de la voiture.`, chipBtn(p, 'trk:stopmin', `${store.get('trkStop', 5)} min`))}
     ${setRow(p, 'Parcours gardés', `${trkIndex().length} sur cet autoradio (300 max, les plus anciens sont effacés). Les tracés ne sont pas dans la sauvegarde des réglages.`, chipBtn(p, 'tab:tracks', 'Ouvrir'))}`]); }
 
@@ -564,7 +572,7 @@ function trkDetail(p) {
   const t = trkIndex().find((x) => x.id === trkSel); if (!t) return null;
   const i = trkInfo(t), cell = (l, v) => `<div style="${box(p, 'padding:8px 12px')}"><div style="font-size:12px;color:${p.mut}">${l}</div><div style="font-size:20px;font-weight:700;line-height:1.2;${ell}">${v}</div></div>`;
   const zb = (a, t2) => `<button data-act="trk:${a}" style="width:52px;height:52px;border-radius:14px;background:${p.card};color:${p.txt};font-size:26px;font-weight:700;box-shadow:0 2px 10px #0006">${t2}</button>`;
-  return pageFrame(p, `<div style="display:grid;grid-template-columns:380px minmax(0,1fr);gap:12px;flex:1;min-height:0">
+  return pageFrame(p, `<div style="display:grid;grid-template-columns:min(380px,43%) minmax(0,1fr);gap:12px;flex:1;min-height:0">
     <div style="${card(p, 'padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0')}">
       <div style="display:flex;gap:8px">${chipBtn(p, 'trk:back', '‹ Retour')}<span style="flex:1"></span>${chipBtn(p, 'trk:mail:' + t.id, 'Envoyer par mail', true)}</div>
       <div style="font-size:15px;font-weight:700">${day47(t.t0)} ${fmtDate(t.t0)}</div>

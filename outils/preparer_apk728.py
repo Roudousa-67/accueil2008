@@ -39,16 +39,16 @@ def manifest_values(data):
                 return values
         pos+=length
     raise AssertionError('Manifeste Android absent.')
-def validate(apk,source,base):
+def validate(apk,source,base,version='7.28',code=98):
     with zipfile.ZipFile(apk) as z,zipfile.ZipFile(base) as b:
         assert z.testzip() is None
         for n in ['classes.dex','classes2.dex','classes3.dex']:assert z.read(n)==b.read(n),'Pont Android différent de la base vérifiée.'
         for f in source.rglob('*'):
             if f.is_file():assert z.read('assets/'+f.relative_to(source).as_posix())==f.read_bytes(),'Asset différent : '+f.name
-        assert "APP_VERSION = '7.28'" in z.read('assets/v4.js').decode()
+        assert f"APP_VERSION = '{version}'" in z.read('assets/v4.js').decode()
         assert '/main/version.json?t=' in z.read('assets/v4.js').decode()
         values=manifest_values(z.read('AndroidManifest.xml'))
-        assert values['package']=='fr.gtline.accueil2008' and values['versionCode']==98 and values['versionName']=='7.28','Identité/version Android incohérente.'
+        assert values['package']=='fr.gtline.accueil2008' and values['versionCode']==code and values['versionName']==version,'Identité/version Android incohérente.'
         for n in z.namelist():assert not n.endswith(('.p12','.jks','.keystore')),'Clé interdite dans un APK.'
         for i in z.infolist():
             if i.compress_type!=zipfile.ZIP_STORED:continue
@@ -58,10 +58,12 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--prepare-only',action='store_true',help='Produit uniquement un paquet non signé, non destiné à l’installation.')
     p.add_argument('--keystore',type=Path);p.add_argument('--apksigner');p.add_argument('--output',type=Path,required=True)
-    a=p.parse_args();base=ROOT/'distribution/Accueil2008GT_v7.26.apk';source=ROOT/'sources_assets'
+    p.add_argument('--version',choices=('7.28','7.29'),default='7.28')
+    a=p.parse_args();version=a.version;code={'7.28':98,'7.29':99}[version]
+    base=ROOT/'distribution/Accueil2008GT_v7.26.apk';source=ROOT/'sources_assets'
     assert digest(base)==BASE_SHA,'Base 7.26 différente de la version vérifiée.'
     assert not a.output.exists(),'Choisir un fichier de sortie inexistant.'
-    assert "APP_VERSION = '7.28'" in (source/'v4.js').read_text()
+    assert f"APP_VERSION = '{version}'" in (source/'v4.js').read_text()
     if not a.prepare_only:
         assert a.keystore and a.keystore.is_file(),'Fournir la clé d’origine, sans en créer une autre.'
         assert a.apksigner and os.environ.get('ACCUEIL_SIGNING_PASSWORD'),'Fournir apksigner et ACCUEIL_SIGNING_PASSWORD.'
@@ -69,7 +71,7 @@ def main():
         w=Path(tmp)
         with zipfile.ZipFile(base) as z:
             (w/'base.xml').write_bytes(z.read('AndroidManifest.xml'));(w/'classes3.dex').write_bytes(z.read('classes3.dex'))
-        run([sys.executable,ROOT/'outils/axml.py',w/'base.xml',w/'manifest.xml','7.28','98'])
+        run([sys.executable,ROOT/'outils/axml.py',w/'base.xml',w/'manifest.xml',version,str(code)])
         env=dict(os.environ,ACCUEIL_NATIVE_DEX=str(w/'classes3.dex'))
         run([sys.executable,ROOT/'outils/build.py',base,w/'unsigned.apk',source,w/'manifest.xml'],env)
         run([sys.executable,ROOT/'outils/align.py',w/'unsigned.apk',w/'aligned.apk'])
@@ -81,7 +83,7 @@ def main():
             if a.keystore.suffix.lower() in ('.p12','.pfx'):command+=['--ks-type','PKCS12']
             run(command+[result]);result=w/'signed.apk'
             assert cert(a.apksigner,result)==expected,'Signature différente : aucune sortie conservée.'
-        validate(result,source,base)
+        validate(result,source,base,version,code)
         a.output.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(result,a.output)
     print('Paquet non signé, non installable.' if a.prepare_only else 'APK signé avec le certificat d’origine, sans publication automatique.')
     print('SHA256',digest(a.output))
