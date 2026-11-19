@@ -1,0 +1,6 @@
+{
+  "version": "7.32",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.32/Accueil2008GT_v7.32.apk",
+  "sha256": "a18f22fb983c0a600b7690776d985c749a60decfb42f5feafe79d21b82eed0ab",
+  "notes": "Barre flottante 49, position à gauche, à droite, en haut ou en bas. Couleurs du fond, des icônes et de la sélection personnalisables avec aperçu. Taille, espacement et ordre conservés. Correction de la pochette du morceau précédent lors des changements de titre. La réception des nouvelles pochettes dépend des informations fournies par le lecteur à Android. Essai sur autoradio encore nécessaire."
+}
