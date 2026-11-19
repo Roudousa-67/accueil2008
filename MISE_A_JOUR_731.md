@@ -1,0 +1,1 @@
+Correction du widget de conduite. Placement de la voiture dans sa voie, stabilité du dessin et reconnaissance des autoroutes, routes réglementées, zones bâties et forêts. Vérifications automatisées réussies. Essai sur autoradio encore nécessaire.
