@@ -1,0 +1,77 @@
+name: Publier la version normale 7.33 signée
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/deposer733.yml']
+permissions:
+  contents: write
+concurrency:
+  group: publication-stable
+  cancel-in-progress: false
+jobs:
+  publication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Charger les sources vérifiées du correctif
+        run: |
+          python3 - <<'PYCODE'
+          import pathlib,base64,io,zipfile
+          parts=sorted(pathlib.Path('distribution').glob('sources733.part*'))
+          data=base64.b64decode(''.join(p.read_text() for p in parts),validate=True)
+          with zipfile.ZipFile(io.BytesIO(data)) as z:
+              for name in z.namelist():
+                  path=pathlib.PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+              z.extractall('.')
+          PYCODE
+      - name: Reconstituer et vérifier le paquet déjà signé
+        run: |
+          python3 outils/reconstruire_apk733.py
+          python3 - <<'PY'
+          import sys,pathlib,json,hashlib,subprocess,os,re
+          sys.path.insert(0,str(pathlib.Path('outils').resolve()))
+          from preparer_apk728 import validate
+          base=pathlib.Path('distribution/Accueil2008GT_v7.26.apk');apk=pathlib.Path('distribution/Accueil2008GT_v7.33.apk')
+          dex=pathlib.Path('native730/classes3.dex')
+          assert hashlib.sha256(dex.read_bytes()).hexdigest()=='a53c8f81a4e73b96196f0c29540ce65778956cf1bbd567a61ab898201f3f5d74'
+          validate(apk,pathlib.Path('sources_assets'),base,'7.33',103,dex)
+          signer=sorted((pathlib.Path(os.environ['ANDROID_HOME'])/'build-tools').glob('*/apksigner'))[-1]
+          def cert(p):return set(re.findall(r'certificate SHA-256 digest: ([0-9a-fA-F]+)',subprocess.check_output([signer,'verify','--print-certs',p],text=True)))
+          assert cert(apk)==cert(base)=={'822483158d97c347175756de6267e01a79a38b8baab9815352fce4794680f126'}
+          print('Manifeste, sources, pont Android et signature d’origine vérifiés.')
+          PY
+      - run: npm ci --prefix tests --ignore-scripts
+      - run: npm test --prefix tests
+      - name: Publier et vérifier le téléchargement
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view v7.33 >/dev/null 2>&1; then
+            test "$(gh release view v7.33 --json isPrerelease -q .isPrerelease)" = false
+          else
+            gh release create v7.33 distribution/Accueil2008GT_v7.33.apk distribution/release733.json --latest --target "$GITHUB_SHA" --title 'Accueil 2008 GT 7.33' --notes-file MISE_A_JOUR_733.md
+          fi
+          gh release download v7.33 --pattern Accueil2008GT_v7.33.apk --dir "$RUNNER_TEMP/verification733"
+          cmp distribution/Accueil2008GT_v7.33.apk "$RUNNER_TEMP/verification733/Accueil2008GT_v7.33.apk"
+      - name: Annoncer uniquement la version effectivement publiée
+        run: |
+          cp distribution/release733.json version.json
+          cp distribution/release733.json distribution/release.json
+          sha256sum distribution/Accueil2008GT_v7.33.apk >> distribution/SHA256SUMS
+          python3 outils/validate_release.py distribution/release733.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add version.json distribution/release.json distribution/SHA256SUMS sources_assets tests outils
+          git add -f distribution/Accueil2008GT_v7.33.apk
+          git commit -m 'Annoncer la version normale 7.33 après vérification du téléchargement'
+          git push origin HEAD:main
