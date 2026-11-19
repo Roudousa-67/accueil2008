@@ -132,25 +132,73 @@ public final class GpsDockInit extends ContentProvider {
             return activity.getSharedPreferences("settings_voice",0).getString("result","{}");
         }
 
-        /** Masque une fenêtre GPS libre en remettant le lanceur devant elle, sans arrêter sa tâche.
-         * Au retour, reprend la tâche existante. Ne demande aucune permission système supplémentaire. */
-        @JavascriptInterface public boolean gpsWindowVisible(String pkg, boolean visible) {
+        private final Map<String, Rect> hiddenBounds730 = new HashMap<>();
+        private final Map<String, Integer> hiddenModes730 = new HashMap<>();
+
+        private ActivityManager.RunningTaskInfo gpsTask730(ActivityManager am, String pkg) {
+            for (ActivityManager.RunningTaskInfo task : am.getRunningTasks(50)) {
+                if ((task.baseActivity != null && pkg.equals(task.baseActivity.getPackageName())) ||
+                    (task.topActivity != null && pkg.equals(task.topActivity.getPackageName()))) return task;
+            }
+            return null;
+        }
+
+        private Object windowConfig730(ActivityManager.RunningTaskInfo task) throws Exception {
+            Object config = task.getClass().getField("configuration").get(task);
+            return config.getClass().getField("windowConfiguration").get(config);
+        }
+
+        private boolean windowMode730(int taskId, int mode) {
+            try {
+                GpsDock.HiddenApi.exemptAll();
+                Class<?> cls = Class.forName("android.app.ActivityTaskManager");
+                Method getter = cls.getDeclaredMethod("getService"); getter.setAccessible(true);
+                Object service = getter.invoke(null);
+                Method method = service.getClass().getMethod("setTaskWindowingMode", int.class, int.class, boolean.class);
+                method.setAccessible(true);
+                Object result = method.invoke(service, taskId, mode, false);
+                return !(result instanceof Boolean) || ((Boolean)result).booleanValue();
+            } catch (Throwable refused) { return false; }
+        }
+
+        /** Suspend uniquement l'affichage du GPS, jamais son activité ni son guidage.
+         * Une tâche flottante est temporairement remise en mode normal avant de ramener
+         * l'accueil devant. Ses dimensions sont restaurées au retour si Android l'autorise. */
+        @JavascriptInterface public synchronized boolean gpsWindowVisible(String pkg, boolean visible) {
             if (pkg == null || pkg.length() == 0 || pkg.equals(activity.getPackageName())) return false;
             try {
-                ActivityManager am=(ActivityManager)activity.getSystemService(Activity.ACTIVITY_SERVICE);
+                ActivityManager am = (ActivityManager)activity.getSystemService(Activity.ACTIVITY_SERVICE);
+                ActivityManager.RunningTaskInfo task = gpsTask730(am, pkg);
                 if (!visible) {
+                    if (task != null && !hiddenModes730.containsKey(pkg)) {
+                        try {
+                            Object config = windowConfig730(task);
+                            int mode = ((Integer)config.getClass().getMethod("getWindowingMode").invoke(config)).intValue();
+                            Rect bounds = new Rect((Rect)config.getClass().getMethod("getBounds").invoke(config));
+                            if (mode == 5) {
+                                if (!windowMode730(task.id, 1)) return false;
+                                hiddenModes730.put(pkg, mode); hiddenBounds730.put(pkg, bounds);
+                            }
+                        } catch (Throwable unsupported) {
+                            // Older firmware: retain the existing move-to-front fallback.
+                        }
+                    }
                     am.moveTaskToFront(activity.getTaskId(), 0);
                     return true;
                 }
-                for (ActivityManager.RunningTaskInfo task:am.getRunningTasks(50)) {
-                    if ((task.baseActivity!=null && pkg.equals(task.baseActivity.getPackageName())) ||
-                        (task.topActivity!=null && pkg.equals(task.topActivity.getPackageName()))) {
-                        am.moveTaskToFront(task.id, 0);
-                        return true;
-                    }
+                if (task == null) return false;
+                Integer mode = hiddenModes730.get(pkg); Rect bounds = hiddenBounds730.get(pkg);
+                if (mode != null) {
+                    if (!windowMode730(task.id, mode.intValue())) return false;
+                    if (bounds != null && !gpsResize(pkg, bounds.left, bounds.top, bounds.right, bounds.bottom)) return false;
+                    hiddenModes730.remove(pkg); hiddenBounds730.remove(pkg);
                 }
-            } catch (Throwable denied) { android.util.Log.w("GpsDock", "Fenêtre GPS : changement de premier plan refusé"); }
-            return false;
+                am.moveTaskToFront(task.id, 0);
+                return true;
+            } catch (Throwable denied) {
+                android.util.Log.w("GpsDock", "Fenêtre GPS : masquage ou restauration refusé par le système");
+                return false;
+            }
         }
 
         @JavascriptInterface public String gpsViewport() { return viewport; }

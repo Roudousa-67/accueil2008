@@ -1,0 +1,45 @@
+name: Compiler le pont GPS 7.30
+on:
+  push:
+    branches: [feat/accueil730-validations]
+    paths:
+      - module_GPS_java/java/**
+      - .github/workflows/native730.yml
+permissions:
+  contents: write
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/accueil730-validations
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Compiler les sources Android sans clé privée
+        shell: bash
+        run: |
+          set -euo pipefail
+          PLATFORM=$(find "$ANDROID_HOME/platforms" -name android.jar | sort -V | tail -1)
+          DEX_COMPILER=$(find "$ANDROID_HOME/build-tools" -name d8 -type f | sort -V | tail -1)
+          test -n "$PLATFORM"
+          test -n "$DEX_COMPILER"
+          mkdir -p work730/classes native730
+          javac --release 8 -encoding UTF-8 -cp "$PLATFORM" -d work730/classes module_GPS_java/java/fr/gtline/accueil2008/*.java
+          jar --create --file work730/gps.jar -C work730/classes .
+          "$DEX_COMPILER" --release --min-api 24 --lib "$PLATFORM" --output native730 work730/gps.jar
+          mv native730/classes.dex native730/classes3.dex
+          sha256sum native730/classes3.dex > native730/SHA256SUMS
+      - name: Conserver le pont compilé sur la branche de travail
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add native730/classes3.dex native730/SHA256SUMS
+          git commit -m 'Compiler le pont GPS 7.30 sans clé de signature'
+          git push origin HEAD:feat/accueil730-validations
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pont-gps-730
+          path: native730/
