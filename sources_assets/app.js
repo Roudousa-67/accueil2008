@@ -854,7 +854,7 @@ function render() {
     if (homePage > nPg - 1) homePage = nPg - 1;
     if (!free && homePage === 1) html = chromeFrame(p, pageCar(p), pos === 'auto' ? 'bas' : pos);
     else if ((!free && homePage === 2) || (free && !editing && homePage === nPg - 1 && !store.get('onePage_' + profIdx(), false))) html = chromeFrame(p, pageApps(p), pos === 'auto' ? 'bas' : pos);
-    else if (editing || (pos !== 'auto' && p.layout !== 'floating')) html = chromeFrame(p, LAYOUTS[p.layout](Object.assign({}, p, { noChrome: true })), pos === 'auto' ? 'bas' : pos);
+    else if (editing || (pos !== 'auto')) html = chromeFrame(p, LAYOUTS[p.layout](Object.assign({}, p, { noChrome: true })), pos === 'auto' ? 'bas' : pos);
     else html = LAYOUTS[p.layout](p);
     if (nPg > 1) html += dotsHtml(p);
     html += fOverlays(p);
@@ -1224,9 +1224,15 @@ let media = null, mediaPosAt = 0, mediaAccess = null;
 window.onMedia = (m, access) => {
   mediaAccess = access;
   if (!access || !m) { media = null; paint(); return; }
-  const prevArt = media && media.art;
-  media = m; mediaPosAt = Date.now();
-  if (!('art' in m)) media.art = prevArt;
+  const previous = media;
+  const sameTrack = previous && ['pkg', 'title', 'artist', 'album', 'mediaId'].every(
+    key => String(previous[key] || '') === String(m[key] || '')
+  );
+  media = Object.assign({}, m);
+  mediaPosAt = Date.now();
+  // Position-only updates may omit artwork. Keep it only for the same track.
+  if (!('art' in m)) media.art = sameTrack ? previous.art : '';
+
   paint();
 };
 

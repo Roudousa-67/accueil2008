@@ -60,8 +60,8 @@ def main():
     p.add_argument('--prepare-only',action='store_true',help='Produit uniquement un paquet non signé, non destiné à l’installation.')
     p.add_argument('--keystore',type=Path);p.add_argument('--apksigner');p.add_argument('--output',type=Path,required=True)
     p.add_argument('--native-dex',type=Path,help='Pont GPS compilé et vérifié, remplaçant uniquement classes3.dex.')
-    p.add_argument('--version',choices=('7.28','7.29','7.30','7.31'),default='7.28')
-    a=p.parse_args();version=a.version;code={'7.28':98,'7.29':99,'7.30':100,'7.31':101}[version]
+    p.add_argument('--version',choices=('7.28','7.29','7.30','7.31','7.32'),default='7.28')
+    a=p.parse_args();version=a.version;code={'7.28':98,'7.29':99,'7.30':100,'7.31':101,'7.32':102}[version]
     base=ROOT/'distribution/Accueil2008GT_v7.26.apk';source=ROOT/'sources_assets'
     assert digest(base)==BASE_SHA,'Base 7.26 différente de la version vérifiée.'
     assert not a.output.exists(),'Choisir un fichier de sortie inexistant.'
