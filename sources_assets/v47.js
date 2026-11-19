@@ -172,7 +172,7 @@ function trkFinish(boot) {
   const t = trk, pts = trkPts; trk = null; trkPts = []; trkAnchor = null; trkFast = 0; store.set('trkCur', null);
   if (t.km < 0.3 || pts.length < 3) { if (!boot && t.man) toast('Parcours trop court : pas enregistré'); if (tab === 'tracks') { trkSel = null; render(); } return; }
   if (!boot) t.to = trkPlace() || t.to;
-  const rec = { id: t.id, t0: t.t0, t1: t.t1, km: Math.round(t.km * 100) / 100, mx: Math.round(t.mx), from: t.from || '', to: t.to || '', n: pts.length, mv: Math.round(t.mv || 0), st: t.st || 0, o0: t.o0 || 0, o1: t.o1 || (boot ? 0 : odoCar47()) || 0, pr: t.pr || fuelPrice(), co: t.co || fuelCons() };
+  const rec = { driver733: t.driver733, id: t.id, t0: t.t0, t1: t.t1, km: Math.round(t.km * 100) / 100, mx: Math.round(t.mx), from: t.from || '', to: t.to || '', n: pts.length, mv: Math.round(t.mv || 0), st: t.st || 0, o0: t.o0 || 0, o1: t.o1 || (boot ? 0 : odoCar47()) || 0, pr: t.pr || fuelPrice(), co: t.co || fuelCons() };
   const enc = plEnc(pts);
   for (let k = 0; k < 3; k++) { try { localStorage.setItem(trkKey(t.id), enc); break; } catch (e) { const idx = trkIndex(); for (let j = 0; j < 10 && idx.length; j++) { const o = idx.shift(); trkArchive(o); localStorage.removeItem(trkKey(o.id)); } store.set('trkIndex', idx); } }
   const idx = trkIndex(); idx.push(rec); store.set('trkIndex', idx); trkPrune();

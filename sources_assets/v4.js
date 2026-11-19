@@ -9,7 +9,7 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.32';
+const APP_VERSION = '7.33';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
@@ -113,7 +113,7 @@ window.header = function (p) {
   const name = profiles()[profIdx()];
   const uiTab = tab === 'eco' || tab === 'tracks' ? 'trips' : tab;
   const tabs = TABS.map(([id, l]) => `<button data-act="tab:${id}" style="height:42px;padding:0 16px;border-radius:${Math.max(6, p.r - 10)}px;font-size:15px;font-weight:600;${uiTab === id ? `background:${p.acc};color:${p.onAcc}` : `color:${p.onmut}`}">${l}</button>`).join('');
-  const subL = uiTab === 'trips' ? tripSubs.map(([k, l]) => ['tsub:' + k, l, tripSub === k && tab !== 'tracks']).concat([['tab:tracks', 'Parcours', tab === 'tracks']]) : uiTab === 'service' ? [['ssub:plan', 'Plan constructeur', svcSub === 'plan'], ['ssub:pleins', 'Pleins', svcSub === 'pleins'], ['ssub:bilan', 'Bilan', svcSub === 'bilan'], ['ssub:log', 'Mon carnet', svcSub === 'log']] : null;
+  const subL = uiTab === 'trips' ? tripSubs.map(([k, l]) => ['tsub:' + k, l, tripSub === k && tab !== 'tracks']) : uiTab === 'service' ? [['ssub:plan', 'Plan constructeur', svcSub === 'plan'], ['ssub:pleins', 'Pleins', svcSub === 'pleins'], ['ssub:bilan', 'Bilan', svcSub === 'bilan'], ['ssub:log', 'Mon carnet', svcSub === 'log']] : null;
   const sub = subL ? `<div style="display:flex;gap:2px;background:${p.card2};border-radius:${Math.max(8, p.r - 8)}px;padding:2px">${subL.map(([a, l, on]) => `<button data-act="${a}" style="height:38px;padding:0 ${subL.length > 3 ? 9 : 12}px;border-radius:${Math.max(6, p.r - 10)}px;font-size:13.5px;font-weight:600;${on ? `background:${p.txt};color:${p.card}` : `color:${p.mut}`}">${l}</button>`).join('')}</div>` : '';
   const c = clk(), cs = CLK_SIZE[c.size] || CLK_SIZE.m;
   const ff = c.font ? `font-family:'${c.font}',Inter,sans-serif;` : '';
