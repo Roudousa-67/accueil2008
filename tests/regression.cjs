@@ -53,7 +53,7 @@ module.exports={make};
 if(require.main===module)(async()=>{
  const t=make(),{run}=t;
  ok('chargement complet sans erreur',t.errors,[]);
- ok('version',run('APP_VERSION'),'7.28');
+ ok('version',run('APP_VERSION'),'7.30');
  ok('délai initial une minute',run('Place710.every()'),60000);
  t.setels([{type:'node',lat:48.5805,lon:7.74,tags:{name:'Village proche',place:'village'}},{type:'node',lat:48.59,lon:7.74,tags:{name:'Grande ville',place:'city'}}]);
  await run('Place710.refresh()');

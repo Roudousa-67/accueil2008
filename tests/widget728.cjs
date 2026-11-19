@@ -7,11 +7,11 @@ const cv=()=>w.document.querySelector('canvas[data-road]');
 function dims(h=400){Object.defineProperty(cv(),'clientWidth',{value:480,configurable:true});Object.defineProperty(cv(),'clientHeight',{value:h,configurable:true});}
 function seed(){r("loc={lat:48.58,lon:7.74,acc:8,ts:Date.now(),spd:47,brg:0};plPos={lat:48.58,lon:7.74};plAt=Date.now();plList=[{n:'Proche',k:'village',lat:48.59,lon:7.74},{n:'Lointain',k:'town',lat:48.7,lon:7.74},{n:'Proche',k:'village',lat:48.595,lon:7.74}];Road723.at=Date.now();Road723.cache=[];Road723.match={id:99,tags:{highway:'residential'},geometry:[{lat:48.579,lon:7.74},{lat:48.581,lon:7.74},{lat:48.583,lon:7.741}]};Road723.cache=[Road723.match];Road723.pos={...loc};");N.reset();}
 function drive(m){t.advance(5000);r(`loc.lat+=${m/111195};loc.ts=Date.now();`);return N.update();}
-check('version stable 7.28',r('APP_VERSION')==='7.28');
+check('version stable 7.30',r('APP_VERSION')==='7.30');
 check('aucun script bêta dans la version normale',!fs.readFileSync(path.join(__dirname,'../sources_assets/index.html'),'utf8').includes('beta727.js'));
 check('vue conducteur activée et désactivable',D.enabled());D.setEnabled(false);check('interrupteur désactive la vue GPS',D.sample(0).fallback);D.setEnabled(true);
 seed();const initial=r('JSON.stringify(loc)');dims();w.RoadDecor721.draw(cv(),0,0,47);check('courbe réelle disponible dans la vue',D.sample(1).path&&!D.sample(1).band);check('la vue ne modifie ni GPS ni vitesse',r('JSON.stringify(loc)')===initial);
-for(const h of [250,400,650]){dims(h);w.RoadDecor721.draw(cv(),1,0,47);const width=parseFloat(cv().parentNode.querySelector('[data-car360]').style.width);check('grande voiture contenue, hauteur '+h,width>480*.5&&width<=480*.64+.01&&width*300/503<=h*.6+.01);}
+for(const h of [250,400,650]){dims(h);w.RoadDecor721.draw(cv(),1,0,47);const width=parseFloat(cv().parentNode.querySelector('[data-car360]').style.width);check('grande voiture contenue, hauteur '+h,width>=480*.28&&width<=480*.62+.01&&width*300/503<=h*.6+.01);}
 let box=cv().parentNode;const limit=box.querySelector('.limit728 [data-show="limit"]');
 check('limitation dans la même ligne que la vitesse',limit.closest('.roadSpeedRow728').contains(box.querySelector('[data-k="speed"]')));
 check('météo en haut à droite avec ville et min/max',!!box.querySelector('.roadWeather728 [data-k="wCity"]')&&!!box.querySelector('.roadWeather728 [data-k="wTemp"]')&&!!box.querySelector('.roadWeather728 [data-k="wMinMax"]'));

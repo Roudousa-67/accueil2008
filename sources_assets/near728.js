@@ -30,7 +30,7 @@
   const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
   // The rear sprite contains transparent side margins: 64% gives a visible car
   // roughly 32% of the tile width, matching the reference without changing it.
-  car.style.width=Math.min(w*.64,h*.60*503/300)+'px';car.style.height='auto';car.style.aspectRatio='503/300';car.style.bottom='8%';car.style.backgroundPosition='52.174% 0';
+  if(['ville','village'].includes(roadScene()))car.style.left=((960*.46+260*((54+.92*(446-54)-180)/(446-180))*.5)/960*100)+'%';car.style.width=Math.min(w*Math.max(.28,Math.min(.62,Number(store.get('carScale730',44))/100)),h*.60*503/300)+'px';car.style.height='auto';car.style.aspectRatio='503/300';car.style.bottom='8%';car.style.backgroundPosition='52.174% 0';
  }
  function hide(box){const e=box.querySelector('[data-near728]');if(e)e.hidden=true;}
  function paint(cv){const box=cv.parentNode;if(!box)return;bigCar(cv);

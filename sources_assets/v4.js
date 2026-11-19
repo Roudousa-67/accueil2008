@@ -9,9 +9,11 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.28';
+const APP_VERSION = '7.30';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.30','Novembre 2026',['Décors ville, village, campagne, forêt et autoroute détaillés','Taille de la voiture, météo et contraste avec aperçu direct','Multimédia compact ou détaillé : couleurs, écriture et disposition','Barre personnalisable et toutes les applications en grille','Masquage du GPS lors du passage aux réglages et aux autres pages']],
+  ['7.29', 'Novembre 2026', ['Démarrage des parcours avec une position GPS récente', 'Message adapté au mode manuel et dates locales corrigées', 'Accès directs aux réglages et résultats de recherche mieux classés', 'Plus de place pour la carte sur les petits écrans']],
   ['7.28', 'Novembre 2026', ['Voiture agrandie et bande du décor retirée', 'Vitesse, limitation et météo dans le widget route', 'Cadre GPS réaligné selon la largeur et la hauteur réelles', 'Vue conducteur GPS activable, courbes cartographiées et GPX local', 'Panneaux des localités proches espacés en kilomètres', 'Paramètres de navigation regroupés et anciens réglages inactifs retirés']],
   ['7.25.1', 'Novembre 2026', ['Correction de la géométrie du modèle compressé avant transformation 3D', 'Conserve les optimisations et les réglages de la 7.25']],
   ['7.25', 'Novembre 2026', ['Animations de route suspendues hors écran et au repos', 'Préférences en mémoire et chargements à la demande', 'Diagnostic des performances et protection du niveau de décor']],
@@ -855,7 +857,7 @@ function pageSettings(p) {
   const side = SETCATS.map(([n, s], i) => `<button data-act="scat:${i}:0" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;min-height:48px;padding:0 14px;border-radius:12px;font-size:15px;font-weight:600;${i === setCat ? `background:${p.acc};color:${p.onAcc}` : `color:${p.txt}`}">${n}</button>${i === setCat && s.length > 1 ? `<div style="margin:2px 0 6px 18px;border-left:2px solid ${p.card2};padding-left:8px;display:flex;flex-direction:column">${s.map(([sn], j) => `<button data-act="scat:${i}:${j}" style="text-align:left;height:38px;padding:0 10px;border-radius:8px;font-size:14px;${j === setSub ? `background:${p.card2};color:${p.txt};font-weight:600` : `color:${p.mut}`}">${sn}</button>`).join('')}</div>` : ''}`).join('');
   const tabsRow = ''; // Les rubriques sont déjà accessibles dans la colonne de gauche.
   let body = ''; try { body = subs[setSub][1](p); } catch (e) { body = `<div style="color:#FF6B6B">Erreur : ${esc(e.message)}</div>`; }
-  return pageFrame(p, `${window.Settings720?Settings720.toolbar(p):''}<div style="display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;flex:1;min-height:0">
+  return pageFrame(p, `${window.Settings720?Settings720.toolbar(p):''}<div style="display:grid;grid-template-columns:min(300px,32%) minmax(0,1fr);gap:12px;flex:1;min-height:0">
     <div class="scroll" data-settings-scroll="side" style="${card(p, 'padding:12px 10px;display:flex;flex-direction:column;gap:2px')}"><div style="font-size:24px;font-weight:700;padding:4px 10px 10px">Paramètres</div>${side}</div>
     <div style="${card(p, 'padding:14px 18px;display:flex;flex-direction:column;min-height:0')}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:20px;font-weight:700">${cn}${subs.length > 1 ? ` <span style="color:${p.mut};font-weight:500">› ${subs[setSub][0]}</span>` : ''}</div>${chipBtn(p, 'tab:home', 'Fermer')}</div>${tabsRow}<div class="scroll" data-settings-scroll="body" style="flex:1;min-height:0;padding-right:6px">${body}</div></div></div>`);
 }
