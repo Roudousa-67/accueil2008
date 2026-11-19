@@ -22,14 +22,8 @@
  };
  const launchFrame=window.gbLaunch;window.gbLaunch=function(){if(!allowedGPS())return false;return launchFrame.apply(this,arguments);};
  const oldOpenSet=window.openSet;window.openSet=function(cat,sub){hideGPS();if(cat==='Navigation'&&sub==='Paysages et météo'){cat='Widgets';sub='Vue voiture et route';}if(cat==='Navigation'&&sub==='Panneaux et localités'){cat='Widgets';sub='Vue voiture et route';}return oldOpenSet(cat,sub);};
- function syncCar(cv){
-  const car=cv.parentNode.querySelector('[data-car360]');if(!car)return;const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
-  const fraction=number('carScale730',28,62)/100;
-  car.style.width=Math.min(w*fraction,h*.60*503/300)+'px';
-  if(roadScene()==='autoroute')car.style.left='52%';
- }
- const bigCar=RoadNear728.bigCar;RoadNear728.bigCar=function(cv){bigCar(cv);syncCar(cv);};
- const draw=RoadDecor721.draw;RoadDecor721.draw=function(cv){const r=draw.apply(this,arguments);syncCar(cv);
+ function syncCar(cv){RoadCar731.resize(cv);}
+ const draw=RoadDecor721.draw;RoadDecor721.draw=function(cv){const r=draw.apply(this,arguments);
   if(roadScene()==='ville'&&window.CityCar730&&(!Driver728.enabled()||cv.dataset.driverFallback==='1')){
    const ctx=cv.getContext('2d');if(ctx){ctx.save();ctx.setTransform(1,0,0,1,0,0);(window.TrafficReview||[]).forEach((v,i)=>{if(v.q>.1&&v.q<1.7)CityCar730(ctx,v.x*cv.width,v.y*cv.height,cv.width*.24*v.q,i);});ctx.restore();}
   }return r;};

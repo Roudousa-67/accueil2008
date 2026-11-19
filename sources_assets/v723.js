@@ -34,7 +34,7 @@ window.Window723 = {
 
 window.Road723 = {
  cache:[],at:0,pos:null,attempt:0,pending:null,match:null,error:'',
- fresh(p=loc){return Place710.valid(p)&&Number.isFinite(p.ts)&&Date.now()-p.ts<30000&&Number(p.acc||0)<=100;},
+ fresh(p=loc){return Place710.valid(p)&&Number.isFinite(p.ts)&&Date.now()-p.ts>=0&&Date.now()-p.ts<30000&&Number.isFinite(p.acc)&&p.acc>=0&&p.acc<=100;},
  angle(a,b){return Math.abs(((a-b+540)%360)-180);},
  segment(p,geometry){
   const kx=111320*Math.cos(p.lat*Math.PI/180),ky=111320;let best=null;
@@ -57,9 +57,12 @@ window.Road723 = {
   }).filter(Boolean).sort((a,b)=>a.score-b.score);
   if(!list.length)return null;
   // Routes parallèles : ne pas inventer une autoroute si les deux solutions sont indiscernables.
-  if(list[1]&&list[1].score-list[0].score<5&&list[1].e.tags.highway!==list[0].e.tags.highway){
+  const roadClass = e => window.RoadScene731?.regulated(e.tags) ? 'route réglementée' : e.tags.highway;
+  if(list[1]&&list[1].score-list[0].score<5&&roadClass(list[1].e)!==roadClass(list[0].e)){
    const previous=list.find(x=>this.match&&x.e.id===this.match.id&&x.score<=list[0].score+3);
-   if(!previous)return null;return previous.e;
+   if(!previous)return null;
+   if(window.RoadScene731 && RoadScene731.regulated(list[0].e.tags)!==RoadScene731.regulated(list[1].e.tags))return null;
+   return previous.e;
   }
   return list[0].e;
  },
@@ -67,7 +70,7 @@ window.Road723 = {
   const fresh=this.fresh()&&this.pos&&Date.now()-this.at<60000&&hav(this.pos.lat,this.pos.lon,loc.lat,loc.lon)<.75;
   this.match=fresh?this.choose(this.cache,loc):null;
   roadHw=this.match?this.match.tags.highway:'';roadHwAt=this.match?Date.now():0;
-  window.__panelGreen=!!this.match&&/^trunk/.test(roadHw);
+  window.__panelGreen=!!this.match&&(window.RoadScene731?RoadScene731.regulated(this.match.tags)&&!/^motorway/.test(roadHw):/^trunk/.test(roadHw));
   limit=this.match?parseMax(this.match.tags.maxspeed):null;
   if(this.match){limitOkAt=Date.now();limitOkPos={lat:loc.lat,lon:loc.lon};}
  },

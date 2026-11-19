@@ -71,8 +71,8 @@ const Place710 = (() => {
     })().finally(() => { pending = null; });
     return pending;
   }
-  function here() {
-    if (!fresh() || !addressPos || distance(loc, addressPos) > 2 || Date.now() - addressAt > Math.max(every() * 2, distance(loc, addressPos) < 0.03 ? 300000 : 120000)) return null;
+  function here(maxKm=2) {
+    if (!fresh() || !addressPos || distance(loc, addressPos) > maxKm || Date.now() - addressAt > Math.max(every() * 2, distance(loc, addressPos) < 0.03 ? 300000 : 120000)) return null;
     return current;
   }
   function roadPlace() {

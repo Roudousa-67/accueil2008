@@ -2446,7 +2446,7 @@ async function forestFetch() {
   } catch (e) { /* pas de réseau */ }
   forestBusy = false;
 }
-setInterval(() => { if (tab !== 'home' && !store.get('gbAuto', false)) return; plFetch(); forestFetch(); }, 5000);
+setInterval(() => { if (tab !== 'home' && !store.get('gbAuto', false)) return; plFetch(); if(!window.RoadScene731)forestFetch(); }, 5000);
 // cap suivi : celui du GPS, sinon calculé entre deux positions à plus de 40 m
 function plHeading() {
   if (!loc) return null;

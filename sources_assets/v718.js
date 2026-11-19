@@ -13,8 +13,13 @@ window.RoadFX718={
    const item=cv.closest('[data-fitem]'),key=item?item.getAttribute('data-fitem'):'hero';
    const scene=window.roadScene(),duration=RoadOptions718.duration(),now=this.now();
    let state=this.frames.get(key);
-   if(state&&state.scene!==scene){state.fade=duration&&state.last?this.copy(state.last):null;state.at=now;state.duration=duration;state.scene=scene;}
-   if(!state){state={scene,fade:null,last:null,at:now,duration};this.frames.set(key,state);if(this.frames.size>16)this.frames.delete(this.frames.keys().next().value);}
+   if(state && state.canvas!==cv)state=null;
+   if(state&&state.scene!==scene){
+    const highwayChange=store.get('roadScene','auto')==='auto' && [scene,state.scene].includes('autoroute');
+    state.fade=duration&&state.last&&!highwayChange?this.copy(state.last):null;
+    state.at=now;state.duration=duration;state.scene=scene;
+   }
+   if(!state){state={scene,canvas:cv,fade:null,last:null,at:now,duration};this.frames.set(key,state);if(this.frames.size>16)this.frames.delete(this.frames.keys().next().value);}
    draw();
    const c=cv.getContext('2d');
    if(state.fade&&duration){const t=Math.max(0,Math.min(1,(now-state.at)/state.duration));

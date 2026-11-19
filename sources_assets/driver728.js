@@ -122,7 +122,9 @@
   }
   if(night){const g=c.createRadialGradient(W*.5,H*.68,5,W*.5,H*.68,165);g.addColorStop(0,'#fff0b92b');g.addColorStop(1,'#fff0b900');c.fillStyle=g;c.fillRect(W*.5-180,H*.33,360,H*.67);}
   if(/^(pluie|orage|neige)$/.test(kind.wx))for(let i=0;i<65;i++){const x=random(i+33)*W,y=((random(i+71)*H+T*(kind.wx==='neige'?13:180))%H);if(kind.wx==='neige'){c.fillStyle='#f2f3eaaa';c.beginPath();c.arc(x,y,1+random(i)*1.8,0,7);c.fill();}else stroke(c,[{x,y},{x:x-3,y:y+10+random(i)*7}],'#d4e6ef77',1);}
-  const car=cv.parentNode.querySelector('[data-car360]');if(car)car.style.left='50%';
+  // The lane around the ego position is 3.6 m wide at its contact point.
+  const left=point(s,-1.8),right=point(s,1.8);
+  RoadCar731.place(cv,(left.x+right.x)/(2*W),(left.y+right.y)/(2*H),(right.x-left.x)/W);
   c.setTransform(1,0,0,1,0,0);
  }
  function setEnabled(v){store.set('driver728On',!!v);smooth=null;RoadFX718.frames.clear();render();RoadLoop725.invalidate();}

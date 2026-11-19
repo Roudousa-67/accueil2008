@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.30';
+const APP_VERSION = '7.31';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
  ['7.30','Novembre 2026',['Décors ville, village, campagne, forêt et autoroute détaillés','Taille de la voiture, météo et contraste avec aperçu direct','Multimédia compact ou détaillé : couleurs, écriture et disposition','Barre personnalisable et toutes les applications en grille','Masquage du GPS lors du passage aux réglages et aux autres pages']],
   ['7.29', 'Novembre 2026', ['Démarrage des parcours avec une position GPS récente', 'Message adapté au mode manuel et dates locales corrigées', 'Accès directs aux réglages et résultats de recherche mieux classés', 'Plus de place pour la carte sur les petits écrans']],
   ['7.28', 'Novembre 2026', ['Voiture agrandie et bande du décor retirée', 'Vitesse, limitation et météo dans le widget route', 'Cadre GPS réaligné selon la largeur et la hauteur réelles', 'Vue conducteur GPS activable, courbes cartographiées et GPX local', 'Panneaux des localités proches espacés en kilomètres', 'Paramètres de navigation regroupés et anciens réglages inactifs retirés']],
@@ -283,6 +284,30 @@ function roadVideoTile(p, w, h) {
 // voiture qui tourne au doigt (24 vues, une tous les 15°), puis revient seule de dos
 let carYaw = 0, carDrag = null, carRelease = 0;
 const car360Pos = () => { const i = ((Math.round((carYaw + 180) / 15) % 24) + 24) % 24; return (i / 23 * 100).toFixed(3) + '%'; };
+// Each renderer sets the lane and the rear wheels' ground point in canvas coordinates.
+window.RoadCar731 = {
+  place(cv, x, y, laneWidth) {
+    cv.roadCar731 = {x, y, laneWidth};
+    this.resize(cv);
+  },
+  resize(cv) {
+    const car = cv.parentNode?.querySelector('[data-car360]');
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (!car || !w || !h || !cv.roadCar731) return;
+    const {x, y, laneWidth} = cv.roadCar731;
+    const scale = Math.max(28, Math.min(62, Number(store.get('carScale730', 44)) || 44))/100;
+    // The original 503 × 300 sprite has side margins. Its rear body takes ~51% of the frame.
+    const turning = (carDrag || Math.abs(carYaw) >= 7.5) && !cv.closest('.liveRoad730,[data-driver728-preview]');
+    const width = Math.min(w*scale, h*.60*503/300, w*laneWidth*.96/(turning ? .99 : .51));
+    const groundOffset = width*300/503*(1-259/300);
+    car.style.left = (x*100)+'%';
+    car.style.bottom = Math.max(0, (1-y)*h-groundOffset)+'px';
+    car.style.width = width+'px';
+    car.style.height = (width*300/503)+'px';
+    car.style.aspectRatio = '503/300';
+    car.style.backgroundPosition = (turning ? car360Pos() : '52.174%')+' 0';
+  }
+};
 function setupCar360() {
   const st = $('stage');
   st.addEventListener('pointerdown', (e) => {

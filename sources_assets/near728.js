@@ -26,14 +26,8 @@
   if(active&&metres-active.at>165)active=null;
   return active;
  }
- function bigCar(cv){const car=cv.parentNode&&cv.parentNode.querySelector('[data-car360]');if(!car)return;
-  const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
-  // The rear sprite contains transparent side margins: 64% gives a visible car
-  // roughly 32% of the tile width, matching the reference without changing it.
-  if(['ville','village'].includes(roadScene()))car.style.left=((960*.46+260*((54+.92*(446-54)-180)/(446-180))*.5)/960*100)+'%';car.style.width=Math.min(w*Math.max(.28,Math.min(.62,Number(store.get('carScale730',44))/100)),h*.60*503/300)+'px';car.style.height='auto';car.style.aspectRatio='503/300';car.style.bottom='8%';car.style.backgroundPosition='52.174% 0';
- }
  function hide(box){const e=box.querySelector('[data-near728]');if(e)e.hidden=true;}
- function paint(cv){const box=cv.parentNode;if(!box)return;bigCar(cv);
+ function paint(cv){const box=cv.parentNode;if(!box)return;
   if(cv.closest('[data-decor721-preview]')||cv.closest('[data-driver728-preview]')){hide(box);return;}
   const item=update();if(!item){hide(box);return;}
   let e=box.querySelector('[data-near728]');if(!e){e=document.createElement('div');e.dataset.near728='';e.className='near728';e.setAttribute('role','status');const head=document.createElement('b');head.className='near728-head';head.textContent='LOCALITÉS PROCHES';e.appendChild(head);const list=document.createElement('div');list.className='near728-list';e.appendChild(list);const foot=document.createElement('small');foot.textContent='Distances à vol d’oiseau';e.appendChild(foot);box.appendChild(e);}
@@ -46,5 +40,5 @@
  const oldAct=window.act;window.act=function(a){if(String(a).startsWith('near728:km:')){setPeriod(a.split(':')[2]);return;}return oldAct.apply(this,arguments);};
  const draw=RoadDecor721.draw;RoadDecor721.draw=function(cv){const result=draw.apply(this,arguments);paint(cv);return result;};
  const style=document.createElement('style');style.textContent='.near728{position:absolute;left:84%;width:31%;max-width:230px;box-sizing:border-box;z-index:5;pointer-events:none;transform-origin:50% 100%;background:#f4f5ed;color:#162d36;border:2px solid #e8eff0;border-radius:3px;box-shadow:0 2px 4px #0006;font:600 clamp(10px,1.15vw,15px)/1.25 Inter,sans-serif}.near728[hidden]{display:none}.near728-head{display:block;padding:5px 3px;background:#245d84;color:#fff;font-size:.74em;text-align:center}.near728-list{padding:5px}.near728-list>div{display:flex;gap:5px;align-items:center;margin:4px 0}.near728-list span{flex:1;min-width:0;overflow-wrap:anywhere}.near728-list strong{white-space:nowrap;font-size:.88em}.near728 small{display:block;text-align:center;font-size:.65em;padding:2px 2px 5px}.near728:before,.near728:after{content:"";position:absolute;top:100%;height:22px;width:3px;background:#a7b6bc;box-shadow:1px 1px 2px #0005}.near728:before{left:20%}.near728:after{right:20%}';document.head.appendChild(style);
- window.RoadNear728={period,setPeriod,closest,advance,update,paint,bigCar,state:()=>({metres,next,active}),reset(){last=null;metres=0;next=0;active=null;}};
+ window.RoadNear728={period,setPeriod,closest,advance,update,paint,state:()=>({metres,next,active}),reset(){last=null;metres=0;next=0;active=null;}};
 })();
