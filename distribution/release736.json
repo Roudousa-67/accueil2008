@@ -1,0 +1,6 @@
+{
+  "version": "7.36",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.36/Accueil2008GT_v7.36.apk",
+  "sha256": "",
+  "notes": "Version 7.36 : défilement de la route à 60 i/s et interpolation continue de la vitesse GPS/CAN pour réduire les à-coups. Tests sur autoradio à effectuer."
+}
