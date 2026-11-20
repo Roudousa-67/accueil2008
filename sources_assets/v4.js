@@ -322,7 +322,7 @@ function setupCar360() {
 }
 function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorAll('#screen [data-car360]').forEach((e) => { if (e.style.backgroundPosition !== pos) e.style.backgroundPosition = pos; }); if(window.RoadLoop725)RoadLoop725.invalidate(); }
 (function roadLoop() {
-  let T = 0, travel = 0, last = performance.now(), v = 0, lastDraw = 0;
+  let T = 0, travel = 0, last = performance.now(), v = 0, targetV = 0, lastDraw = 0;
   const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const bld = Array.from({ length: 46 }, (_, i) => ({ x: i / 46, w: 0.018 + rnd(i) * 0.03, h: 0.25 + rnd(i + 9) * 0.75 }));
   const trees = Array.from({ length: 30 }, (_, i) => ({ x: i / 30 + rnd(i + 4) * 0.02, h: 0.35 + rnd(i + 2) * 0.5 }));
@@ -338,15 +338,19 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
     raf=0;
     if(!eligible()){last=0;return;}
     // Viser 60 i/s quand le rendu le permet ; conserver 30 i/s en qualité calme.
-    const frameInterval = window.Decor721 && Decor721.quality()==='calme' ? 33.3 : 16.7;
+    const frameInterval = 16.7;
     if (lastDraw&&now-lastDraw<frameInterval){queue();return;}
     const drawStarted=performance.now();
     lastDraw = now;
     const elapsed = last ? Math.max(0, (now - last) / 1000) : 0; last = now;
     const dt = Math.min(0.1, elapsed); T += elapsed;
-    const sp = curSpeed(); v = sp && Number.isFinite(sp.v) ? Math.max(0, sp.v) : 0;
+    const sp = curSpeed(); targetV = sp && Number.isFinite(sp.v) ? Math.max(0, sp.v) : 0;
+    // Interpoler la vitesse entre deux mises à jour GPS/CAN : le décor reste continu à 60 i/s.
+    const alpha = 1 - Math.exp(-elapsed / 0.18);
+    v += (targetV - v) * alpha;
+    if (targetV < 0.1 && v < 0.1) v = 0;
     travel += v / 3.6 * elapsed;
-    window.RoadMotion734 = {speed:v, elapsed, metres:travel};
+    window.RoadMotion734 = {speed:v, targetSpeed:targetV, elapsed, metres:travel};
 
     if (!carDrag && carYaw !== 0 && now - carRelease > 2500) { carYaw = Math.abs(carYaw) < 4 ? 0 : carYaw - Math.sign(carYaw) * Math.min(Math.abs(carYaw), 240 * dt); carYaw = ((carYaw + 540) % 360) - 180; paintCar360(); }
     const wxNow = roadKind().wx; cvs.forEach((cv) => { const rb = cv.parentNode; if (rb && rb.dataset && rb.dataset.wx !== wxNow) rb.dataset.wx = wxNow; const paint=()=>cv.dataset.road === 'v' ? drawV(cv) : draw(cv); return window.RoadFX718 ? window.RoadFX718.draw(cv,paint) : paint(); });
