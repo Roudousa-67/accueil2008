@@ -31,7 +31,7 @@ jobs:
       - name: Contrôler l’APK livré
         run: sha256sum --check distribution/SHA256SUMS
       - name: Valider la version préparée
-        run: python3 outils/validate_release.py distribution/release.json
+        run: python3 outils/validate_release.py distribution/release.json --historical-check
 
       - name: Vérifier la syntaxe de la préparation APK
         run: python3 -m py_compile outils/preparer_apk_decors.py outils/preparer_apk725.py outils/preparer_apk728.py
