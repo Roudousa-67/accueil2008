@@ -6,7 +6,10 @@
  const populated = /^(city|town|village|hamlet)$/;
  const typeTags = ['zone:traffic','maxspeed:type','source:maxspeed','zone:maxspeed','maxspeed'];
  const context = { at:0, pos:null, areas:[], places:[], pending:null, attempt:0 };
+ // Le pont Android abandonne une requête après 17 s : rester en dessous.
+ const CONTEXT_RADIUS=700, CONTEXT_REUSE=600;
  let active = null, candidate = null, confirmedAt = 0, sampled = null, sampledScene = null, manualBefore;
+ const status = { reason:'', match:'', density:null, context:0 };
  const distance = (a,b) => hav(a.lat,a.lon,b.lat,b.lon)*1000;
  const samePoint = (a,b) => a.lat===b.lat && a.lon===b.lon;
  const validLine = line => Array.isArray(line) && line.length>=2 && line.every(Place710.valid);
@@ -78,12 +81,52 @@
   }
   return '';
  }
- function environment(p, match, data) {
-  if (!match) return null;
-  const tags=match.tags;
-  if (regulated(tags)) return 'autoroute';
+ // 7.36 : longueur de rues résidentielles autour de la position, calculée sur les
+ // routes déjà chargées (aucune requête de plus). Une avenue de ville bordée de
+ // rues reste reconnue même sans polygone d'occupation du sol à moins de 22 m.
+ function clipped(ax,ay,bx,by,r) {
+  const dx=bx-ax,dy=by-ay,a=dx*dx+dy*dy;if(!a)return 0;
+  const b=2*(ax*dx+ay*dy),c=ax*ax+ay*ay-r*r,disc=b*b-4*a*c;if(disc<=0)return 0;
+  const s=Math.sqrt(disc),t0=Math.max(0,(-b-s)/(2*a)),t1=Math.min(1,(-b+s)/(2*a));
+  return t1>t0?(t1-t0)*Math.sqrt(a):0;
+ }
+ function streetDensity(p,radius=150) {
+  const cache=Road723.cache,origin=Road723.pos;
+  // Hors de la zone couverte par la dernière requête, la mesure serait sous-estimée.
+  if(!Array.isArray(cache)||!cache.length||!Place710.valid(origin)||distance(p,origin)>450||!(Date.now()-Road723.at<30*60000))return null;
+  const kx=111320*Math.cos(p.lat*Math.PI/180),ky=111320;let total=0;
+  for(const e of cache) {
+   if(!e.tags||!/^(residential|living_street)$/.test(e.tags.highway)||!Array.isArray(e.geometry))continue;
+   for(let i=1;i<e.geometry.length;i++) {
+    const a=e.geometry[i-1],b=e.geometry[i];if(!Place710.valid(a)||!Place710.valid(b))continue;
+    total+=clipped((a.lon-p.lon)*kx,(a.lat-p.lat)*ky,(b.lon-p.lon)*kx,(b.lat-p.lat)*ky,radius);
+   }
+  }
+  return total;
+ }
+ function nearbyPlace(p,list) {
+  let nearest=null,score=Infinity;
+  for(const place of list) {
+   if(!Place710.valid(place))continue;
+   const kind=place.kind||place.k,metres=distance(p,place),radius=kind==='city'?2500:kind==='town'?1500:750;
+   if(metres<=radius&&metres<score){nearest=kind;score=metres;}
+  }
+  return nearest;
+ }
+ function placesList() {
+  // Liste des centres déjà chargée pour les panneaux (Place710), réutilisée si récente.
+  if(typeof plList==='undefined'||!Array.isArray(plList)||!Place710.valid(plPos)||!Number.isFinite(plAt))return [];
+  if(Date.now()-plAt<0||Date.now()-plAt>Math.max(300000,Place710.every()*3)||distance(loc,plPos)>5000)return [];
+  return plList;
+ }
+ function environment(p, match, data, density) {
+  // Sans chaussée reconnue (requête absente ou routes parallèles indiscernables),
+  // l'environnement reste évalué par les zones et les rues ; jamais d'autoroute.
+  const tags=match?match.tags:{};
+  if (match && regulated(tags)) return 'autoroute';
+  if (density===undefined) density=streetDensity(p);
   const zone=roadZone(tags);
-  const segment=Road723.segment(p,match.geometry);
+  const segment=match?Road723.segment(p,match.geometry):null;
   // A road can divide two land-use polygons. Check close to the road on both sides too.
   const points=[p];
   if(segment) {
@@ -94,15 +137,13 @@
   }
   const areasAt=(point,kind)=>data.areas.filter(area=>area.kind===kind && area.outer.some(ring=>contains(ring,point)) && !area.inner.some(ring=>contains(ring,point)));
   const settlement=areasAt(p,'settlement')[0];
-  const built=zone==='urban' || (zone!=='rural' && (settlement || points.some(point=>areasAt(point,'built').length) || /^(residential|living_street)$/.test(tags.highway)));
+  const speed=parseMax(tags.maxspeed);
+  const streets=Number.isFinite(density) && (density>=450 || (density>=200 && Number.isFinite(speed) && speed>0 && speed<=50));
+  const built=zone==='urban' || (zone!=='rural' && (settlement || points.some(point=>areasAt(point,'built').length) || /^(residential|living_street)$/.test(tags.highway) || streets));
   if(built) {
    if(settlement) return small.test(settlement.place)?'village':'ville';
-   let nearest=null, score=Infinity;
-   for(const place of data.places) {
-    const metres=distance(p,place), radius=place.kind==='city'?2500:place.kind==='town'?1500:750;
-    if(metres<=radius && metres<score) { nearest=place; score=metres; }
-   }
-   if(nearest) return small.test(nearest.kind)?'village':'ville';
+   const nearest=nearbyPlace(p,data.places)||nearbyPlace(p,placesList());
+   if(nearest) return small.test(nearest)?'village':'ville';
    const here=Place710.here(.2);
    return here && small.test(here.kind)?'village':'ville';
   }
@@ -121,16 +162,18 @@
   if(context.at && context.pos && now-context.at<60000 && distance(loc,context.pos)<350) return;
   if(context.attempt && now-context.attempt<15000) return;
   const p={lat:loc.lat,lon:loc.lon}, lat=p.lat.toFixed(6), lon=p.lon.toFixed(6);
-  const around=`around:1200,${lat},${lon}`;
+  // 7.36 : rayon réduit (1200 → 700 m). En ville, la réponse complète dépassait
+  // souvent le délai du serveur : le décor restait alors sur Campagne.
+  const around=`around:${CONTEXT_RADIUS},${lat},${lon}`;
   const filters=['[landuse~"^(residential|retail|commercial|industrial|forest)$"]','[natural=wood]','[place~"^(city|town|village|hamlet)$"][boundary!="administrative"]'];
-  const query=`[out:json][timeout:10];is_in(${lat},${lon})->.containing;(${filters.map(f=>`wr(${around})${f};way(pivot.containing)${f};rel(pivot.containing)${f};`).join('')}`+
+  const query=`[out:json][timeout:13];is_in(${lat},${lon})->.containing;(${filters.map(f=>`wr(${around})${f};way(pivot.containing)${f};rel(pivot.containing)${f};`).join('')}`+
    `node(around:3500,${lat},${lon})[place~"^(city|town|village|hamlet)$"];);out geom;`;
   context.attempt=now;
   let timer;
   context.pending=(async()=>{
    try {
-    const data=await Promise.race([getJSON('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),14000);})]);
-    if(!Array.isArray(data.elements) || data.remark || !usable(loc) || distance(loc,p)>850) return;
+    const data=await Promise.race([getJSON('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),16500);})]);
+    if(!Array.isArray(data.elements) || data.remark || !usable(loc) || distance(loc,p)>CONTEXT_REUSE) return;
     Object.assign(context,decode(data.elements),{pos:p,at:Date.now()});
     sampled=null; RoadLoop725.invalidate();
    }catch(e){ /* Keep the previous map context only within its time and distance limits. */ }
@@ -143,40 +186,47 @@
   if(manual!==manualBefore) { active=null; candidate=null; sampled=null; manualBefore=manual; }
   if(manual!=='auto' && settings.includes(manual)) return manual;
   const now=Date.now();
-  const keepFor=active==='autoroute'?4000:8000;
+  // 7.36 : GPS dégradé (immeubles, tunnel) ou données momentanément absentes :
+  // conserver le dernier décor confirmé une minute au lieu de basculer sur Campagne.
+  const keepFor=60000;
   if(!usable(loc)) {
-   candidate=null; sampled=null;
+   candidate=null; sampled=null; status.reason='GPS imprécis ou ancien : décor précédent conservé';
    if(now-confirmedAt>keepFor) active=null;
    return active||'campagne';
   }
-  const key=[loc.ts,loc.lat,loc.lon,loc.brg,loc.acc,Road723.at,context.at].join('|');
+  const key=[loc.ts,loc.lat,loc.lon,loc.brg,loc.acc,Road723.at,context.at,plAt].join('|');
   if(sampled===key) {
    if(!sampledScene && now-confirmedAt>keepFor) active=null;
    return active||'campagne';
   }
   sampled=key;
   Road723.apply();
-  const map=context.pos && now-context.at<=150000 && distance(loc,context.pos)<850?context:{areas:[],places:[]};
-  const next=sampledScene=environment(loc,Road723.match,map);
-  // En l'absence de contexte récent, ne pas conserver indéfiniment un ancien
-  // décor : la route reconnue permet encore de distinguer autoroute et ville.
-  // Une forêt ne peut être affirmée sans polygone cartographique.
+  const map=context.pos && now-context.at<=150000 && distance(loc,context.pos)<CONTEXT_REUSE?context:{areas:[],places:[]};
+  const match=Road723.match,density=streetDensity(loc);
+  // Sans route reconnue ni rues ni zones chargées, rien ne permet de trancher.
+  const informed=!!match || density!==null || map.areas.length>0;
+  const next=sampledScene=informed?environment(loc,match,map,density):null;
+  status.match=match?match.tags.highway:'';status.density=density;status.context=map.areas.length;
   if(!next) {
-   candidate=null;
+   candidate=null; status.reason='Données cartographiques absentes : décor précédent conservé';
    if(now-confirmedAt>keepFor) active=null;
    return active||'campagne';
   }
   confirmedAt=loc.ts;
-  if(!active || next===active || next==='autoroute' || active==='autoroute') {
+  // Une conclusion sans chaussée reconnue ne fait pas quitter l'autoroute
+  // immédiatement (échangeurs, routes parallèles) : 6 s de confirmation.
+  const weak=!match, confirm=weak&&active==='autoroute'?6000:1000;
+  if(!active || next===active || (!weak && (next==='autoroute' || active==='autoroute'))) {
    active=next; candidate=null;
   } else if(!candidate || candidate.scene!==next) {
    candidate={scene:next,stamp:loc.ts};
-  } else if(loc.ts-candidate.stamp>=1000) {
+  } else if(loc.ts-candidate.stamp>=confirm) {
    active=next; candidate=null;
   }
+  status.reason=(match?'Route '+match.tags.highway:'Route non identifiée')+(density!==null?' · rues '+Math.round(density)+' m':'')+(map.areas.length?' · '+map.areas.length+' zones':'');
   return active;
  }
- window.RoadScene731={regulated,decode,environment,refresh,context};
+ window.RoadScene731={regulated,decode,environment,refresh,context,streetDensity,status};
  window.roadScene=pick;
  // Le changement de position est la source de vérité : solliciter les deux
  // rafraîchissements sans multiplier les requêtes (leurs garde-fous restent actifs).

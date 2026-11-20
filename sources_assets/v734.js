@@ -8,7 +8,7 @@
  const widgets=SETCATS.find(c=>c[0]==='Widgets');
  const view=widgets?.[1].find(s=>s[0]==='Vue voiture et route');
  if(view){const before=view[1];view[1]=p=>before(p)+setRow(p,'État du décor',
-  (store.get('roadScene','auto')==='auto'?'Mode automatique':'Mode manuel : '+store.get('roadScene'))+' · '+Road723.status()+' · '+Math.round((curSpeed()||{}).v||0)+' km/h',
+  (store.get('roadScene','auto')==='auto'?'Mode automatique':'Mode manuel : '+store.get('roadScene')+' (le décor ne change plus seul)')+' · Décor affiché : '+roadScene()+(window.RoadScene731&&RoadScene731.status&&RoadScene731.status.reason&&store.get('roadScene','auto')==='auto'?' ('+RoadScene731.status.reason+')':'')+' · '+Road723.status()+' · '+Math.round((curSpeed()||{}).v||0)+' km/h',
   chipBtn(p,'scene:auto','Détection automatique',store.get('roadScene','auto')==='auto')+chipBtn(p,'road723:refresh','Actualiser la route'));
  }
 })();

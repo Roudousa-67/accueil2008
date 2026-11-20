@@ -16,18 +16,18 @@ window.RoadFX718={
    if(state && state.canvas!==cv)state=null;
    if(state&&state.scene!==scene){
     const highwayChange=store.get('roadScene','auto')==='auto' && [scene,state.scene].includes('autoroute');
-    state.fade=duration&&state.last&&!highwayChange?this.copy(state.last):null;
+    // 7.36 : le canevas contient encore la dernière image de l'ancien décor ; la
+    // copier une seule fois ici évite une copie complète toutes les 180 ms.
+    state.fade=duration&&cv.width&&cv.height&&!highwayChange?this.copy(cv):null;
     state.at=now;state.duration=duration;state.scene=scene;
    }
-   if(!state){state={scene,canvas:cv,fade:null,last:null,at:now,duration};this.frames.set(key,state);if(this.frames.size>16)this.frames.delete(this.frames.keys().next().value);}
+   if(!state){state={scene,canvas:cv,fade:null,at:now,duration};this.frames.set(key,state);if(this.frames.size>16)this.frames.delete(this.frames.keys().next().value);}
    draw();
    const c=cv.getContext('2d');
    if(state.fade&&duration){const t=Math.max(0,Math.min(1,(now-state.at)/state.duration));
      if(t<1){c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1-t*t*(3-2*t);c.drawImage(state.fade,0,0,cv.width,cv.height);c.restore();}
      else state.fade=null;
    }else state.fade=null;
-   if(duration && (!state.capturedAt || now-state.capturedAt>=180 || !state.last || state.last.width!==cv.width || state.last.height!==cv.height)){state.capturedAt=now;if(!state.last||state.last.width!==cv.width||state.last.height!==cv.height)state.last=this.copy(cv);
-     else {const last=state.last.getContext('2d');last.clearRect(0,0,cv.width,cv.height);last.drawImage(cv,0,0);}}
  }
 };
 const nav718=SETCATS.find(c=>c[0]==='Navigation');
