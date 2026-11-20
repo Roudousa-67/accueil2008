@@ -1,6 +1,6 @@
 {
-  "version": "7.35",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.35/Accueil2008GT_v7.35.apk",
-  "sha256": "9578333e748ea0538aeaa797e4205e51169c7cc0696030045b8e8cca17940a9f",
-  "notes": "Météo détaillée du widget selon les données disponibles : pluie avec flaques et ondulations, neige sur le décor et la voiture, scènes de jeu hors chaussée, brouillard de jour et de nuit. Faisceaux antibrouillard illustratifs uniquement, sans commande des feux réels. Réglages dans Widgets → Vue voiture et route.\nDéfilement conservé en mètres selon vitesse GPS et temps écoulé, sans ralentissement lié au nombre d’images. Les décors restent illustratifs et ne constituent pas une reconstruction exacte de la route.\nLes corrections et fonctionnalités de la 7.34 sont conservées. Le service QR reste privé ; aucun nouvel envoi automatique de données.\nTests sur l’autoradio restant à effectuer.\n"
+  "version": "7.36",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.36/Accueil2008GT_v7.36.apk",
+  "sha256": "e34950b7c3c5a9963b751bb569b74909876e9649937e910d9b324648596e3db2",
+  "notes": "Widget voiture et décor : cadence calée sur l’écran, au même rythme d’une image à l’autre (60, 30, 20 ou 15 images/s selon ce que le poste tient), au lieu d’une image sur deux sautée irrégulièrement. Plus de saut du paysage au bouclage du décor : l’ancienne boucle s’efface en continuant d’avancer. Dessin allégé (champs, forêts, façades regroupés), même rendu.\nDétection du décor : en ville, les grands axes sont reconnus grâce aux rues résidentielles alentour, même sans zone cartographiée ; requêtes routières allégées pour aboutir en ville ; décor conservé une minute si le GPS devient imprécis. L’état du décor (route reconnue, rues, zones) est affiché dans Widgets → Vue voiture et route.\nLes fonctions de la 7.35 sont conservées. Tests sur l’autoradio restant à effectuer.\n"
 }
