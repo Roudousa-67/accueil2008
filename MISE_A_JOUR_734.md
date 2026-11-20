@@ -1,0 +1,7 @@
+Correction du défilement du widget : distance proportionnelle à la vitesse réelle et au temps écoulé, même lorsque le dessin est lent. Fin du plafonnement de la distance à 0,1 seconde par image. Pause sans rattrapage lors du retour.
+Les voies rapides cartographiées trunk/trunk_link utilisent désormais le décor autoroute, comme les autoroutes et voies explicitement réservées aux automobiles. Réutilisation locale de routes cartographiées jusqu’à 30 minutes avec vérification GPS et géométrique. Les limitations anciennes restent masquées après une minute. Cache inutilisable si la route est éloignée ou le GPS imprécis.
+Réduction des copies de canevas et adaptation de la résolution lorsque le poste dessine lentement. État de la détection et bouton Automatique dans les réglages du widget.
+Ajout des imports par QR pour photo de ticket et GPX. Chiffrement local du fichier et lien valable 15 minutes. Le service est préparé avec un accès privé. Son ouverture à l’accès par QR nécessite encore confirmation de l’utilisateur avant que le poste et le téléphone puissent y accéder directement. Un service HTTPS compatible peut aussi être renseigné dans les paramètres.
+La 7.33 ne contenait pas cette option QR. Les e-mails/SMS automatiques, l’OCR et les prix de toute l’Europe restent hors de cette correction.
+Tests automatisés de distance à 0/20/80/130 km/h à 2 et 25 images/s, pause, cache routier, scènes et protocole de transfert réussis. Tests sur autoradio et transferts Internet réels encore à réaliser. Signature d’origine conservée.
+
