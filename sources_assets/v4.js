@@ -9,7 +9,7 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.34';
+const APP_VERSION = '7.35';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
