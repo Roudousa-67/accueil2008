@@ -10,7 +10,9 @@ def number(value):
  parts=tuple(map(int,value.split('.')))
  return parts+(0,)*(3-len(parts))
 public=json.loads((root/'version.json').read_text())
-if number(v)<number(public['version']):raise SystemExit('Retour à une ancienne version refusé')
+# Les versions historiques peuvent être revérifiées en CI, sans autoriser leur publication OTA.
+allow_historical='--historical-check' in sys.argv[2:]
+if number(v)<number(public['version']) and not allow_historical:raise SystemExit('Retour à une ancienne version refusé')
 name=f'Accueil2008GT_v{v}.apk'
 url=f'https://github.com/Roudousa-67/accueil2008/releases/download/v{v}/{name}'
 if j.get('apk')!=url:raise SystemExit('Lien APK incompatible avec le dépôt/version')
