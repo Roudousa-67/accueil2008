@@ -2,7 +2,7 @@ name: Construire et publier APK 7.36
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publier735.yml', 'tests/regression.cjs', 'tests/widget728.cjs', 'tests/accueil730.cjs']
+    paths: ['.github/workflows/publier736.yml', 'sources_assets/**', 'outils/preparer_apk728.py', 'tests/**', 'distribution/release736.json']
   workflow_dispatch:
 permissions:
   contents: write
@@ -66,12 +66,12 @@ jobs:
           p=pathlib.Path(os.environ['RUNNER_TEMP'])/'Accueil2008GT_v7.36.apk'
           j=json.loads(pathlib.Path('distribution/release736.json').read_text())
           j['sha256']=hashlib.sha256(p.read_bytes()).hexdigest()
-          for name in ('version.json','distribution/release735.json'):
+          for name in ('version.json','distribution/release736.json'):
               pathlib.Path(name).write_text(json.dumps(j,ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add version.json distribution/release735.json
+          git add version.json distribution/release736.json
           git commit -m 'Annoncer APK 7.36 signé et téléchargé avec empreinte vérifiée'
           git pull --rebase origin main
           git push origin HEAD:main
