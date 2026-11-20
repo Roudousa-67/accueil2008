@@ -337,7 +337,9 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
   function frame(now) {
     raf=0;
     if(!eligible()){last=0;return;}
-    if (lastDraw&&now-lastDraw<33){queue();return;}
+    // Viser 60 i/s quand le rendu le permet ; conserver 30 i/s en qualité calme.
+    const frameInterval = window.Decor721 && Decor721.quality()==='calme' ? 33.3 : 16.7;
+    if (lastDraw&&now-lastDraw<frameInterval){queue();return;}
     const drawStarted=performance.now();
     lastDraw = now;
     const elapsed = last ? Math.max(0, (now - last) / 1000) : 0; last = now;
