@@ -1378,7 +1378,7 @@ function renderLive(cv,T,metres,speed){metres=Number.isFinite(metres)?Math.max(0
  metres%=currentScene==='autoroute'?1120:currentScene==='campagne'?330:currentScene==='foret'?450:400;
  if(currentScene==='autoroute')return motorwayDraw(cv,T,metres,speed);
  const width=cv.clientWidth,height=cv.clientHeight;if(!width||!height)return;
- const ratio=Math.min(1.25,window.devicePixelRatio||1);
+ const ratio=Math.min(1.25,window.devicePixelRatio||1,window.Perf725?[.85,1,1.25][Perf725.cap()]:1.25);
  if(cv.width!==Math.round(width*ratio)||cv.height!==Math.round(height*ratio)){cv.width=Math.round(width*ratio);cv.height=Math.round(height*ratio)}
  c=cv.getContext('2d');if(!c)return;if(!c.roundRect)c.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this};c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
  t=T;travelled=metres;scene=currentScene;ruralSeason=productionSeason730();const kind=roadKind();night=!!kind.night;
@@ -2127,7 +2127,7 @@ function matmosphere(){
 }
 function motorwayDraw(cv,T,metres,speed){
  const width=cv.clientWidth,height=cv.clientHeight;if(!width||!height)return;
- const ratio=Math.min(1.25,window.devicePixelRatio||1);
+ const ratio=Math.min(1.25,window.devicePixelRatio||1,window.Perf725?[.85,1,1.25][Perf725.cap()]:1.25);
  const pxWidth=Math.round(width*ratio), pxHeight=Math.round(height*ratio);
  if(cv.width!==pxWidth || cv.height!==pxHeight){cv.width=pxWidth;cv.height=pxHeight;}
  c=cv.getContext('2d');if(!c)return;

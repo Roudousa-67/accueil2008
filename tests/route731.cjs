@@ -15,7 +15,7 @@ assert.equal(scene.environment(p,main,builtContext),'village');
 assert.equal(scene.environment({...p,lat:48.5812},main,builtContext),'campagne');
 assert.equal(scene.environment(p,way({...main.tags,'zone:traffic':'FR:rural'}),builtContext),'campagne');
 assert.equal(scene.environment(p,way({...main.tags,'source:maxspeed':'FR:urban'}),scene.decode([village])),'village');
-assert.equal(scene.environment(p,way({highway:'trunk',maxspeed:'110'}),scene.decode([village])),'campagne');
+assert.equal(scene.environment(p,way({highway:'trunk',maxspeed:'110'}),scene.decode([village])),'autoroute');
 assert.equal(scene.environment(p,way({highway:'trunk',motorroad:'yes'}),builtContext),'autoroute');
 assert.equal(scene.environment(p,way({highway:'primary','source:maxspeed':'FR:expressway'}),builtContext),'autoroute');
 assert.equal(scene.environment(p,way({highway:'motorway_link'}),builtContext),'autoroute');
@@ -39,7 +39,7 @@ console.log('OK cartographie : zone bâtie, forêt avec clairière, routes ordin
  assert.equal(w.roadScene(),'autoroute');
  w.matcher=[main];t.advance(1000);run('Road723.cache=matcher;Road723.pos={...loc};Road723.at=Date.now()');
  assert.equal(w.roadScene(),'campagne');
- w.matcher=[way({highway:'trunk',motorroad:'yes'},1,p.lon+.00002),way({highway:'trunk'},2)];
+ w.matcher=[way({highway:'trunk',motorroad:'yes'},1,p.lon+.00002),way({highway:'secondary'},2)];
  assert.equal(w.Road723.choose(w.matcher,{...p,acc:8,ts:run('Date.now()')}),null);
  run("store.set('roadScene','foret')");assert.equal(w.roadScene(),'foret');
  run("store.set('roadScene','auto');loc.acc=80");assert.equal(w.roadScene(),'campagne');

@@ -15,7 +15,7 @@ window.Perf725=(()=>{
  function draw(ms,at){draws++;drawMs+=ms;fpsN++;const dt=at-lastFPS;if(dt>=1000){fps=fpsN*1000/dt;fpsN=0;lastFPS=at;}
   if(typeof store==='undefined'||!store.get('perf725Guard',true)){slowStart=null;slowMs=slowN=0;cap=2;return;}
   if(slowStart===null)slowStart=at;slowMs+=ms;slowN++;
-  if(at-slowStart>=3000){if(slowN>=20&&slowMs/slowN>20&&cap>0){const q=typeof Decor721==='undefined'?2:['calme','normal','riche'].indexOf(Decor721.quality());cap=Math.max(0,Math.min(cap,q<0?2:q)-1);if(lastNotice===0||at-lastNotice>5000){lastNotice=at;if(typeof toast==='function')toast('Décor allégé pour garder une animation fluide.');}}slowStart=at;slowMs=slowN=0;}
+  if(at-slowStart>=3000){if(slowN>=4&&slowMs/slowN>20&&cap>0){const q=typeof Decor721==='undefined'?2:['calme','normal','riche'].indexOf(Decor721.quality());cap=Math.max(0,Math.min(cap,q<0?2:q)-1);if(lastNotice===0||at-lastNotice>5000){lastNotice=at;if(typeof toast==='function')toast('Décor allégé pour garder une animation fluide.');}}slowStart=at;slowMs=slowN=0;}
  }
  return {native,script,every,cancel,suspend,paused:()=>paused,draw,resetGuard(){cap=2;slowStart=null;slowMs=slowN=0;},
   cap:()=>cap,render(ms){renders++;renderMs+=ms;if(boot===null)boot=performance.now()-started;},

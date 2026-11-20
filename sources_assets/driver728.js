@@ -48,7 +48,7 @@
   return points;
  }
  function selectGeometry(){
-  if(!window.Road723||!Road723.fresh()||!Road723.match||Date.now()-Road723.at>60000)return null;
+  if(!window.Road723||!Road723.fresh()||!Road723.match||Date.now()-Road723.at>30*60000)return null;
   const match=Road723.match;if(!Array.isArray(match.geometry))return null;
   const heading=bearing();if(heading===null)return null;
   const directionPath=geoPath(match.geometry,'orient');if(!directionPath)return null;

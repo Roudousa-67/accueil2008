@@ -67,11 +67,11 @@ window.Road723 = {
   return list[0].e;
  },
  apply(){
-  const fresh=this.fresh()&&this.pos&&Date.now()-this.at<60000&&hav(this.pos.lat,this.pos.lon,loc.lat,loc.lon)<.75;
+  const fresh=this.fresh()&&this.pos&&Date.now()-this.at<30*60000;
   this.match=fresh?this.choose(this.cache,loc):null;
   roadHw=this.match?this.match.tags.highway:'';roadHwAt=this.match?Date.now():0;
   window.__panelGreen=!!this.match&&(window.RoadScene731?RoadScene731.regulated(this.match.tags)&&!/^motorway/.test(roadHw):/^trunk/.test(roadHw));
-  limit=this.match?parseMax(this.match.tags.maxspeed):null;
+  limit=this.match&&Date.now()-this.at<60000?parseMax(this.match.tags.maxspeed):null;
   if(this.match){limitOkAt=Date.now();limitOkPos={lat:loc.lat,lon:loc.lon};}
  },
  async refresh(force=false){
@@ -87,7 +87,7 @@ window.Road723 = {
    const j=await Promise.race([getJSON('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),14000);})]);
    if(!Array.isArray(j.elements)||j.remark)throw Error('incomplete');
    if(!this.fresh()||hav(p.lat,p.lon,loc.lat,loc.lon)>.75)return;
-   this.cache=j.elements;this.pos=p;this.at=Date.now();this.error='';this.apply();
+   this.cache=j.elements;this.pos=p;this.at=Date.now();this.error='';this.apply();const count=j.elements.reduce((n,e)=>n+(e.geometry||[]).length,0);if(j.elements.length<=200&&count<=12000)store.set('roadCache734',{elements:j.elements,pos:p,at:this.at});
   }catch(e){this.error='Données routières indisponibles';this.apply();}
   finally{clearTimeout(timer);this.pending=null;}})();return this.pending;
  },

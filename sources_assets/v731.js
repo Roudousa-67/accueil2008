@@ -11,7 +11,7 @@
  const samePoint = (a,b) => a.lat===b.lat && a.lon===b.lon;
  const validLine = line => Array.isArray(line) && line.length>=2 && line.every(Place710.valid);
  const closed = line => line.length>=4 && samePoint(line[0],line[line.length-1]);
- const regulated = tags => !!tags && (/^motorway(?:_link)?$/.test(tags.highway) || tags.motorroad==='yes' || typeTags.some(key=>/^fr:expressway$/i.test(String(tags[key]||'').trim())));
+ const regulated = tags => !!tags && (/^(?:motorway|trunk)(?:_link)?$/.test(tags.highway) || tags.motorroad==='yes' || typeTags.some(key=>/^fr:expressway$/i.test(String(tags[key]||'').trim())));
  function areaKind(tags) {
   if (tags.boundary!=='administrative' && populated.test(tags.place)) return 'settlement';
   if (/^(residential|retail|commercial|industrial)$/.test(tags.landuse)) return 'built';

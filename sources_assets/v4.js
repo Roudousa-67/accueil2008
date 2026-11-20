@@ -9,7 +9,7 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.33';
+const APP_VERSION = '7.34';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
@@ -333,16 +333,18 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
   const animate=()=>!!(window.Driver728&&Driver728.preview)||!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||fading()||/^(pluie|orage|neige)$/.test(roadKind().wx);
   function queue(){if(!raf&&eligible())raf=requestAnimationFrame(frame);}
   function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=0;}
-  window.RoadLoop725={refresh(){cvs=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};
+  window.RoadLoop725={refresh(){const next=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);const changed=next.length!==cvs.length||next.some((cv,i)=>cv!==cvs[i]);cvs=next;if(changed)stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};
   function frame(now) {
     raf=0;
     if(!eligible()){last=0;return;}
     if (lastDraw&&now-lastDraw<33){queue();return;}
     const drawStarted=performance.now();
     lastDraw = now;
-    const dt = last?Math.min(0.1, (now - last) / 1000):0; last = now; T += dt;
-    const sp = curSpeed(); const tgt = sp ? sp.v : 0; v += (tgt - v) * Math.min(1, dt * 2);if(tgt===0&&v<.1)v=0;
-    travel += v / 3.6 * dt;
+    const elapsed = last ? Math.max(0, (now - last) / 1000) : 0; last = now;
+    const dt = Math.min(0.1, elapsed); T += elapsed;
+    const sp = curSpeed(); v = sp && Number.isFinite(sp.v) ? Math.max(0, sp.v) : 0;
+    travel += v / 3.6 * elapsed;
+    window.RoadMotion734 = {speed:v, elapsed, metres:travel};
 
     if (!carDrag && carYaw !== 0 && now - carRelease > 2500) { carYaw = Math.abs(carYaw) < 4 ? 0 : carYaw - Math.sign(carYaw) * Math.min(Math.abs(carYaw), 240 * dt); carYaw = ((carYaw + 540) % 360) - 180; paintCar360(); }
     const wxNow = roadKind().wx; cvs.forEach((cv) => { const rb = cv.parentNode; if (rb && rb.dataset && rb.dataset.wx !== wxNow) rb.dataset.wx = wxNow; const paint=()=>cv.dataset.road === 'v' ? drawV(cv) : draw(cv); return window.RoadFX718 ? window.RoadFX718.draw(cv,paint) : paint(); });

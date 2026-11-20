@@ -26,7 +26,7 @@ window.RoadFX718={
      if(t<1){c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1-t*t*(3-2*t);c.drawImage(state.fade,0,0,cv.width,cv.height);c.restore();}
      else state.fade=null;
    }else state.fade=null;
-   if(duration){if(!state.last||state.last.width!==cv.width||state.last.height!==cv.height)state.last=this.copy(cv);
+   if(duration && (!state.capturedAt || now-state.capturedAt>=180 || !state.last || state.last.width!==cv.width || state.last.height!==cv.height)){state.capturedAt=now;if(!state.last||state.last.width!==cv.width||state.last.height!==cv.height)state.last=this.copy(cv);
      else {const last=state.last.getContext('2d');last.clearRect(0,0,cv.width,cv.height);last.drawImage(cv,0,0);}}
  }
 };
