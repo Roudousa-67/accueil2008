@@ -49,7 +49,9 @@ window.Performance725=(()=>{
   const need=!!document.querySelector('[data-perf725]');
   if(need&&!diagnosticTimer)diagnosticTimer=displayEvery725(updateDiagnostic,1000);
   if(!need&&diagnosticTimer){Perf725.cancel(diagnosticTimer);diagnosticTimer=null;}
-  updateDiagnostic();return result;
+  // Les mesures du diagnostic sont rafraîchies par leur minuterie (1 s),
+  // pas à chaque reconstruction de l'accueil : évite des accès DOM inutiles.
+  return result;
  };
  window.paint=function(){
   if(Perf725.paused())return;
