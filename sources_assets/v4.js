@@ -11,6 +11,7 @@
 'use strict';
 const APP_VERSION = '7.36';
 const APP_AUTHOR = 'Roudoussa 67';
+// 7.36 : animation de route lissée à 60 i/s.
 const CHANGELOG = [
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
  ['7.30','Novembre 2026',['Décors ville, village, campagne, forêt et autoroute détaillés','Taille de la voiture, météo et contraste avec aperçu direct','Multimédia compact ou détaillé : couleurs, écriture et disposition','Barre personnalisable et toutes les applications en grille','Masquage du GPS lors du passage aux réglages et aux autres pages']],
