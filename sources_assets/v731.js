@@ -116,7 +116,9 @@
  async function refresh() {
   if(DEMO || !usable(loc) || context.pending || store.get('roadScene','auto')!=='auto') return;
   const now=Date.now();
-  if(context.at && context.pos && now-context.at<90000 && distance(loc,context.pos)<500) return;
+  // Renouveler le contexte avant qu'il devienne inutilisable (150 s / 850 m).
+  // Un trajet lent en ville ne doit pas rester bloqué sur un ancien paysage.
+  if(context.at && context.pos && now-context.at<60000 && distance(loc,context.pos)<350) return;
   if(context.attempt && now-context.attempt<15000) return;
   const p={lat:loc.lat,lon:loc.lon}, lat=p.lat.toFixed(6), lon=p.lon.toFixed(6);
   const around=`around:1200,${lat},${lon}`;
@@ -156,6 +158,9 @@
   Road723.apply();
   const map=context.pos && now-context.at<=150000 && distance(loc,context.pos)<850?context:{areas:[],places:[]};
   const next=sampledScene=environment(loc,Road723.match,map);
+  // En l'absence de contexte récent, ne pas conserver indéfiniment un ancien
+  // décor : la route reconnue permet encore de distinguer autoroute et ville.
+  // Une forêt ne peut être affirmée sans polygone cartographique.
   if(!next) {
    candidate=null;
    if(now-confirmedAt>keepFor) active=null;
@@ -173,6 +178,14 @@
  }
  window.RoadScene731={regulated,decode,environment,refresh,context};
  window.roadScene=pick;
+ // Le changement de position est la source de vérité : solliciter les deux
+ // rafraîchissements sans multiplier les requêtes (leurs garde-fous restent actifs).
+ const oldApply=Road723.apply;
+ Road723.apply=function(){
+  const result=oldApply.apply(this,arguments);
+  if(!context.pending && store.get('roadScene','auto')==='auto' && usable(loc))refresh();
+  return result;
+ };
  // The road matching cache still supplies limits and geometry. This request only adds terrain.
  const refreshRoad=window.maybeLimit;
  window.maybeLimit=function(){if(tab==='home')refresh();return refreshRoad.apply(this,arguments);};
