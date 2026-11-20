@@ -32,7 +32,7 @@ let count=0;const ok=(n,a,b=true)=>{assert.deepEqual(a,b,n);count++;console.log(
  t.setoffline(true);t.advance(61000);await run('Road723.refresh()');ok('échec réseau conserve uniquement la route proche du GPS',run('Road723.match.tags.highway'),'motorway');ok('échec réseau masque la limitation devenue ancienne',run('limit'),null);t.pos(48.59,7.74);run('Road723.apply()');ok('une route en cache éloignée du GPS est abandonnée',run('Road723.match'),null);ok('échec réseau libère le verrou',run('Road723.pending'),null);t.setoffline(false);
  // Un pont HTTP qui ne rappelle jamais ne doit pas bloquer les détections suivantes.
  t.pos();t.advance(15000);run('window.savedJSON723=getJSON;getJSON=()=>new Promise(()=>{});Road723.at=0;Road723.attempt=0;');const pending=run('Road723.refresh()');
- const timeout=t.timers.filter(x=>x.ms===14000).at(-1);timeout.fn();await pending;ok('callback réseau absent libère le verrou après délai',run('Road723.pending'),null);run('getJSON=savedJSON723');
+ const timeout=t.timers.filter(x=>x.ms===16500).at(-1);timeout.fn();await pending;ok('callback réseau absent libère le verrou après délai',run('Road723.pending'),null);run('getJSON=savedJSON723');
  // Toutes les pages de réglages : chargement, aide de rubrique et information de chaque ligne.
  run('gbLive=false;Settings720.query="";Settings720.filter="";');let pages=0,rows=0;
  const sizes=run('SETCATS.map(c=>c[1].length)');

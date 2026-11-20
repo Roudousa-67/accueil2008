@@ -80,11 +80,14 @@ window.Road723 = {
   this.apply();
   const far=!this.pos||hav(this.pos.lat,this.pos.lon,loc.lat,loc.lon)>.35;
   if(!force&&((this.at&&Date.now()-this.at<45000&&!far)||(this.attempt&&Date.now()-this.attempt<12000)))return;
-  this.attempt=Date.now();const p={lat:loc.lat,lon:loc.lon},radius=1000;
-  const q=`[out:json][timeout:10];way(around:${radius},${p.lat.toFixed(6)},${p.lon.toFixed(6)})[highway~"^(motorway|motorway_link|trunk|trunk_link|primary|secondary|tertiary|unclassified|residential|living_street|service|road|primary_link|secondary_link|tertiary_link)$"];out geom;`;
+  this.attempt=Date.now();const p={lat:loc.lat,lon:loc.lon},at=`${p.lat.toFixed(6)},${p.lon.toFixed(6)}`;
+  // 7.36 : en ville, 1 km de rues et d'allées de service dépassait souvent le délai
+  // (réponse de plusieurs Mo) : plus aucune route reconnue, décor bloqué sur Campagne.
+  // Grands axes sur 1 km, rues résidentielles sur 600 m, voies de service exclues.
+  const q=`[out:json][timeout:13];(way(around:1000,${at})[highway~"^(motorway|motorway_link|trunk|trunk_link|primary|secondary|tertiary|unclassified|road|primary_link|secondary_link|tertiary_link)$"];way(around:600,${at})[highway~"^(residential|living_street)$"];);out geom;`;
   let timer;
   this.pending=(async()=>{try{
-   const j=await Promise.race([getJSON('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),14000);})]);
+   const j=await Promise.race([getJSON('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),16500);})]);
    if(!Array.isArray(j.elements)||j.remark)throw Error('incomplete');
    if(!this.fresh()||hav(p.lat,p.lon,loc.lat,loc.lon)>.75)return;
    this.cache=j.elements;this.pos=p;this.at=Date.now();this.error='';this.apply();const count=j.elements.reduce((n,e)=>n+(e.geometry||[]).length,0);if(j.elements.length<=200&&count<=12000)store.set('roadCache734',{elements:j.elements,pos:p,at:this.at});

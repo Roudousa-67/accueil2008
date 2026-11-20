@@ -11,8 +11,8 @@
 'use strict';
 const APP_VERSION = '7.36';
 const APP_AUTHOR = 'Roudoussa 67';
-// 7.36 : animation de route lissée à 60 i/s.
 const CHANGELOG = [
+ ['7.36','Novembre 2026',['Widget voiture : cadence régulière calée sur l’écran (60, 30, 20 ou 15 images/s selon le poste)','Plus de saut du décor au bouclage : la boucle précédente s’efface en continuant d’avancer','Décor ville ou village reconnu sur les grands axes grâce aux rues alentour, même sans zone cartographiée','Décor conservé une minute quand le GPS devient imprécis entre les immeubles','Dessin allégé : champs, forêts et façades regroupés en beaucoup moins de tracés']],
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
  ['7.30','Novembre 2026',['Décors ville, village, campagne, forêt et autoroute détaillés','Taille de la voiture, météo et contraste avec aperçu direct','Multimédia compact ou détaillé : couleurs, écriture et disposition','Barre personnalisable et toutes les applications en grille','Masquage du GPS lors du passage aux réglages et aux autres pages']],
   ['7.29', 'Novembre 2026', ['Démarrage des parcours avec une position GPS récente', 'Message adapté au mode manuel et dates locales corrigées', 'Accès directs aux réglages et résultats de recherche mieux classés', 'Plus de place pour la carte sur les petits écrans']],
@@ -323,7 +323,12 @@ function setupCar360() {
 }
 function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorAll('#screen [data-car360]').forEach((e) => { if (e.style.backgroundPosition !== pos) e.style.backgroundPosition = pos; }); if(window.RoadLoop725)RoadLoop725.invalidate(); }
 (function roadLoop() {
-  let T = 0, travel = 0, last = performance.now(), v = 0, targetV = 0, lastDraw = 0;
+  let T = 0, travel = 0, last = 0, v = 0, targetV = 0, lastDraw = 0;
+  // 7.36 : cadence calée sur le rafraîchissement mesuré de l'écran. Le décor est
+  // dessiné toutes les 1 à 4 images d'affichage (60, 30, 20 ou 15 i/s à 60 Hz) selon
+  // le temps réellement nécessaire, toujours au même rythme : des intervalles
+  // réguliers paraissent plus fluides qu'une cadence élevée mais irrégulière.
+  const pace = { period: 1000 / 60, cost: 0, step: 1, late: 1, prev: 0, slowSince: 0, fastSince: 0, holdUntil: 0, warm: 0, hold: 6000, downAt: -1e9 };
   const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const bld = Array.from({ length: 46 }, (_, i) => ({ x: i / 46, w: 0.018 + rnd(i) * 0.03, h: 0.25 + rnd(i + 9) * 0.75 }));
   const trees = Array.from({ length: 30 }, (_, i) => ({ x: i / 30 + rnd(i + 4) * 0.02, h: 0.35 + rnd(i + 2) * 0.5 }));
@@ -333,30 +338,49 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
   const fading=()=>window.RoadFX718&&cvs.some(cv=>{const item=cv.closest('[data-fitem]'),key=item?item.getAttribute('data-fitem'):'hero',state=RoadFX718.frames.get(key);return !!(state&&state.fade);});
   const animate=()=>!!(window.Driver728&&Driver728.preview)||!!(window.Decor721&&Decor721.preview)||v>.1||((curSpeed()||{}).v||0)>.1||carDrag||carYaw!==0||fading()||/^(pluie|orage|neige)$/.test(roadKind().wx);
   function queue(){if(!raf&&eligible())raf=requestAnimationFrame(frame);}
-  function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=0;}
-  window.RoadLoop725={refresh(){const next=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);const changed=next.length!==cvs.length||next.some((cv,i)=>cv!==cvs[i]);cvs=next;if(changed)stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=0;lastDraw=0;pace.prev=0;pace.warm=0;}
+  window.RoadLoop725={pace:()=>({fps:1000/(pace.period*pace.step),step:pace.step,period:pace.period,cost:pace.cost}),refresh(){const next=Array.from(document.querySelectorAll('#screen canvas[data-road]')).filter(cv=>cv.isConnected);const changed=next.length!==cvs.length||next.some((cv,i)=>cv!==cvs[i]);cvs=next;if(changed)stop();queue();},invalidate(){queue();},stop,running:()=>!!raf,canvases:()=>cvs.length};
   function frame(now) {
     raf=0;
-    if(!eligible()){last=0;return;}
-    // Viser 60 i/s quand le rendu le permet ; conserver 30 i/s en qualité calme.
-    const frameInterval = 16.7;
-    if (lastDraw&&now-lastDraw<frameInterval){queue();return;}
+    if(!eligible()){last=0;lastDraw=0;pace.prev=0;pace.warm=0;return;}
+    // Période d'affichage : seuls les écarts proches d'une image servent à la mesure.
+    if(pace.prev){const d=now-pace.prev;if(d>5&&d<pace.period*1.5)pace.period+=(d-pace.period)*.05;}
+    pace.prev=now;
+    // Tolérance d'une demi-image : 16,66 ms ne doit plus être refusé face à 16,7 ms.
+    if (lastDraw&&now-lastDraw<pace.step*pace.period-pace.period*.5){queue();return;}
     const drawStarted=performance.now();
+    // Retard réel (y compris le rendu du canevas hors JavaScript), ignoré pendant les
+    // premières images après un démarrage, une reprise ou une reconstruction de l'écran.
+    if(lastDraw&&++pace.warm>12){const ratio=(now-lastDraw)/(pace.step*pace.period);pace.late+=(Math.min(3,ratio)-pace.late)*.1;}
     lastDraw = now;
-    const elapsed = last ? Math.max(0, (now - last) / 1000) : 0; last = now;
+    const elapsed = last ? Math.max(0, (now - last) / 1000) : 0;
     const dt = Math.min(0.1, elapsed); T += elapsed;
     const sp = curSpeed(); targetV = sp && Number.isFinite(sp.v) ? Math.max(0, sp.v) : 0;
-    // Interpoler la vitesse entre deux mises à jour GPS/CAN : le décor reste continu à 60 i/s.
-    const alpha = 1 - Math.exp(-elapsed / 0.18);
-    v += (targetV - v) * alpha;
+    // Au démarrage ou à la reprise, partir directement de la vitesse mesurée.
+    // Ensuite, lisser les paliers GPS/CAN (1 mesure/s) : la distance reste celle de la vitesse réelle.
+    if (!last) v = targetV;
+    else { const alpha = 1 - Math.exp(-elapsed / 0.25); v += (targetV - v) * alpha; }
+    last = now;
     if (targetV < 0.1 && v < 0.1) v = 0;
     travel += v / 3.6 * elapsed;
     window.RoadMotion734 = {speed:v, targetSpeed:targetV, elapsed, metres:travel};
 
     if (!carDrag && carYaw !== 0 && now - carRelease > 2500) { carYaw = Math.abs(carYaw) < 4 ? 0 : carYaw - Math.sign(carYaw) * Math.min(Math.abs(carYaw), 240 * dt); carYaw = ((carYaw + 540) % 360) - 180; paintCar360(); }
     const wxNow = roadKind().wx; cvs.forEach((cv) => { const rb = cv.parentNode; if (rb && rb.dataset && rb.dataset.wx !== wxNow) rb.dataset.wx = wxNow; const paint=()=>cv.dataset.road === 'v' ? drawV(cv) : draw(cv); return window.RoadFX718 ? window.RoadFX718.draw(cv,paint) : paint(); });
-    Perf725.draw(performance.now()-drawStarted,now);
-    if(animate())queue();else last=0;
+    const spent=performance.now()-drawStarted;
+    Perf725.draw(spent,now);
+    // Le fondu de bouclage (moins d'une seconde) dessine deux fois : ne pas en tirer de cadence.
+    const blending=!!(window.Decors726&&Decors726.blending);
+    if(blending){pace.late=Math.min(pace.late,1.1);pace.slowSince=0;}
+    else pace.cost=pace.cost?pace.cost+(spent-pace.cost)*.1:spent;
+    // Nombre d'images d'affichage nécessaires, avec marge ; montée rapide, descente prudente.
+    let want=Math.max(1,Math.min(4,Math.ceil((pace.cost*1.15+1.5)/pace.period)));
+    // Retard persistant : une image d'affichage de plus. Si cela se reproduit juste
+    // après une tentative de remontée, attendre plus longtemps avant la suivante.
+    if(pace.late>1.35&&pace.step<4){want=Math.max(want,pace.step+1);pace.hold=now-pace.downAt<8000?Math.min(60000,pace.hold*2):6000;pace.holdUntil=now+pace.hold;}
+    if(want>pace.step){if(!pace.slowSince)pace.slowSince=now;if(now-pace.slowSince>=300){pace.step=want;pace.slowSince=0;pace.late=1;}}else pace.slowSince=0;
+    if(want<pace.step&&now>=pace.holdUntil&&pace.late<1.15){if(!pace.fastSince)pace.fastSince=now;if(now-pace.fastSince>=2000){pace.step--;pace.downAt=now;pace.fastSince=0;pace.late=1;}}else pace.fastSince=0;
+    if(animate())queue();else {last=0;lastDraw=0;}
   }
   function draw(cv) {
     const dpr = Math.min(1.5, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
