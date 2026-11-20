@@ -2,7 +2,7 @@ name: Construire et publier APK 7.35
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publier735.yml']
+    paths: ['.github/workflows/publier735.yml', 'tests/regression.cjs']
   workflow_dispatch:
 permissions:
   contents: write
