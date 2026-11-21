@@ -77,15 +77,39 @@
   const lat=Number((url.match(/[?&]lat=([-\d.]+)/)||[])[1]),lon=Number((url.match(/[?&]lon=([-\d.]+)/)||[])[1]);
   if(!result||!Number.isFinite(lat)||!Number.isFinite(lon))return;
   const type=result.category==='highway'||result.class==='highway'?String(result.type||''):'';
-  hint={lat,lon,at:Date.now(),type};
+  // 7.38 : une maison ou un bâtiment adressé à moins de 60 m signale une zone habitée.
+  const rlat=Number(result.lat),rlon=Number(result.lon),near=Number.isFinite(rlat)&&Number.isFinite(rlon)&&hav(lat,lon,rlat,rlon)<=.06;
+  const house=near&&(/^(building)$/.test(result.category)||/^(house|building|residential|apartments|detached|terrace|semidetached_house)$/.test(String(result.type||''))||/^(building|house)$/.test(String(result.addresstype||'')))&&!!(result.address&&(result.address.house_number||result.address.road));
+  hint={lat,lon,at:Date.now(),type,house};
  }
  window.RoadHint737=function(p){
-  if(!hint||!hint.type||!p||Date.now()-hint.at>90000||hav(hint.lat,hint.lon,p.lat,p.lon)>1)return null;
+  if(!hint||(!hint.type&&!hint.house)||!p||Date.now()-hint.at>90000||hav(hint.lat,hint.lon,p.lat,p.lon)>1)return null;
   if(/^(motorway|trunk)(_link)?$/.test(hint.type))return {kind:'autoroute',type:hint.type};
   if(/^(residential|living_street|pedestrian)$/.test(hint.type))return {kind:'bâti',type:hint.type};
+  if(hint.house)return {kind:'bâti',type:'maison proche'};
   return null;
  };
 
+ // 7.38 : réception GPS. Le pont natif transmet aussi, toutes les 10 s, la position
+ // « réseau » (précision de l'ordre du kilomètre) : elle écrasait la position GPS et
+ // pouvait lancer une recherche de routes au mauvais endroit. Elle est ignorée tant
+ // qu'une position GPS précise a moins de 5 s. Chaque étape est isolée : une erreur
+ // (trajet, adresse…) n'empêche plus la recherche des routes, et elle est affichée.
+ const gpsStats={received:0,ignored:0,error:'',errorAt:0};
+ let goodAt=0;
+ const receive=window.onLoc;
+ function failure(where,e){gpsStats.error=where+' : '+short(e&&e.message||e);gpsStats.errorAt=Date.now();}
+ window.onLoc=function(lat,lon,spd,acc){
+  gpsStats.received++;
+  const precise=Number.isFinite(acc)&&acc>=0&&acc<=50;
+  if(!precise&&goodAt&&Date.now()-goodAt<5000){gpsStats.ignored++;return;}
+  if(precise)goodAt=Date.now();
+  try{receive.apply(this,arguments);}catch(e){failure('réception GPS',e);}
+  refreshRoads();
+ };
+ // La recherche des routes ne dépend plus des minuteries générales de l'appli.
+ function refreshRoads(){try{const r=Road723.refresh();if(r&&typeof r.catch==='function')r.catch(e=>failure('recherche des routes',e));}catch(e){failure('recherche des routes',e);}}
+ displayEvery725(()=>{if(tab==='home')refreshRoads();},3000);
  const age=t=>{if(!t)return 'jamais';const s=Math.round((Date.now()-t)/1000);return s<90?'il y a '+s+' s':'il y a '+Math.round(s/60)+' min';};
  function line(k,label){
   const s=stats[k];if(!s)return label+' : aucune demande';
@@ -94,9 +118,9 @@
  }
  function gps(){
   if(!loc||!Number.isFinite(loc.ts))return 'GPS : aucune position';
-  return 'GPS : précision '+(Number.isFinite(loc.acc)?Math.round(loc.acc)+' m':'inconnue')+', '+age(loc.ts)+(Number.isFinite(loc.acc)&&loc.acc>45?' (trop imprécis pour le décor)':'');
+  return 'GPS : précision '+(Number.isFinite(loc.acc)?Math.round(loc.acc)+' m':'inconnue')+', '+age(loc.ts)+(Number.isFinite(loc.acc)&&loc.acc>45?' (trop imprécis pour le décor)':'')+(gpsStats.ignored?' · '+gpsStats.ignored+' positions réseau ignorées':'');
  }
- window.Overpass737={stats,queue,pump,kind,report(){return [gps(),line('routes','Routes'),line('zones','Zones bâties'),Date.now()<spareUntil?'Serveur de secours utilisé':'',coolUntil>Date.now()?'Pause après refus du serveur : '+Math.ceil((coolUntil-Date.now())/1000)+' s':''].filter(Boolean);}};
+ window.Overpass737={stats,queue,pump,kind,gpsStats,report(){return [gps(),line('routes','Routes'),line('zones','Zones bâties'),hint&&Date.now()-hint.at<90000?'Adresse : '+(hint.type||'')+(hint.house?' (maison à moins de 60 m)':'')+' '+age(hint.at):'',gpsStats.error?'Erreur '+gpsStats.error+' '+age(gpsStats.errorAt):'',Date.now()<spareUntil?'Serveur de secours utilisé':'',coolUntil>Date.now()?'Pause après refus du serveur : '+Math.ceil((coolUntil-Date.now())/1000)+' s':''].filter(Boolean);}};
 
  // Diagnostic lisible dans Widgets → Vue voiture et route.
  const widgets=SETCATS.find(c=>c[0]==='Widgets');

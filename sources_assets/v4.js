@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.37';
+const APP_VERSION = '7.38';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.38','Novembre 2026',['Décor : position « réseau » approximative ignorée quand le GPS précis est récent','Recherche des routes indépendante des autres fonctions : une erreur ailleurs ne la bloque plus','Village ou ville reconnu par une maison adressée toute proche quand le serveur cartographique ne répond pas','Diagnostic : adresse utilisée et dernière erreur de réception GPS']],
  ['7.37','Novembre 2026',['Décor : requêtes cartographiques envoyées une par une, routes en priorité, pause et serveur de secours quand le serveur public sature','Autoroute et rues reconnues par l’adresse quand les données routières manquent','Dernier décor conservé 5 minutes au lieu de revenir sur Campagne','Widgets → Vue voiture et route : état du GPS et des requêtes cartographiques']],
  ['7.36','Novembre 2026',['Widget voiture : cadence régulière calée sur l’écran (60, 30, 20 ou 15 images/s selon le poste)','Plus de saut du décor au bouclage : la boucle précédente s’efface en continuant d’avancer','Décor ville ou village reconnu sur les grands axes grâce aux rues alentour, même sans zone cartographiée','Décor conservé une minute quand le GPS devient imprécis entre les immeubles','Dessin allégé : champs, forêts et façades regroupés en beaucoup moins de tracés']],
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],

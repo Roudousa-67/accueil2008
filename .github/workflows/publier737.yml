@@ -1,8 +1,6 @@
 name: Construire et publier APK 7.37
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/publier737.yml', 'sources_assets/**', 'outils/preparer_apk728.py', 'tests/**', 'distribution/release737.json']
+  # Version publiée : relance manuelle uniquement, pour ne pas reconstruire une ancienne version à chaque envoi sur main.
   workflow_dispatch:
 permissions:
   contents: write

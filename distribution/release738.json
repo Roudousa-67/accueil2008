@@ -1,0 +1,6 @@
+{
+  "version": "7.38",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.38/Accueil2008GT_v7.38.apk",
+  "sha256": "",
+  "notes": "Décor : la position « réseau » approximative (toutes les 10 s, précision d’environ 1 km) n’écrase plus la position GPS précise. La recherche des routes ne dépend plus des autres fonctions de l’appli : une erreur ailleurs (trajet, stations) ne la bloque plus. Quand le serveur cartographique ne répond pas, une maison adressée à moins de 60 m suffit pour afficher Village ou Ville, et l’autoroute reste reconnue par l’adresse.\nWidgets → Vue voiture et route → Données du décor indique aussi l’adresse utilisée et la dernière erreur de réception GPS.\nTests sur l’autoradio restant à effectuer.\n"
+}

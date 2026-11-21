@@ -64,6 +64,35 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  t.advance(10000);run('loc.lat+=0.000001');assert.equal(w.roadScene(),'campagne','abandonné après 5 min sans aucune donnée');
  console.log('OK autoroute reconnue par l’adresse quand Overpass manque, décor conservé 5 min');
 
+ // 5. 7.38 : maison adressée à moins de 60 m → zone habitée, même sans Overpass.
+ pending.length=0;
+ run("store.set('roadScene','auto');plList=[{n:'Geispolsheim-Gare',k:'village',lat:loc.lat+0.001,lon:loc.lon}];plAt=Date.now();plPos={lat:loc.lat,lon:loc.lon};");
+ run("window.rev738=getJSON('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+loc.lat.toFixed(6)+'&lon='+loc.lon.toFixed(6)+'&zoom=18')");await flush();
+ const house=pending.find(p=>p.url.includes('nominatim'));
+ answer(pending.indexOf(house),true,{category:'place',type:'house',lat:String(run('loc.lat')+0.0002),lon:String(run('loc.lon')),address:{house_number:'3',road:'Rue du Fort',village:'Geispolsheim-Gare'}});await flush();
+ assert.equal(run('RoadHint737(loc).kind'),'bâti','maison proche : zone habitée');
+ run("store.set('roadScene','village');roadScene();store.set('roadScene','auto');");
+ t.advance(1000);run('loc.lat+=0.000001');
+ assert.equal(w.roadScene(),'village','village reconnu par l’adresse sans données Overpass');
+ assert.match(run('RoadScene731.status.reason'),/indice adresse : maison proche/);
+ console.log('OK village reconnu par une maison adressée à moins de 60 m');
+
+ // 6. 7.38 : position réseau imprécise ignorée, étapes de réception isolées.
+ pending.length=0;
+ run('onLoc(48.58,7.74,30,6,90,150)');const precise=run('loc.acc');
+ run('onLoc(48.583,7.736,-1,1400,-1,-9999)');
+ assert.equal(run('loc.acc'),precise,'position réseau ignorée tant que le GPS précis est récent');
+ assert.equal(run('Overpass737.gpsStats.ignored'),1);
+ t.advance(6000);run('onLoc(48.583,7.736,-1,1400,-1,-9999)');
+ assert.equal(run('loc.acc'),1400,'acceptée quand le GPS précis manque depuis plus de 5 s');
+ run("window.tripOnLoc=()=>{throw Error('trajet illisible')};Road723.at=0;Road723.attempt=0;");
+ t.advance(1000);run('onLoc(48.58,7.74,30,6,90,150)');await flush();
+ assert.equal(run('loc.acc'),6,'position enregistrée malgré l’erreur');
+ assert(pending.some(p=>/around%3A1000%2C|around:1000,/.test(p.url)),'routes demandées malgré l’erreur du trajet');
+ assert.match(run('Overpass737.report().join(" | ")'),/Erreur réception GPS : trajet illisible/);
+ for(const p of overpass())answer(pending.indexOf(p),true,{elements:[]});await flush();
+ console.log('OK position réseau ignorée, recherche des routes protégée des erreurs, erreur affichée');
+
  // 4. Diagnostic visible dans les réglages.
  run("tab='settings';openSet('Widgets','Vue voiture et route');render();");
  const text=w.document.body.textContent;
