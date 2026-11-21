@@ -113,7 +113,8 @@ function pacing(drawMs){
  t.advance(1000);run('loc.acc=80');
  assert.equal(w.roadScene(),'ville','GPS imprécis : décor conservé');
  t.advance(50000);assert.equal(w.roadScene(),'ville','encore conservé après 50 s');
- t.advance(15000);assert.equal(w.roadScene(),'campagne','abandonné après une minute sans GPS exploitable');
+ t.advance(200000);assert.equal(w.roadScene(),'ville','conservé jusqu’à 5 min (7.37)');
+ t.advance(60000);assert.equal(w.roadScene(),'campagne','abandonné après 5 min sans GPS exploitable');
  t.pos(p.lat,p.lon);load([way({highway:'motorway'},5,[[-600,0],[600,0]]),...streets]);
  assert.equal(w.roadScene(),'autoroute');
  // Échangeur : route non identifiée pendant quelques secondes, rues proches.
