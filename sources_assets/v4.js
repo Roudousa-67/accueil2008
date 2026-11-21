@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.36';
+const APP_VERSION = '7.37';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.37','Novembre 2026',['Décor : requêtes cartographiques envoyées une par une, routes en priorité, pause et serveur de secours quand le serveur public sature','Autoroute et rues reconnues par l’adresse quand les données routières manquent','Dernier décor conservé 5 minutes au lieu de revenir sur Campagne','Widgets → Vue voiture et route : état du GPS et des requêtes cartographiques']],
  ['7.36','Novembre 2026',['Widget voiture : cadence régulière calée sur l’écran (60, 30, 20 ou 15 images/s selon le poste)','Plus de saut du décor au bouclage : la boucle précédente s’efface en continuant d’avancer','Décor ville ou village reconnu sur les grands axes grâce aux rues alentour, même sans zone cartographiée','Décor conservé une minute quand le GPS devient imprécis entre les immeubles','Dessin allégé : champs, forêts et façades regroupés en beaucoup moins de tracés']],
  ['7.31','Novembre 2026',['Voiture alignée sur la voie dans les différents décors','Autoroutes et routes réglementées reconnues par les données cartographiques','Distinction entre village, ville, campagne et forêt','Rendu stabilisé lors des changements de décor']],
  ['7.30','Novembre 2026',['Décors ville, village, campagne, forêt et autoroute détaillés','Taille de la voiture, météo et contraste avec aperçu direct','Multimédia compact ou détaillé : couleurs, écriture et disposition','Barre personnalisable et toutes les applications en grille','Masquage du GPS lors du passage aux réglages et aux autres pages']],

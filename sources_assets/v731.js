@@ -9,7 +9,7 @@
  // Le pont Android abandonne une requête après 17 s : rester en dessous.
  const CONTEXT_RADIUS=700, CONTEXT_REUSE=600;
  let active = null, candidate = null, confirmedAt = 0, sampled = null, sampledScene = null, manualBefore;
- const status = { reason:'', match:'', density:null, context:0 };
+ const status = { reason:'', match:'', density:null, context:0, hint:'' };
  const distance = (a,b) => hav(a.lat,a.lon,b.lat,b.lon)*1000;
  const samePoint = (a,b) => a.lat===b.lat && a.lon===b.lon;
  const validLine = line => Array.isArray(line) && line.length>=2 && line.every(Place710.valid);
@@ -186,9 +186,9 @@
   if(manual!==manualBefore) { active=null; candidate=null; sampled=null; manualBefore=manual; }
   if(manual!=='auto' && settings.includes(manual)) return manual;
   const now=Date.now();
-  // 7.36 : GPS dégradé (immeubles, tunnel) ou données momentanément absentes :
-  // conserver le dernier décor confirmé une minute au lieu de basculer sur Campagne.
-  const keepFor=60000;
+  // GPS dégradé (immeubles, tunnel) ou données cartographiques absentes : conserver le
+  // dernier décor confirmé (5 min en 7.37) plutôt que de retomber sur Campagne.
+  const keepFor=300000;
   if(!usable(loc)) {
    candidate=null; sampled=null; status.reason='GPS imprécis ou ancien : décor précédent conservé';
    if(now-confirmedAt>keepFor) active=null;
@@ -205,8 +205,12 @@
   const match=Road723.match,density=streetDensity(loc);
   // Sans route reconnue ni rues ni zones chargées, rien ne permet de trancher.
   const informed=!!match || density!==null || map.areas.length>0;
-  const next=sampledScene=informed?environment(loc,match,map,density):null;
-  status.match=match?match.tags.highway:'';status.density=density;status.context=map.areas.length;
+  let next=informed?environment(loc,match,map,density):null,hint=null;
+  // 7.37 : sans aucune donnée Overpass, type de la voie la plus proche donné par
+  // l'adresse Nominatim (autoroute ou rue résidentielle), récent et à moins de 1 km.
+  if(!informed&&typeof window.RoadHint737==='function'){hint=RoadHint737(loc);if(hint)next=hint.kind==='autoroute'?'autoroute':environment(loc,null,map,450);}
+  sampledScene=next;
+  status.match=match?match.tags.highway:'';status.density=density;status.context=map.areas.length;status.hint=hint?hint.type:'';
   if(!next) {
    candidate=null; status.reason='Données cartographiques absentes : décor précédent conservé';
    if(now-confirmedAt>keepFor) active=null;
@@ -223,7 +227,7 @@
   } else if(loc.ts-candidate.stamp>=confirm) {
    active=next; candidate=null;
   }
-  status.reason=(match?'Route '+match.tags.highway:'Route non identifiée')+(density!==null?' · rues '+Math.round(density)+' m':'')+(map.areas.length?' · '+map.areas.length+' zones':'');
+  status.reason=(match?'Route '+match.tags.highway:'Route non identifiée')+(density!==null?' · rues '+Math.round(density)+' m':'')+(map.areas.length?' · '+map.areas.length+' zones':'')+(hint?' · indice adresse : '+hint.type:'');
   return active;
  }
  window.RoadScene731={regulated,decode,environment,refresh,context,streetDensity,status};

@@ -1,8 +1,6 @@
 name: Construire et publier APK 7.35
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/publier735.yml', 'tests/regression.cjs', 'tests/widget728.cjs', 'tests/accueil730.cjs']
+  # Version publiée : relance manuelle uniquement, pour ne pas reconstruire une ancienne version à chaque envoi sur main.
   workflow_dispatch:
 permissions:
   contents: write
