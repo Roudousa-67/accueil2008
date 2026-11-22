@@ -1,6 +1,6 @@
 {
   "version": "7.39",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.39/Accueil2008GT_v7.39.apk",
-  "sha256": "",
+  "sha256": "e48d1b2af8fe6fa18ef5ed4e2b81a9dc29aa3f11158786648a1b0ed9954871ef",
   "notes": "Stations : filtres en menus déroulants (carburant, rayon, paiement, tri, pays) ; la carte remonte dans l’écran.\nAutoroute : panneaux de sortie placés à la vraie distance, tous les kilomètres (ou 2 km et 1 km), panneaux de la prochaine station avec le prix, petit panneau en haut à droite dès 500 m. Réglage : GPS et navigation → Panneaux d’autoroute.\nComprend toute la 7.38 : cartes des trajets et des stations, soleil et lune réels, météo dans tous les décors avec neige au sol, stations avec AdBlue et paiement, prix allemands, tickets et GPX par QR, rapport de diagnostic, réglages rangés.\nTests sur l’autoradio restant à effectuer."
 }
