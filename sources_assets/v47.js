@@ -243,7 +243,7 @@ function pageTracks(p) {
   let head = `<div style="color:${p.mut};font-size:15px">Choisis un parcours dans la liste.</div>`;
   if (sel) { const live = trkSel === 'cur', ms = (live ? Date.now() : sel.t1) - sel.t0, avg = ms > 60000 ? sel.km / (ms / 3600e3) : 0;
     head = `<div style="display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap">${stat('Distance', `<span ${live ? 'data-k="trkKm"' : ''}>${fr1(sel.km)}</span> km`)}${stat('Durée', `<span ${live ? 'data-k="trkDur"' : ''}>${dur47(ms)}</span>`)}${stat('Moyenne', `${Math.round(avg)} km/h`)}${stat('Vitesse max', `${Math.round(sel.mx || 0)} km/h`)}<span style="flex:1"></span>${live ? chipBtn(p, 'trk:stop', 'Arrêter et enregistrer', true) : chipBtn(p, 'trk:full', 'Détails', true) + chipBtn(p, 'trk:del:' + sel.id, trkDelArm === sel.id ? 'Confirmer ?' : 'Supprimer')}</div>
-    <div style="font-size:13.5px;color:${p.mut};${ell}">${day47(sel.t0)} ${fmtDate(sel.t0)} · ${fmtTime(sel.t0)}${live ? '' : ' → ' + fmtTime(sel.t1)} · ${esc(sel.from || 'Départ')} → ${esc(live ? 'en cours…' : sel.to || 'Arrivée')}</div>`; }
+    <div style="font-size:13.5px;color:${p.mut};${ell}">${day47(sel.t0)} ${fmtDate(sel.t0)} · ${fmtTime(sel.t0)}${live ? '' : ' → ' + fmtTime(sel.t1)} · ${esc(sel.from || 'Départ')} → ${esc(live ? 'en cours…' : sel.to || 'Arrivée')}</div>` + (window.RoadsTaken738 ? `<div class="scroll" style="max-height:118px">${RoadsTaken738.html(sel.id)}</div>` : ''); }
   return pageFrame(p, `<div style="display:grid;grid-template-columns:min(400px,43%) minmax(0,1fr);gap:12px;flex:1;min-height:0">
     <div style="${card(p, 'padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0')}">
       <div style="display:flex;gap:8px">${sums}</div>
@@ -1311,7 +1311,7 @@ async function st47Update(force) {
       let pr = k ? parseFloat(r[k]) : NaN; if (pr > 10) pr /= 1000; if (!(pr > 0)) continue;
       const g = r.geom || {}, la = +g.lat || (+r.latitude > 1000 ? r.latitude / 1e5 : +r.latitude), lo = +g.lon || (+r.longitude > 1000 ? r.longitude / 1e5 : +r.longitude);
       const mj = r[fk + '_maj'] ? Date.parse(r[fk + '_maj']) : 0;
-      out.push({ c: 'FR', name: r.enseigne || r.nom || r.ville || 'Station', addr: [r.adresse, r.ville].filter(Boolean).join(', '), price: pr, lat: la, lon: lo, maj: mj });
+      out.push({ c: 'FR', name: r.enseigne || r.nom || (r.ville ? 'Station de ' + String(r.ville).replace(/\b\w/g, (m) => m.toUpperCase()) : 'Station'), addr: [r.adresse, r.ville].filter(Boolean).join(', '), price: pr, lat: la, lon: lo, maj: mj });
     }
   } catch (e) { /* pas de réseau ou flux indisponible */ }
   // --- Allemagne

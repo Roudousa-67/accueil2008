@@ -1415,6 +1415,63 @@ villageSquare=function(x,y,s,id){
 const LOOP736={autoroute:1120,campagne:330,foret:450,village:400,ville:400},LEAD736={autoroute:300,campagne:0,foret:560,village:300,ville:660};
 function loopMetres(metres,sc){const loop=LOOP736[sc]??400,lead=LEAD736[sc]??0;return mod(metres,loop+lead)-lead;}
 let blendCanvas=null;
+// 7.38 : soleil, lune et étoiles à leur place réelle. Hauteur selon l'heure et la
+// position GPS (SunCalc), direction par rapport au cap de la voiture : un astre situé
+// derrière la voiture n'apparaît pas devant. Sans GPS ni cap : vue vers le sud.
+let skyCache738=null,heading738=null;
+// Lumière dorée quand le soleil réel est à moins de 7° au-dessus de l'horizon (matin et soir).
+function duskNow738(sky){
+ if(window.SunCalc&&window.RoadSky719&&typeof loc!=='undefined'&&loc&&Number.isFinite(loc.lat)&&Number.isFinite(loc.lon))return SunCalc.getPosition(RoadSky719.now(),loc.lat,loc.lon).altitude*180/Math.PI<7;
+ return !!(sky&&sky.hour>=17&&sky.hour<21);
+}
+function skyBodies738(){
+ if(!window.RoadSky719||!RoadSky719.enabled())return;
+ const wx=roadKind().wx;if(/^(pluie|orage|brouillard)$/.test(wx))return;
+ const date=RoadSky719.now(),p=typeof loc!=='undefined'&&loc&&Number.isFinite(loc.lat)&&Number.isFinite(loc.lon)?loc:null;
+ if(p&&Number.isFinite(p.brg)&&p.brg>=0&&(p.spd||0)>5)heading738=p.brg;
+ const key=[Math.floor(date.getTime()/5000),p?p.lat.toFixed(2):'',p?p.lon.toFixed(2):'',heading738==null?'':Math.round(heading738/2)].join('|');
+ if(!skyCache738||skyCache738.key!==key){
+  const bodies=[];
+  if(window.SunCalc&&p){
+   const ill=SunCalc.getMoonIllumination(date);
+   for(const [kind,q] of [['sun',SunCalc.getPosition(date,p.lat,p.lon)],['moon',SunCalc.getMoonPosition(date,p.lat,p.lon)]]){
+    const az=(q.azimuth*180/Math.PI+180+360)%360,alt=q.altitude*180/Math.PI;   // SunCalc : azimut compté depuis le sud
+    const rel=heading738==null?az-180:((az-heading738+540)%360)-180;
+    if(alt<-1.5||Math.abs(rel)>100)continue;
+    bodies.push({kind,x:W*(.5+rel/210),alt,frac:ill.fraction,waxing:ill.phase<.5});
+   }
+  }else{
+   const h=date.getHours()+date.getMinutes()/60;
+   if(h>=6&&h<=20)bodies.push({kind:'sun',x:W*(.08+.84*(h-6)/14),alt:55*Math.sin(Math.PI*(h-6)/14)});
+   if(h>=19||h<=7){const u=((h>=19?h-19:h+5))/12;bodies.push({kind:'moon',x:W*(.08+.84*u),alt:40*Math.sin(Math.PI*u),frac:.6,waxing:true});}
+  }
+  skyCache738={key,bodies,stars:Array.from({length:34},(_,i)=>({x:rnd(i+700)*W,y:TOP+4+rnd(i+760)*(HZ-TOP-30),a:.25+rnd(i+820)*.55}))};
+ }
+ const cloudy=wx==='nuages';
+ if(night&&!cloudy)for(const st of skyCache738.stars){c.globalAlpha=st.a*(.75+.25*Math.sin(t*1.7+st.x));c.fillStyle='#e8eeff';c.fillRect(st.x,st.y,1.1,1.1);}
+ c.globalAlpha=1;
+ // Le canevas n'a pas la même échelle en largeur et en hauteur : compenser pour des disques ronds.
+ const m=c.getTransform(),k=m.d?m.a/m.d:1;
+ for(const b of skyCache738.bodies){
+  // Au-dessus des collines lointaines tant que l'astre est levé ; il passe derrière en se couchant.
+  const sun=b.kind==='sun',r=sun?10:8,base=HZ-30,y=b.alt>=0?base-(base-TOP-14)*Math.min(1,b.alt/50):base-b.alt*9,low=b.alt<10;
+  c.save();c.globalAlpha=cloudy?.6:(!sun&&!night?.5:1);
+  const g=c.createRadialGradient(b.x,y,r*.4,b.x,y,r*(sun?(low?6:4.5):3));
+  g.addColorStop(0,sun?(low?'#ffb26a88':'#fff1b070'):'#dfe8ff40');g.addColorStop(1,sun?(low?'#ffb26a00':'#fff1b000'):'#dfe8ff00');
+  c.translate(b.x,y);c.scale(1,k);c.translate(-b.x,-y);
+  c.fillStyle=g;c.fillRect(b.x-r*6,y-r*6,r*12,r*12);
+  if(sun){c.fillStyle=low?'#ffcd7c':'#fff4cc';c.beginPath();c.arc(b.x,y,r,0,7);c.fill();}
+  else{
+   // Phase : disque éclairé, puis ombre décalée du côté sombre (croissant ou gibbeuse).
+   c.beginPath();c.arc(b.x,y,r,0,7);c.clip();
+   c.fillStyle='#f2f3ea';c.fillRect(b.x-r,y-r,2*r,2*r);
+   const shift=2*r*Math.max(0,Math.min(1,b.frac));
+   c.fillStyle=night?'#1a2840':'#a9c6dc';c.globalAlpha*=.92;
+   c.beginPath();c.arc(b.x+(b.waxing?-shift:shift),y,r*1.02,0,7);c.fill();
+  }
+  c.restore();
+ }
+}
 function renderLive(cv,T,metres,speed){metres=Number.isFinite(metres)?Math.max(0,metres):0;roadTravel=metres;
  const currentScene=roadScene(),span=(LOOP736[currentScene]??400)+(LEAD736[currentScene]??0),m=loopMetres(metres,currentScene);
  paintLive(cv,T,m,speed,currentScene,true);
@@ -1438,14 +1495,14 @@ function paintLive(cv,T,metres,speed,currentScene,main){
  }
  c=cv.getContext('2d');if(!c)return;if(!c.roundRect)c.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this};c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
  t=T;travelled=metres;scene=currentScene;ruralSeason=productionSeason730();const kind=roadKind();night=!!kind.night;
- const sky=window.RoadSky719&&RoadSky719.current();dusk=!night&&((sky&&sky.hour>=17&&sky.hour<21)||false);
+ const sky=window.RoadSky719&&RoadSky719.current();dusk=!night&&duskNow738(sky);
  const fresh=window.Road723&&Road723.fresh()&&Road723.match&&Date.now()-Road723.at<60000;
  const tags=fresh?Road723.match.tags:{};liveLimit=fresh&&Number.isFinite(limit)&&limit>0&&parseMax(tags.maxspeed)===limit?limit:0;
  zone30=liveLimit===30&&/zone.*30|30.*zone/i.test(String(tags['zone:maxspeed']||tags['maxspeed:type']||''));
  const locality=fresh&&['ville','village'].includes(scene)?Place710.here(.2):null;
  panelName=locality?locality.name.toLocaleUpperCase('fr'):'';
  roadRef=fresh?String(tags.ref||'').slice(0,12):'';euroRef=fresh?String(tags['int_ref']||'').slice(0,12):'';
- const g=c.createLinearGradient(0,TOP,0,HZ);g.addColorStop(0,night?'#091526':dusk?'#747493':'#78b2d3');g.addColorStop(1,night?'#283e57':dusk?'#e4b38f':'#c7dce4');rect(0,TOP,W,HZ-TOP,g);rect(0,HZ,W,BOT-HZ,night?'#253d32':'#72965d');
+ const g=c.createLinearGradient(0,TOP,0,HZ);g.addColorStop(0,night?'#091526':dusk?'#747493':'#78b2d3');g.addColorStop(1,night?'#283e57':dusk?'#e4b38f':'#c7dce4');rect(0,TOP,W,HZ-TOP,g);skyBodies738();rect(0,HZ,W,BOT-HZ,night?'#253d32':'#72965d');
  if(scene==='ville')rect(0,HZ,W,BOT-HZ,night?'#38464d':'#a7afa5');countrysideBackdrop();villageBackdrop();villageLandscape();villageLanes();villageRemoteHousing();cityBackdrop();if(scene==='campagne'||scene==='autoroute')landFields();ruralLandscapeAccents();ruralFarmWorld();ruralArrival();forestGround();forestLeafFloor();drawRoad();ruralWildEdges();villageWetRoad();restArea();if(scene==='foret')improvedForestWorld();
  const objects=[],gap=scene==='ville'?57:scene==='village'?58:90,d=distance();
  for(let n=Math.floor((d-40)/gap);n<Math.floor((d-40)/gap)+12;n++)for(const sg of [-1,1]){const z=60+n*gap+(sg<0?gap*.48:0)-d;if(z< -30||z>480)continue;objects.push({q:depthQ(z),id:n+18+(sg<0?3:0),sg})}
@@ -2202,8 +2259,8 @@ function motorwayDraw(cv,T,metres,speed,main=true){
  }
  c=cv.getContext('2d');if(!c)return;
  c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
- t=T;travelled=metres;scene='autoroute';night=!!roadKind().night;dusk=!night&&!!(window.RoadSky719&&RoadSky719.current()&&RoadSky719.current().hour>=17&&RoadSky719.current().hour<21);
- const sky=c.createLinearGradient(0,TOP,0,HZ);sky.addColorStop(0,night?'#102132':dusk?'#9096a2':/^(pluie|orage)$/.test(roadKind().wx)?'#9eb8bd':'#8ab8c9');sky.addColorStop(1,night?'#2c423e':dusk?'#d1baa0':'#d2dfcf');rect(0,TOP,W,HZ-TOP,sky);rect(0,HZ,W,BOT-HZ,night?'#314b36':'#849d68');
+ t=T;travelled=metres;scene='autoroute';night=!!roadKind().night;dusk=!night&&duskNow738(window.RoadSky719&&RoadSky719.current());
+ const sky=c.createLinearGradient(0,TOP,0,HZ);sky.addColorStop(0,night?'#102132':dusk?'#9096a2':/^(pluie|orage)$/.test(roadKind().wx)?'#9eb8bd':'#8ab8c9');sky.addColorStop(1,night?'#2c423e':dusk?'#d1baa0':'#d2dfcf');rect(0,TOP,W,HZ-TOP,sky);skyBodies738();rect(0,HZ,W,BOT-HZ,night?'#314b36':'#849d68');
  mbackdrop();mfields();mroad();mrestArea();mexit();munderpass();
  const items=[...msceneryItems(),...mtrafficItems()];for(const o of items.sort((a,b)=>b.z-a.z)){c.save();c.globalAlpha=Math.min(1,Math.max(0,(750-(o.z-distance()))/160));o.draw();c.restore();}
  mbarriers();mbridge();mgantry();mgantry(930);
