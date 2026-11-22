@@ -1,6 +1,6 @@
 {
   "version": "7.40",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.40/Accueil2008GT_v7.40.apk",
-  "sha256": "",
+  "sha256": "781c3bbabe281e255d4477075a1812115d69d85f4a4a1a81c20782ca9ce29db7",
   "notes": "Météo devant toi : un petit message dans le widget de la route quand de la pluie, de la neige, un orage, du brouillard ou du verglas arrive (touche-le pour le détail, la croix l’enlève).\nBouchons en direct : avec ta clé TomTom gratuite (GPS et navigation → Bouchons en direct), message « Bouchon à 2 km » et couleurs de circulation sur les cartes.\nPéages : estimation pendant tes trajets sur autoroute à péage, dans le détail du trajet (prix au km réglable).\nDécor : panneau de sortie barré en quittant un village, saisons dans tous les décors.\nComprend les 7.38 et 7.39. Tests sur l’autoradio restant à effectuer."
 }
