@@ -72,7 +72,7 @@ jobs:
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.38 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.38" --notes "Version 7.38 : décor — GPS réseau imprécis ignoré, recherche des routes protégée, village reconnu par l’adresse. Essais sur autoradio à effectuer."
+          gh release create v7.38 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.38" --notes "Version 7.38 : décor (GPS réseau ignoré, village par l’adresse) ; soleil, lune, lever et coucher réels ; météo dans tous les décors avec neige au sol et orages ; panneaux d’autoroute (prochaine sortie, prochaine station et son prix) ; stations filtrées (carburant, AdBlue, rayon, paiement) avec carte ; cartes des trajets ; tickets et GPX par QR via l’autoradio ; rapport de diagnostic ; réglages rangés. Essais sur autoradio à effectuer."
           mkdir -p "$RUNNER_TEMP/check"
           gh release download v7.38 --pattern Accueil2008GT_v7.38.apk --dir "$RUNNER_TEMP/check"
           cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.38.apk"
