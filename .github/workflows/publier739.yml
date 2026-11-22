@@ -66,7 +66,7 @@ jobs:
           set -euo pipefail
           apk="$RUNNER_TEMP/Accueil2008GT_v7.39.apk"
           aapt="$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)"
-          "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='108' versionName='7.39'"
+          "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='109' versionName='7.39'"
           sha256sum "$apk"
           if gh release view v7.39 >/dev/null 2>&1; then
             echo 'La release existe déjà : ne pas écraser un APK publié.'
