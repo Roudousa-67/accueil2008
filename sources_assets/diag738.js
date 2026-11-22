@@ -74,6 +74,11 @@
   }
   for (const name of ['Prix carburant France', 'Prix carburant Allemagne']) { const s = sv[name]; if (s && s.fail && s.failAt > s.okAt) add('stations', 'todo', `${name} : dernier échec ${ago(s.failAt)} — ${s.error}.`); }
   if (loc && safe(() => st47InDE(loc.lat, loc.lon), false) && !String(store.get('tkKey', '') || '').trim()) add('stations', 'info', 'Prix allemands indisponibles : aucune clé Tankerkönig enregistrée.', '', ['journey733:stationSettings', 'Réglages']);
+  const S738 = safe(() => Stations738.state, null), H738 = safe(() => Highway738.state, null);
+  if (S738 && S738.frError) add('stations', 'todo', S738.frError, 'Vérifie Internet (carte SIM) puis Actualiser dans Carburant → Stations.');
+  if (S738 && S738.osmError) add('stations', 'info', S738.osmError); else if (S738 && S738.osmAt) add('stations', 'ok', `Paiement et AdBlue (OpenStreetMap) : ${S738.osm.length} stations décrites autour de toi.`);
+  if (H738 && H738.exitsAt) add('carto', H738.exitError ? 'todo' : 'ok', H738.exitError ? 'Sorties d’autoroute : ' + H738.exitError : `Sorties d’autoroute connues : ${H738.exits.length} (recherche ${ago(H738.exitsAt)}).`);
+  if (H738 && H738.stAt) add('stations', H738.stError ? 'todo' : 'ok', H738.stError ? 'Stations d’autoroute : ' + H738.stError : `Stations d’autoroute jusqu’à 60 km : ${H738.stations.length} (${H738.source}).`);
   // --- Transfert QR
   const tr = safe(() => Transfer738.status(), null);
   if (!tr) add('transfert', 'info', 'Serveur de transfert non disponible dans cette version.');
@@ -105,7 +110,7 @@
   if (broken.length) broken.forEach(b => add('reglages', 'bad', 'Page de réglages en erreur : ' + b, 'Envoie-moi ce rapport.'));
   else add('reglages', 'ok', `${pages} pages de réglages vérifiées : toutes s’affichent.`);
   // --- Fonctionnement de l'appli : modules et décors
-  const modules = [['Route', 'Road723'], ['Choix du décor', 'RoadScene731'], ['Lieux', 'Place710'], ['Décors', 'Decors726'], ['Requêtes cartographiques', 'Overpass737'], ['Cartes', 'Maps738'], ['Routes empruntées', 'RoadsTaken738'], ['Trajets', 'Journeys733'], ['Transfert', 'Transfer738']];
+  const modules = [['Route', 'Road723'], ['Choix du décor', 'RoadScene731'], ['Lieux', 'Place710'], ['Décors', 'Decors726'], ['Requêtes cartographiques', 'Overpass737'], ['Cartes', 'Maps738'], ['Routes empruntées', 'RoadsTaken738'], ['Trajets', 'Journeys733'], ['Transfert', 'Transfer738'], ['Stations', 'Stations738'], ['Autoroute', 'Highway738'], ['Météo du décor', 'Weather738']];
   // Certains modules sont des déclarations globales (const), pas des propriétés de window.
   const exists = name => safe(() => new Function(`return typeof ${name} !== 'undefined'`)(), false);
   const missing = modules.filter(([, g]) => !exists(g)).map(([n]) => n);

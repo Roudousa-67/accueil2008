@@ -8,12 +8,14 @@
  // pause croissante après un refus et serveur de secours pendant deux minutes.
  const MAIN='https://overpass-api.de/api/interpreter?data=';
  const SPARE='https://overpass.kumi.systems/api/interpreter?data=';
- const PRIORITY={routes:0,zones:1,test:1,localites:2,dangers:3,autre:3};
+ const PRIORITY={routes:0,zones:1,test:1,sorties:2,localites:2,stations:3,dangers:3,autre:3};
  const base=window.getJSON;
  const queue=[];
  let running=null,coolUntil=0,backoff=0,spareUntil=0,timer=0;
  const stats={};
  function kind(query){
+  if(/motorway_junction/.test(query))return 'sorties';
+  if(/"amenity"="fuel"/.test(query))return 'stations';
   if(/is_in\(/.test(query))return 'zones';
   if(/highway~/.test(query)&&/around:1000,/.test(query))return 'routes';
   if(/around:25000/.test(query))return 'localites';
