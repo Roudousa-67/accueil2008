@@ -2329,10 +2329,54 @@ function mpanel(z,k,lines,color='#286b99',width=132){
 // villes, distance), le second la prochaine station avec le prix de ton carburant.
 // Sans données (pas d'Internet, hors autoroute) : lieux proches, comme avant.
 function gantryMode738(z){
+ // 7.39 : avec les panneaux synchronisés, les portiques fixes du décor ne montrent plus que les lieux proches.
+ if(sync739())return ['near',null];
  const hw=window.Highway738&&Highway738.signs?Highway738.signs():null,ex=hw&&hw.exit,st=hw&&hw.station;
  if(z!==90&&st)return ['station',st];if(ex)return ['exit',ex];if(st)return ['station',st];return ['near',null];
 }
-const dist738=d=>d<1?Math.max(100,Math.round(d*10)*100)+' m':(d<10?d.toFixed(1).replace('.',','):String(Math.round(d)))+' km';
+// 7.39 : panneaux placés à la vraie distance. Chaque seuil (5 km, 4 km… ou 2 km, 1 km, 500 m)
+// fait apparaître un portique 600 m devant : on le passe quand la sortie est vraiment à cette distance.
+const ev739={signs:[],done:new Set(),log:[]};
+function prefs739(){return window.Highway738&&Highway738.prefs?Highway738.prefs():null;}
+function sync739(){const pr=prefs739();return !!(pr&&(pr.exits||pr.stations)&&Highway738.signs&&Highway738.signs());}
+function syncSigns739(main){
+ const pr=prefs739(),data=pr&&Highway738.signs&&Highway738.signs();
+ if(main&&data){
+  const look=.6;
+  const spawn=(kind,obj,list,id)=>{for(const T of list){
+   const key=kind+'|'+id+'|'+T;if(ev739.done.has(key))continue;
+   const rem=obj.d-look;
+   if(rem<=T&&rem>T-.25){ev739.done.add(key);let S=roadTravel+look*1000;for(const g of ev739.signs)if(Math.abs(g.S-S)<140)S=g.S+140;ev739.signs.push({S,kind,T,data:Object.assign({},obj)});ev739.log.push([kind,T,Math.round(S)]);if(ev739.log.length>40)ev739.log.shift();}
+   else if(rem<=T-.25)ev739.done.add(key);
+  }};
+  const small=pr.small;
+  if(pr.exits&&data.exit)spawn('exit',data.exit,(pr.every==='km'?[5,4,3,2,1]:[2,1]).concat(small?[]:[.5]),data.exit.id);
+  if(pr.stations&&data.station)spawn('station',data.station,(pr.every==='km'?[10,5,4,3,2,1]:[10,5,2,1]).concat(small?[]:[.5]),data.station.id||data.station.name);
+ }
+ ev739.signs=ev739.signs.filter(g=>g.S-roadTravel>-30);
+ if(ev739.done.size>400)ev739.done.clear();
+}
+function drawSyncSigns739(){
+ for(const g of ev739.signs){const z=distance()+(g.S-roadTravel);if(mvisible(z,650))mgantry(z,[g.kind,Object.assign({},g.data,{d:g.T})]);}
+}
+// Petit panneau dès que la sortie (ou la station) est à 500 m : affiché tout de suite en haut à
+// droite de l'image, distance mise à jour, jusqu'au passage.
+function smallSign739(){
+ const pr=prefs739();if(!pr||!pr.small)return;
+ const data=Highway738.signs&&Highway738.signs();if(!data)return;
+ const ex=pr.exits&&data.exit&&data.exit.d<=.5&&data.exit.d>.03?data.exit:null,st=!ex&&pr.stations&&data.station&&data.station.d<=.5&&data.station.d>.03?data.station:null,o=ex||st;if(!o)return;
+ const m=c.getTransform(),k=m.d?m.a/m.d:1,w=W*.36,h=w*.42,x=W-w-14,y=TOP+12;
+ c.save();c.translate(x,y);c.scale(1,k);
+ c.fillStyle='#00000040';c.fillRect(4,5,w,h);c.fillStyle=ex?'#1f5fa8':'#1f5fa8';c.fillRect(0,0,w,h);c.strokeStyle='#ffffff';c.lineWidth=h*.035;c.strokeRect(h*.05,h*.05,w-h*.1,h-h*.1);
+ const pad=h*.12,box=h*.56;
+ if(ex){c.fillStyle='#ffffff';c.fillRect(pad,pad,box,box);c.fillStyle='#1f5fa8';c.font=`bold ${box*.2}px Inter, sans-serif`;c.textAlign='center';c.fillText('SORTIE',pad+box/2,pad+box*.27);fitText738(ex.ref||'→',pad+box/2,pad+box*.86,box*.9,box*.55,'#1f5fa8','center');
+  fitText738((ex.dest[0]||'Sortie'),pad*2+box,pad+h*.2,w-pad*3-box,h*.19,'#ffffff','left');}
+ else{pump738(pad,pad,box);fitText738(String(st.name||'Station'),pad*2+box,pad+h*.17,w-pad*3-box,h*.16,'#ffffff','left');if(st.price>0)fitText738(st.price.toFixed(3).replace('.',',')+' €',pad*2+box,pad+h*.42,w-pad*3-box,h*.22,'#ffd84d','left');}
+ const dm=Math.max(50,Math.round(o.d*20)*50);
+ fitText738(dm+' m',w-pad,h-pad*.9,w*.5,h*.3,'#ffffff','right');
+ c.restore();
+}
+const dist738=d=>d<1?Math.max(100,Math.round(d*10)*100)+' m':(Number.isInteger(d)||d>=10?String(Math.round(d)):d.toFixed(1).replace('.',','))+' km';
 // Texte ajusté à la largeur disponible (espace uniforme : 1 unité en largeur = 1 en hauteur).
 function fitText738(s,x,y,maxW,size,col,align='left',bold=true){
  let f=size;c.font=`${bold?'bold ':''}${f}px Inter, sans-serif`;const w=c.measureText(s).width;if(w>maxW&&w>0){f=Math.max(4,f*maxW/w);c.font=`${bold?'bold ':''}${f}px Inter, sans-serif`;}
@@ -2375,8 +2419,8 @@ function stationFace738(w,h,st){
  fitText738(st.c==='DE'?'Tankerkönig':'Prix officiel',pad,h-pad*1.1,w*.45,h*.12,'#c4d6ea','left',false);
  fitText738('dans '+dist738(st.d),w-pad,h-pad*1.1,w*.5,h*.19,'#ffffff','right');
 }
-function mgantry(z=90){
- const [mode,data]=gantryMode738(z);
+function mgantry(z=90,forced){
+ const [mode,data]=forced||gantryMode738(z);
  const rows=mode==='near'&&window.RoadNear728&&RoadNear728.period()?RoadNear728.closest():[];if(mode==='near'&&!rows.length||!mvisible(z,650))return;const q=worldQ(z),a=mp(z,.11),b=mp(z,1.19),aa=mp(z,.11,196),bb=mp(z,1.19,196);
  line([[a.x,a.y],[aa.x,aa.y],[bb.x,bb.y],[b.x,b.y]],night?'#8c9e98':'#a7b7ae',Math.max(1,6*q));
  const top=mp(z,.13,304),right=mp(z,1.17,304),bottom=mp(z,.13,196),w=right.x-top.x,h=bottom.y-top.y;
@@ -2419,8 +2463,7 @@ function mrestArea(){
  for(const [zz,k,id]of [[307,2.8,3],[283,3.0,4],[316,3.3,6]])if(mvisible(zz)){const p=mp(zz,k);person(p.x,p.y,64*worldQ(zz),id);}
  // Lighting is concentrated inside the rest area.
  for(const [zz,k]of [[220,1.85],[285,3.6],[318,2.0]]){if(!mvisible(zz))continue;const p=mp(zz,k),q=worldQ(zz);lamp(p.x,p.y,120*q,1);}
- const st738=window.Highway738&&Highway738.signs&&Highway738.signs(),next738=st738&&st738.station;
- mpanel(147,1.56,next738?['STATION  '+dist738(next738.d),next738.price>0?next738.price.toFixed(3).replace('.',',')+' €':'AIRE']:['P  ·  WC','AIRE DE REPOS']);
+ mpanel(147,1.56,['P  ·  WC','AIRE DE REPOS']);
 }
 function mexit(){
  if(distance()<625){
@@ -2493,10 +2536,10 @@ function motorwayDraw(cv,T,metres,speed,main=true){
  const sky=skyFill738('#8ab8c9','#d2dfcf',night?'#102132':dusk?'#9096a2':'#8ab8c9',night?'#2c423e':dusk?'#d1baa0':'#d2dfcf');rect(0,TOP,W,HZ-TOP,sky);sky738();rect(0,HZ,W,BOT-HZ,night?'#314b36':'#849d68');
  mbackdrop();mfields();snowGround738();mroad();mrestArea();mexit();munderpass();
  const items=[...msceneryItems(),...mtrafficItems()];for(const o of items.sort((a,b)=>b.z-a.z)){c.save();c.globalAlpha=Math.min(1,Math.max(0,(750-(o.z-distance()))/160));o.draw();c.restore();}
- mbarriers();mbridge();mgantry();mgantry(930);
+ syncSigns739(main);mbarriers();mbridge();mgantry();mgantry(930);drawSyncSigns739();
  // Illustrative speed limit, separate from the destinations.
  const speedLimit=productionLimit730();if(speedLimit&&mvisible(35)){const p=mp(35,1.38);sign(p.x,p.y,125*worldQ(35),speedLimit,false);}
- matmosphere();weatherFront738(cv,main);
+ matmosphere();weatherFront738(cv,main);smallSign739();
  const depth=(TOP+.92*(BOT-TOP)-HZ)/(BOT-HZ), left=mq(depth,.555), right=mq(depth,1.08);
  if(main)RoadCar731.place(cv,(left.x+right.x)/(2*W),(left.y-TOP)/(BOT-TOP),(right.x-left.x)/W);
  c.setTransform(1,0,0,1,0,0);
@@ -2505,6 +2548,6 @@ function motorwayDraw(cv,T,metres,speed,main=true){
 window.MotorwayStudy=MotorwayStudy;
 function productionSeason730(){const chosen=store.get('season730','auto');if(['printemps','ete','automne','hiver'].includes(chosen))return chosen;const m=new Date().getMonth();return m>=2&&m<=4?'printemps':m>=5&&m<=7?'ete':m>=8&&m<=10?'automne':'hiver';}
 function productionLimit730(){if(!window.Road723||!Road723.fresh()||!Road723.match)return 0;const value=parseMax(Road723.match.tags.maxspeed);return Number.isFinite(value)&&value>0?value:0;}
-window.Decors726={draw:renderLive,loopMetres,LOOP:LOOP736,LEAD:LEAD736};
+window.Decors726={draw:renderLive,loopMetres,LOOP:LOOP736,LEAD:LEAD736,signs739:ev739};
 RoadDecor721.draw=renderLive;
 })();

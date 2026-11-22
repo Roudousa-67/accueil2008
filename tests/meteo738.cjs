@@ -82,7 +82,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
  run("act('st738:rad:10');act('st738:country:DE')");assert(JSON.parse(run('JSON.stringify(Stations738.rows().map(s=>s.c))')).every(c=>c==='DE'),'pays');
  run("act('st738:country:all');render()");
  const html=run("document.querySelector('.st738').textContent");
- for(const s of ['Gazole','SP95-E10','AdBlue','30 km','Espèces','CB 24h/24','Moins chère'])assert(html.includes(s),'filtre affiché : '+s);
+ for(const s of ['Gazole','SP95-E10','AdBlue','30 km','Espèces','CB 24h/24','La moins chère'])assert(html.includes(s),'filtre affiché : '+s);
  run("act('st738:pick:FRTotalEnergies')");assert(run("document.querySelector('.st738-card').textContent").includes('Ouvrir dans Google Maps'),'fiche avec Waze et Google Maps');
  run("window.__open=[];Android.openUrl=u=>{__open.push(u);return true;};act('st738:gmaps:FRTotalEnergies');act('st738:go:FRTotalEnergies')");
  const opened=run('JSON.stringify(__open)');assert(/google\.com\/maps\/dir\/\?api=1&destination=/.test(opened)&&/waze\.com\/ul\?ll=/.test(opened),'liens d’itinéraire : '+opened);
