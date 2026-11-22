@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Envoi vers l'autoradio</title>
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--ink:#14223a;--muted:#5b6880;--accent:#1f3f99;--ok:#2e7d3c;--bad:#b3261e;--btn:#e6ebf5}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1626;--card:#172238;--ink:#e8edf8;--muted:#9fb0cc;--accent:#8fb0ff;--ok:#8fe0a6;--bad:#ffb3ae;--btn:#22314f}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,sans-serif}
+header{background:#1f3f99;color:#fff;padding:22px 18px 16px}header b{font-size:20px}header div{font-size:13.5px;opacity:.88;margin-top:4px}
+main{padding:12px 14px 30px;display:flex;flex-direction:column;gap:12px;max-width:560px;margin:0 auto}
+section{background:var(--card);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+h2{font-size:17px;margin:0}small,.muted{color:var(--muted);font-size:13.5px}
+label.btn,button,a.btn{display:block;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:16px;border:0;background:var(--btn);color:var(--ink);text-decoration:none;cursor:pointer}
+button.main{background:#61b04a;color:#fff}button:disabled{opacity:.5}
+input[type=file]{position:absolute;opacity:0;width:1px;height:1px}
+img{max-width:100%;border-radius:10px;display:block}
+.status{font-weight:700}.ok{color:var(--ok)}.bad{color:var(--bad)}
+progress{width:100%;height:10px}
+</style>
+<header><b>Accueil 2008 GT</b><div id="sub">Envoi vers l'autoradio</div></header>
+<main>
+ <section id="ticket" hidden>
+  <h2>Ticket de carburant</h2>
+  <img id="preview" alt="Aperçu du ticket" hidden>
+  <label class="btn" for="camera">📷 Prendre une photo</label><input id="camera" type="file" accept="image/*" capture="environment">
+  <label class="btn" for="gallery">Choisir dans mes photos</label><input id="gallery" type="file" accept="image/*">
+  <button id="sendPhoto" class="main" disabled>Envoyer à l'autoradio</button>
+ </section>
+ <section id="other" hidden>
+  <h2 id="otherTitle">Autres fichiers</h2>
+  <small>GPX de trajet, photo ou PDF · 15 Mo maximum.</small>
+  <label class="btn" for="any">Choisir un fichier</label><input id="any" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml,image/*,application/pdf">
+ </section>
+ <section id="download" hidden>
+  <h2>Rapport de diagnostic</h2>
+  <small>Télécharge-le, puis envoie-le dans la conversation.</small>
+  <a id="downloadLink" class="btn main" href="#">Télécharger le rapport</a>
+ </section>
+ <section id="state" hidden><progress id="bar" max="100" value="0" hidden></progress><div id="msg" class="status" role="status"></div><small id="hint"></small></section>
+</main>
+<script>
+'use strict';
+const params=new URLSearchParams(location.search),token=params.get('t')||'',$=id=>document.getElementById(id);
+let photo=null,expires=0;
+function say(text,kind,hint){$('state').hidden=false;$('msg').textContent=text;$('msg').className='status '+(kind||'');$('hint').textContent=hint||'';}
+async function info(){
+ try{const r=await fetch('/etat?t='+encodeURIComponent(token),{cache:'no-store'});if(!r.ok)throw 0;const s=await r.json();expires=s.expires;
+  if(s.kind==='telechargement'){$('download').hidden=false;$('downloadLink').href='/fichier?t='+encodeURIComponent(token)+'&nom='+encodeURIComponent(s.file);$('sub').textContent='Téléchargement depuis l\'autoradio';}
+  else if(s.kind==='gpx'){$('other').hidden=false;$('otherTitle').textContent='Trajet GPX';}
+  else{$('ticket').hidden=false;$('other').hidden=false;}
+  tick();
+ }catch(e){say('Lien expiré ou autoradio injoignable.','bad','Vérifie que ton téléphone est connecté au Wi-Fi de l\'autoradio, puis crée un nouveau QR.');}
+}
+function tick(){if(!expires)return;const m=Math.max(0,Math.ceil((expires-Date.now())/60000));$('sub').textContent=($('download').hidden?'Envoi':'Téléchargement')+' · lien valable encore '+m+' min';if(m>0)setTimeout(tick,20000);}
+// Photo réduite dans le téléphone : envoi rapide, même lisibilité du ticket.
+async function shrink(file){
+ const url=URL.createObjectURL(file);
+ try{const img=await new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=url;});
+  const k=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.82));
+ }finally{URL.revokeObjectURL(url);}
+}
+function upload(blob,type,name){
+ return new Promise(resolve=>{
+  const x=new XMLHttpRequest();x.open('POST','/envoi?t='+encodeURIComponent(token)+'&type='+encodeURIComponent(type)+'&nom='+encodeURIComponent(name||type));
+  $('bar').hidden=false;$('bar').value=0;
+  x.upload.onprogress=e=>{if(e.lengthComputable)$('bar').value=Math.round(e.loaded/e.total*100);};
+  x.onload=()=>{let r={};try{r=JSON.parse(x.responseText);}catch(e){}$('bar').hidden=true;
+   if(x.status===200&&r.ok)say('✓ Reçu par l\'autoradio','ok',type==='ticket'?'Il apparaît dans Trajets → Carburant → Mes pleins. Vérifie les montants avant d\'enregistrer.':'Le fichier est sur l\'autoradio.');
+   else say(r.error||'Envoi refusé ('+x.status+').','bad');resolve();};
+  x.onerror=()=>{$('bar').hidden=true;say('Envoi impossible.','bad','Vérifie que ton téléphone est toujours sur le Wi-Fi de l\'autoradio.');resolve();};
+  x.send(blob);
+ });
+}
+async function pickPhoto(e){const f=e.target.files[0];if(!f)return;say('Préparation de la photo…');try{photo=await shrink(f);$('preview').src=URL.createObjectURL(photo);$('preview').hidden=false;$('sendPhoto').disabled=false;say('Photo prête.','', 'Touche « Envoyer à l\'autoradio ».');}catch(err){say('Photo illisible : essaie une autre photo.','bad');}}
+$('camera').onchange=pickPhoto;$('gallery').onchange=pickPhoto;
+$('sendPhoto').onclick=async()=>{if(!photo)return;$('sendPhoto').disabled=true;say('Envoi…');await upload(photo,'ticket','ticket.jpg');$('sendPhoto').disabled=false;};
+$('any').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>15*1024*1024){say('Fichier trop gros (15 Mo maximum).','bad');return;}
+ const isImage=/^image\//.test(f.type),blob=isImage?await shrink(f):f,type=/\.gpx$/i.test(f.name)?'gpx':'fichier';say('Envoi…');await upload(blob,type,f.name);};
+info();
+</script>
+</html>

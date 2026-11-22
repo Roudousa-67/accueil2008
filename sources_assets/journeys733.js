@@ -2,7 +2,7 @@
 (() => {
  'use strict';
  const palette = ['#61b1ff','#ed9c64','#a99aff'];
- const state = {view:'history',period:'month',driver:'all',from:'',to:'',query:'',minKm:'',maxKm:'',minMinutes:'',maxMinutes:'',minCost:'',maxCost:'',selected:null,fuelView:'fills',stationSort:'price',country:'all',busy:false};
+ const state = {view:'history',period:'month',driver:'all',from:'',to:'',query:'',minKm:'',maxKm:'',minMinutes:'',maxMinutes:'',minCost:'',maxCost:'',selected:null,fuelView:'fills',stationSort:'distance',country:'all',busy:false};
  let pendingReceipt=null,receiptGeneration=0;
  const extra = () => store.get('journeyNotes733', {});
  const num = value => Number(String(value ?? '').replace(',', '.'));
@@ -44,13 +44,13 @@
   return `<div class="j733-kpis">${[['Trajets',n.count],['Distance',fr1(n.km)+' km'],['Durée',Math.round(n.minutes)+' min'],['Carburant estimé',n.knownLitres?fr1(n.litres)+' L':'—'],['Coût estimé',n.knownCost?fr2(n.euros)+' €':'—']].map(([label,value])=>`<div><small>${label}</small><b>${value}</b></div>`).join('')}</div>`;
  }
  function toolbar(p) {
-  return `<div class="j733-toolbar">${select('period','Période',[['day','Aujourd’hui'],['week','Semaine'],['month','Mois'],['year','Année'],['all','Tout'],['dates','Dates personnalisées']],state.period)}${select('driver','Conducteur',[['all','Tous'],...profiles().map((n,i)=>[String(i),n]),['unknown','Non renseigné']],state.driver)}${btn(p,'settings','Réglages')}${chipBtn(p,'transfer734:gpx','Importer un GPX par QR')}</div>
+  return `<div class="j733-toolbar">${select('period','Période',[['day','Aujourd’hui'],['week','Semaine'],['month','Mois'],['year','Année'],['all','Tout'],['dates','Dates personnalisées']],state.period)}${select('driver','Conducteur',[['all','Tous'],...profiles().map((n,i)=>[String(i),n]),['unknown','Non renseigné']],state.driver)}${btn(p,'settings','Réglages')}${chipBtn(p,'transfer738:gpx','Importer un GPX par QR')}</div>
   <details class="j733-search" ${state.period==='dates'?'open':''}><summary>Rechercher et filtrer</summary><div class="j733-form">${field('from','Du','date',state.from)}${field('to','Au (inclus)','date',state.to)}${field('query','Adresse, conducteur ou note','search',state.query)}${field('minKm','Distance minimale (km)','number',state.minKm,'min="0"')}${field('maxKm','Distance maximale (km)','number',state.maxKm,'min="0"')}${field('minMinutes','Durée minimale (min)','number',state.minMinutes,'min="0"')}${field('maxMinutes','Durée maximale (min)','number',state.maxMinutes,'min="0"')}${field('minCost','Coût minimal estimé (€)','number',state.minCost,'min="0" step="0.01"')}${field('maxCost','Coût maximal estimé (€)','number',state.maxCost,'min="0" step="0.01"')}</div><div class="j733-actions">${btn(p,'search','Appliquer',true)}${btn(p,'reset','Réinitialiser')}</div><p>Renseigne une date seule pour cette journée, ou les deux dates pour une période.</p></details>`;
  }
  function live(p) {
   if(!trk)return `<div class="j733-panel">Aucun trajet en cours. ${btn(p,'start','Démarrer un trajet')}</div>`;
   const driver=Number.isInteger(trk.driver733)?trk.driver733:null;
-  return `<div class="j733-panel" style="border-left:5px solid ${driverColor(driver)}"><b>Trajet en cours · ${esc(driverName(driver))}</b><p>${esc(trk.from||'Adresse de départ indisponible')} → ${esc(trkPlace()||'Position actuelle')}</p><p>${fr1(trk.km)} km · ${time(trk.t0)}${trk.mx?' · maximum '+Math.round(trk.mx)+' km/h':''}</p>${btn(p,'finish','Terminer le trajet')}</div>`;
+  return `<div class="j733-panel" style="border-left:5px solid ${driverColor(driver)}"><b>Trajet en cours · ${esc(driverName(driver))}</b><p>${esc(trk.from||'Adresse de départ indisponible')} → ${esc(trkPlace()||'Position actuelle')}</p><p>${fr1(trk.km)} km · ${time(trk.t0)}${trk.mx?' · maximum '+Math.round(trk.mx)+' km/h':''}</p><div id="liveMap738"></div>${window.RoadsTaken738?RoadsTaken738.html(trk.id):''}${btn(p,'finish','Terminer le trajet')}</div>`;
  }
  function graph(values,unit) {
   const max=Math.max(1,...values.map(v=>v.value));
@@ -68,7 +68,7 @@
  function mapHTML(p,t) {
   const points=pathFor(t);
   if(points.length<2)return '<p>Le tracé GPS n’est pas disponible pour ce trajet.</p>';
-  return `<div id="journeyMap733" class="j733-map" data-trip="${esc(t.id)}"></div><p>Parcours GPS enregistré · ${points.length} positions. Les coupures GPS peuvent laisser des segments incomplets.</p>`;
+  return `<div id="journeyMap733" class="j733-map" data-trip="${esc(t.id)}"></div><p>Parcours GPS enregistré · ${points.length} positions. Les coupures GPS peuvent laisser des segments incomplets.</p>${window.RoadsTaken738?RoadsTaken738.html(t.id):''}`;
  }
  function detail(p,t) {
   return `<div class="j733-panel">${btn(p,'back','Retour')}<h3>${date(t.start)} · ${time(t.start)} – ${time(t.end)}</h3><p>${esc(t.from||'Adresse de départ inconnue')} → ${esc(t.to||'Adresse d’arrivée inconnue')}</p>${summary([t])}${mapHTML(p,t)}<div class="j733-form">${select('assign','Conducteur', [['unknown','Non renseigné'],...profiles().map((n,i)=>[String(i),n])],String(t.driver??'unknown'))}${field('note','Note du trajet','text',t.note||'','maxlength="500"')}</div><div class="j733-actions">${btn(p,'note','Enregistrer la note')}${btn(p,'mail','Préparer un e-mail')}${btn(p,'sms','Préparer un SMS')}${btn(p,'report','Rapport imprimable / PDF')}${btn(p,'json','Exporter le tracé')}</div><p>Les adresses et les coûts sont présentés selon les informations enregistrées.</p></div>`;
@@ -97,11 +97,12 @@
   return `<details class="j733-panel"><summary>Ajouter un plein</summary><div class="j733-form">${field('fillDate','Date','date',dayKey(Date.now()))}${field('litres','Litres','number','','min="0.01" max="500" step="0.01"')}${field('paid','Montant payé (€)','number','','min="0.01" max="5000" step="0.01"')}${field('perLitre','Prix au litre (€)','number','','min="0.001" max="10" step="0.001"')}${field('odometer','Compteur kilométrique','number',odoCar47()||'','min="0" max="3000000"')}${field('station','Station / adresse','text','','maxlength="200"')}<label>Type de plein<select id="j733-full"><option value="yes">Réservoir rempli complètement</option><option value="no">Plein partiel</option></select></label></div><p>Renseigne les litres et le montant, ou les litres et le prix au litre. Vérifie les montants du ticket.</p>${btn(p,'saveFill','Enregistrer le plein',true)}${pendingReceipt?'<p>Photo prête à joindre.</p>':''}</details>`;
  }
  function receiptControls(p) {
-  return `<div class="j733-panel"><h3>Ticket du prochain plein</h3>${chipBtn(p,'transfer734:ticket','Envoyer un ticket par QR')}<label>Photographier ou choisir un ticket<input type="file" id="j733-ticket" accept="image/jpeg,image/png,image/webp" capture="environment"></label><p id="j733-ticket-status">${pendingReceipt?'Photo prête à joindre au prochain plein.':'La photo est conservée sur le poste après validation du plein. Vérifie les montants avant d’enregistrer.'}</p><label>Importer un plein exporté<input type="file" id="j733-import" accept="application/json,.json"></label>${btn(p,'exportFills','Exporter les pleins')}<p>Les photos jointes se consultent dans l’historique. L’export JSON contient les montants et dates.</p></div>`;
+  return `<div class="j733-panel"><h3>Ticket du prochain plein</h3>${chipBtn(p,'transfer738:ticket','Envoyer un ticket par QR')}<label>Photographier ou choisir un ticket<input type="file" id="j733-ticket" accept="image/jpeg,image/png,image/webp" capture="environment"></label><p id="j733-ticket-status">${pendingReceipt?'Photo prête à joindre au prochain plein.':'La photo est conservée sur le poste après validation du plein. Vérifie les montants avant d’enregistrer.'}</p><label>Importer un plein exporté<input type="file" id="j733-import" accept="application/json,.json"></label>${btn(p,'exportFills','Exporter les pleins')}<p>Les photos jointes se consultent dans l’historique. L’export JSON contient les montants et dates.</p></div>`;
  }
  function showTicket(stamp) {
-  const fill=fuelLog().find(f=>f.t===stamp),src=fill?.receipt733&&localStorage.getItem(fill.receipt733);
-  if(!src||!src.startsWith('data:image/jpeg;base64,')){toast('Photo indisponible.');return;}
+  // 7.38 : photo reçue par l'autoradio (fichier) ou ancienne photo gardée dans l'appli.
+  const ref=fill?.receipt733,src=ref&&(String(ref).startsWith('file738:')?(window.Transfer738?Transfer738.dataUrl(ref.slice(8)):''):localStorage.getItem(ref));
+  if(!src||!/^data:image\/(jpeg|png);base64,/.test(src)){toast('Photo indisponible.');return;}
   const overlay=document.createElement('div');overlay.className='ov on';overlay.style.zIndex='6000';
   const close=document.createElement('button');close.className='close';close.textContent='Fermer le ticket';close.onclick=()=>overlay.remove();
   const img=document.createElement('img');img.src=src;img.alt='Ticket du plein du '+date(stamp);img.style.cssText='max-width:100%;min-height:0;flex:1;object-fit:contain';
@@ -133,6 +134,8 @@
  function cleanReceipts() {
   const used=new Set(fuelLog().map(f=>f.receipt733).filter(Boolean));
   for(const key of Object.keys(localStorage))if(key.startsWith('receipt733-')&&!used.has(key))localStorage.removeItem(key);
+  // Les photos reçues par l'autoradio restent gardées tant qu'un plein les utilise.
+  if(window.Transfer738)Transfer738.keepOnly([...used].filter(r=>String(r).startsWith('file738:')).map(r=>String(r).slice(8)));
  }
  document.addEventListener('change',event=>{if(event.target.id==='j733-ticket')readReceipt(event.target.files?.[0]);if(event.target.id==='j733-import')importFills(event.target.files?.[0]);});
  function fuel(p) {
@@ -142,14 +145,16 @@
  }
  function monthlyFuel(fills) {const map=new Map();for(const f of fills){const key=dayKey(f.t).slice(0,7);map.set(key,(map.get(key)||0)+f.e);}return graph([...map].sort().slice(-24).map(([label,value])=>({label,value})),'€');}
  function stationRows() {
+  if(window.Stations738)return Stations738.rows();
   if(!loc)return [];
   const radius=Number(store.get('stRad',10)),list=st47.list.filter(s=>finite(s.lat)&&finite(s.lon)).map(s=>({...s,dist:hav(loc.lat,loc.lon,s.lat,s.lon)})).filter(s=>s.dist<=radius&&(state.country==='all'||s.c===state.country));
   const key=state.stationSort==='distance'?'dist':'price';
   return list.sort((a,b)=>(a.closed?1:0)-(b.closed?1:0)||(a[key]>0?a[key]:Infinity)-(b[key]>0?b[key]:Infinity));
  }
  function stations(p) {
+  if(window.Stations738)return Stations738.page(p);
   const list=stationRows(),known=list.filter(s=>s.price>0),low=Math.min(...known.map(s=>s.price)),high=Math.max(...known.map(s=>s.price));
-  return `<div class="j733-panel"><div class="j733-toolbar">${select('stationSort','Trier',[['price','Prix croissant'],['distance','Distance croissante']],state.stationSort)}${select('country','Pays',[['all','Tous disponibles'],['FR','France'],['DE','Allemagne'],['LU','Luxembourg']],state.country)}${btn(p,'stationSettings','Carburant et rayon')}${btn(p,'refreshStations',state.busy?'Recherche…':'Actualiser')}</div><p>${esc(st47.msg||'')} ${esc(st47.de||'')}</p><p>Distance à vol d’oiseau · ${st47.at?'recherche du '+date(st47.at)+' à '+time(st47.at):'aucune recherche effectuée'}. France et Allemagne selon les sources configurées. Un prix inconnu reste hors du classement.</p>${list.length?`<div id="stationMap733" class="j733-map"></div>`:''}${list.map((s,i)=>{const ratio=s.price>0&&high>low?(s.price-low)/(high-low):0,color=s.price>0?`hsl(${Math.round(125-ratio*125)},60%,40%)`:'#9099a2';return `<button class="j733-row" data-act="journey733:station:${i}" style="border-left:5px solid ${color}"><div><b>${esc(s.name)}</b><small>${esc(s.c)} · ${s.dist.toFixed(1)} km${s.closed?' · fermée':''}</small></div><span>${esc(s.addr||'')}<small>${s.maj?'Prix relevé le '+date(s.maj)+' '+time(s.maj):'Heure du relevé non fournie'}</small></span><b style="color:${color}">${s.price>0?s.price.toFixed(3)+' €/L':'Prix inconnu'}</b></button>`;}).join('')||'<p>Aucune station disponible pour ces critères. Actualise ou change le rayon.</p>'}<p>Autres pays européens et Luxembourg : source de prix à connecter avant comparaison.</p></div>`;
+  return `<div class="j733-panel"><div class="j733-toolbar">${select('stationSort','Trier',[['distance','La plus proche d’abord'],['price','La moins chère d’abord']],state.stationSort)}${select('country','Pays',[['all','Tous disponibles'],['FR','France'],['DE','Allemagne']],state.country)}${btn(p,'stationSettings','Carburant et rayon')}${btn(p,'refreshStations',state.busy?'Recherche…':'Actualiser')}</div><p>${esc(st47.msg||'')} ${esc(st47.de||'')}</p><p>Distance à vol d’oiseau · ${st47.at?'recherche du '+date(st47.at)+' à '+time(st47.at):'aucune recherche effectuée'}. France et Allemagne selon les sources configurées. Un prix inconnu reste hors du classement.</p>${list.length?`<div id="stationMap733" class="j733-map"></div>`:''}${list.map((s,i)=>{const ratio=s.price>0&&high>low?(s.price-low)/(high-low):0,color=s.price>0?`hsl(${Math.round(125-ratio*125)},60%,40%)`:'#9099a2';return `<button class="j733-row" data-act="journey733:station:${i}" style="border-left:5px solid ${color}"><div><b>${esc(s.name)}</b><small>${esc(s.c)} · ${s.dist.toFixed(1)} km${s.closed?' · fermée':''}</small></div><span>${esc(s.addr||'')}<small>${s.maj?'Prix relevé le '+date(s.maj)+' '+time(s.maj):'Heure du relevé non fournie'}</small></span><b style="color:${color}">${s.price>0?s.price.toFixed(3)+' €/L':'Prix inconnu'}</b></button>`;}).join('')||'<p>Aucune station disponible pour ces critères. Actualise ou change le rayon.</p>'}<p>Prix disponibles : France (flux officiel) et Allemagne (avec une clé Tankerkönig, dans Carburant et stations).</p></div>`;
  }
  function page(p) {
   const list=filtered(),selected=rows().find(t=>t.id===state.selected),content=selected?detail(p,selected):toolbar(p)+(state.view==='fuel'?fuel(p):summary(list)+(state.view==='stats'?stats(list):live(p)+history(p,list)));
@@ -160,10 +165,11 @@
   if(typeof L==='undefined')return;
   const mapEl=$('journeyMap733');
   if(journeyMap&&journeyMap.getContainer()!==mapEl){journeyMap.remove();journeyMap=null;}
-  if(mapEl&&!journeyMap){const t=rows().find(t=>t.id===mapEl.dataset.trip),points=t&&pathFor(t);if(points?.length>1){journeyMap=L.map(mapEl,{zoomControl:true,attributionControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(journeyMap);const line=L.polyline(points,{color:driverColor(t.driver),weight:5}).addTo(journeyMap);journeyMap.fitBounds(line.getBounds(),{padding:[15,15],maxZoom:16});L.marker(points[0]).addTo(journeyMap).bindPopup('Départ');L.marker(points[points.length-1]).addTo(journeyMap).bindPopup('Arrivée');}}
+  if(mapEl&&!journeyMap){const t=rows().find(t=>t.id===mapEl.dataset.trip),points=t&&pathFor(t);if(points?.length>1){journeyMap=L.map(mapEl,{zoomControl:true,attributionControl:true});window.Maps738?Maps738.tiles(journeyMap):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(journeyMap);L.polyline(points,{color:'#ffffff',weight:9,opacity:.9}).addTo(journeyMap);const line=L.polyline(points,{color:Number.isInteger(t.driver)?driverColor(t.driver):'#1f6fd1',weight:5}).addTo(journeyMap);journeyMap.fitBounds(line.getBounds(),{padding:[15,15],maxZoom:16});L.circleMarker(points[0],{radius:8,color:'#fff',weight:3,fillColor:'#2e9e4d',fillOpacity:1}).addTo(journeyMap).bindTooltip('Départ');L.circleMarker(points[points.length-1],{radius:8,color:'#fff',weight:3,fillColor:'#e0312b',fillOpacity:1}).addTo(journeyMap).bindTooltip('Arrivée');}}
+  if(window.Stations738){Stations738.mount();return;}
   const stationEl=$('stationMap733');
   if(stationMap&&stationMap.getContainer()!==stationEl){stationMap.remove();stationMap=null;}
-  if(stationEl&&!stationMap){stationMap=L.map(stationEl);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(stationMap);const list=stationRows();for(const [i,s] of list.entries()){const marker=L.marker([s.lat,s.lon]).addTo(stationMap),button=document.createElement('button');button.textContent=s.name+' · '+(s.price>0?s.price.toFixed(3)+' €/L':'prix inconnu');button.onclick=()=>window.act('journey733:station:'+i);marker.bindPopup(button);}stationMap.fitBounds(list.map(s=>[s.lat,s.lon]),{padding:[15,15],maxZoom:14});}
+  if(stationEl&&!stationMap){stationMap=L.map(stationEl);window.Maps738?Maps738.tiles(stationMap):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(stationMap);if(loc)L.circleMarker([loc.lat,loc.lon],{radius:8,color:'#fff',weight:3,fillColor:'#1f6fd1',fillOpacity:1}).addTo(stationMap).bindTooltip('Ma position');const list=stationRows();for(const [i,s] of list.entries()){const marker=L.marker([s.lat,s.lon]).addTo(stationMap),button=document.createElement('button');button.textContent=s.name+' · '+(s.price>0?s.price.toFixed(3)+' €/L':'prix inconnu');button.onclick=()=>window.act('journey733:station:'+i);marker.bindPopup(button);}const pts=list.map(s=>[s.lat,s.lon]).concat(loc?[[loc.lat,loc.lon]]:[]);if(pts.length>1)stationMap.fitBounds(pts,{padding:[15,15],maxZoom:14});else if(pts.length)stationMap.setView(pts[0],13);else stationMap.setView([48.58,7.75],10);}
  }
  function metadata(id,patch) {const map=extra();map[id]={...(map[id]||{}),...patch};store.set('journeyNotes733',map);}
  function settings(p) {
@@ -177,7 +183,7 @@
   const list=fuelLog();if(list.some(f=>Math.abs(f.t-dt)<60000&&Math.abs(f.l-litres)<.01&&Math.abs(f.e-amount)<.01)){toast('Ce plein est déjà présent.');return;}
   const before=list.filter(f=>f.t<dt&&f.k>0).at(-1),after=list.find(f=>f.t>dt&&f.k>0);
   if(km&&((before&&km<before.k)||(after&&km>after.k))){toast('Le compteur ne correspond pas à l’ordre des pleins.');return;}
-  const record={t:dt,l:litres,e:Math.round(amount*100)/100,k:km,s:read('station').slice(0,200),driver733:profIdx(),full733:read('full')==='yes'};if(pendingReceipt){try{const id='receipt733-'+Date.now().toString(36);localStorage.setItem(id,pendingReceipt);record.receipt733=id;pendingReceipt=null;}catch(e){toast('Photo non enregistrée : stockage insuffisant. Le plein reste enregistré.');}}list.push(record);store.set('fuelLog',list.sort((a,b)=>a.t-b.t));toast('Plein enregistré.');render();
+  const record={t:dt,l:litres,e:Math.round(amount*100)/100,k:km,s:read('station').slice(0,200),driver733:profIdx(),full733:read('full')==='yes'};if(pendingReceipt&&String(pendingReceipt).startsWith('file738:')){record.receipt733=pendingReceipt;if(window.Transfer738)Transfer738.keep(pendingReceipt.slice(8),true);pendingReceipt=null;}else if(pendingReceipt){try{const id='receipt733-'+Date.now().toString(36);localStorage.setItem(id,pendingReceipt);record.receipt733=id;pendingReceipt=null;}catch(e){toast('Photo non enregistrée : stockage insuffisant. Le plein reste enregistré.');}}list.push(record);store.set('fuelLog',list.sort((a,b)=>a.t-b.t));toast('Plein enregistré.');render();
  }
  function prune(days) {
   if(!days)return;

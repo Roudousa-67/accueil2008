@@ -32,6 +32,7 @@ public final class GpsDockInit extends ContentProvider {
 
     private final Map<Activity, GpsDock> docks = new HashMap<>();
     private final Map<Activity, AppFiles721> fileServices = new HashMap<>();
+    private final Map<Activity, LocalTransfer738> transfers = new HashMap<>();
 
     @Override
     public boolean onCreate() {
@@ -57,6 +58,7 @@ public final class GpsDockInit extends ContentProvider {
                 GpsDock d = docks.remove(a);
                 if (d != null) d.release();
                 AppFiles721 files=fileServices.remove(a); if(files!=null)files.release();
+                LocalTransfer738 transfer=transfers.remove(a); if(transfer!=null)transfer.release();
             }
         });
         return true;
@@ -84,6 +86,8 @@ public final class GpsDockInit extends ContentProvider {
         docks.put(a, dock);
         web.addJavascriptInterface(new Js(a, dock, web, root), "GpsDock");
         AppFiles721 files=new AppFiles721(a);fileServices.put(a,files);web.addJavascriptInterface(files,"AppFiles721");
+        // 7.38 : réception des tickets et fichiers du téléphone, sur le réseau local.
+        LocalTransfer738 transfer=new LocalTransfer738(a,web,a.getFilesDir());transfers.put(a,transfer);web.addJavascriptInterface(transfer,"Transfer738Native");
         // Le JavaScript décide quand ouvrir : pas de lancement concurrent au démarrage.
     }
 
