@@ -10,6 +10,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
  assert.equal(t.errors.length,0,t.errors.join('\n'));
  const index=fs.readFileSync(path.join(__dirname,'../sources_assets/index.html'),'utf8');
  for(const f of ['stations738.js','highway738.js'])assert(index.includes(`src="${f}"`),'chargé par index.html : '+f);
+ assert(run("/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(store.get('tkKey'))&&store.get('tk738Init')===true"),'clé Allemagne intégrée enregistrée au premier démarrage');
 
  // ---------- 1. Météo : type et intensité d'après le code WMO ----------
  const info=c=>{run(`weather={c:${c},day:1,t:8,hours:[]};`);return JSON.parse(run('JSON.stringify(Weather738.info())'));};
@@ -32,6 +33,8 @@ const flush=()=>new Promise(r=>setImmediate(r));
  assert(night[0]+night[1]+night[2]<200,'ciel sombre la nuit : '+night.map(Math.round));
  const clear=avg(frame('ville',0,'2026-11-22T13:00:00+01:00',180),.02,.2),rain=avg(frame('ville',65,'2026-11-22T13:00:00+01:00',180),.02,.2);
  assert(Math.abs(rain[0]-rain[2])<Math.abs(clear[0]-clear[2]),'ciel gris sous la pluie : '+rain.map(Math.round)+' / '+clear.map(Math.round));
+ const ground=code=>avg(frame('campagne',code,'2026-11-22T13:00:00+01:00',180),.75,.98).reduce((x,y)=>x+y,0);
+ assert(ground(73)>ground(3)+120,'neige au sol : '+Math.round(ground(73))+' / '+Math.round(ground(3)));
  for(const [scene,code]of [['ville',73],['village',45],['foret',63],['autoroute',95],['campagne',3]])assert.doesNotThrow(()=>frame(scene,code,'2026-11-22T13:00:00+01:00',180),scene+' '+code);
  // Orage : un éclair déclenché au moment voulu éclaire le ciel.
  run('Weather738.storm().next=0;Weather738.storm().bolts=[];');
@@ -116,6 +119,17 @@ const flush=()=>new Promise(r=>setImmediate(r));
  assert.doesNotThrow(()=>{for(const m of [300,360,1170,1195,420])w.RoadDecor721.draw(cv,10,m,110);},'portiques sortie et station dessinés');
  assert(/sorties/.test(fs.readFileSync(path.join(__dirname,'../sources_assets/v737.js'),'utf8')),'requêtes de sorties classées dans la file Overpass');
  console.log('OK autoroute : prochaine sortie du bon sens et de la bonne autoroute, prochaine station devant avec son prix, portiques dessinés');
+
+ // ---------- 5 bis. Carte : fond de secours si le premier ne répond pas ----------
+ run(`window.__div=document.createElement('div');window.L={tileLayer:(url,opt)=>({url,options:opt,h:{},on(e,f){this.h[e]=f;return this;},setUrl(u){this.url=u;},addTo(){return this;}})};
+  window.__map={getContainer:()=>__div,attributionControl:{removeAttribution(){},addAttribution(){}}};Maps738.provider=0;window.__layer=Maps738.tiles(__map);`);
+ assert(/arcgisonline/.test(run('__layer.url')),'fond Esri d’abord (celui de l’accueil)');
+ run("for(let i=0;i<4;i++)__layer.h.tileerror();");assert(/openstreetmap\.fr/.test(run('__layer.url')),'bascule sur OpenStreetMap France');
+ run("for(let i=0;i<4;i++)__layer.h.tileerror();");assert(/tile\.openstreetmap\.org/.test(run('__layer.url')),'puis OpenStreetMap');
+ run("for(let i=0;i<4;i++)__layer.h.tileerror();");assert(run("!!__div.querySelector('.offline738')"),'message seulement quand aucun fond ne répond');
+ run("__layer.h.tileload();");assert(run("!__div.querySelector('.offline738')"),'message retiré dès qu’une tuile arrive');
+ run('delete window.L;Maps738.provider=0;');
+ console.log('OK carte : fond de secours automatique, message seulement sans aucun fond');
 
  // ---------- 6. Réglages : clé Tankerkönig testable ----------
  run("openSet('Trajets et carburant','Carburant et stations');render();");

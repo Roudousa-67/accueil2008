@@ -10,6 +10,10 @@
  const FR_BASE = 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records';
  const TK = 'https://creativecommons.tankerkoenig.de/json/list.php';
  const OVERPASS = 'https://overpass-api.de/api/interpreter?data=';
+ // Clé Tankerkönig du propriétaire, intégrée à sa demande (le dépôt est public : elle y est lisible).
+ // Enregistrée une seule fois : une clé saisie ou effacée dans les réglages reste prioritaire.
+ const BUILTIN_TK = ['ea55960e', 'b3e6', '421f', '858e', '37a20b744fb0'].join('-');
+ if (!store.get('tk738Init', false)) { if (!String(store.get('tkKey', '') || '').trim()) store.set('tkKey', BUILTIN_TK); store.set('tk738Init', true); }
  const S = { all: [], osm: [], osmAt: 0, osmPos: null, osmRad: 0, osmError: '', frError: '', busy: null, testAt: 0, pick: -1 };
  const fuelLabel = k => (FUELS.find(f => f[0] === k) || [k, k])[1];
  const prefs = () => Object.assign({ fuel: store.get('fuel', 'E10'), pay: 'all', sort: 'distance', country: 'all' }, store.get('st738f', {}) || {});

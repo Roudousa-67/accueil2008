@@ -44,11 +44,26 @@
    if (!this.pending) { if (this.failed >= 3) return Promise.reject(Error('bibliothèque de cartes indisponible')); this.pending = Perf725.script('lib/leaflet.js').then(() => { if (typeof L === 'undefined') { this.failed++; this.pending = null; } }, e => { this.failed++; addError('carte', e); this.pending = null; throw e; }); }
    return this.pending;
   },
-  // Même fond pour toutes les cartes des trajets : rues et noms lisibles, sans l'en-tête exigé par les tuiles OSM.
+  // Même fond pour toutes les cartes (celui de la carte de l'accueil). S'il ne répond pas
+  // (4 tuiles en échec sans aucune réussie), bascule sur un autre fond, et ainsi de suite.
+  PROVIDERS: [['https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', '© Esri'],
+   ['https://tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', '© OpenStreetMap France'],
+   ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', '© OpenStreetMap']],
+  provider: 0,
   tiles(map) {
-   const layer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: '© Esri' });
-   layer.on('tileload', () => { Maps738.tileLoads++; });
-   layer.on('tileerror', () => { Maps738.tileErrors++; const el = map.getContainer(); if (el && !el.querySelector('.offline738')) { const n = document.createElement('div'); n.className = 'offline738'; n.textContent = 'Fond de carte indisponible (pas d’Internet) : le tracé reste exact.'; el.appendChild(n); } });
+   const P = Maps738.PROVIDERS;let idx = Maps738.provider, errors = 0, loads = 0;
+   const layer = L.tileLayer(P[idx][0], { maxZoom: 18, attribution: P[idx][1] });
+   layer.on('tileload', () => { Maps738.tileLoads++; loads++; const n = map.getContainer().querySelector('.offline738'); if (n) n.remove(); });
+   layer.on('tileerror', () => {
+    Maps738.tileErrors++; errors++;
+    if (!loads && errors >= 4 && idx < P.length - 1) {
+     if (map.attributionControl) map.attributionControl.removeAttribution(P[idx][1]);
+     idx++; Maps738.provider = idx; errors = 0; layer.options.attribution = P[idx][1];
+     if (map.attributionControl) map.attributionControl.addAttribution(P[idx][1]);
+     layer.setUrl(P[idx][0]); return;
+    }
+    const el = map.getContainer(); if (el && !loads && !el.querySelector('.offline738')) { const n = document.createElement('div'); n.className = 'offline738'; n.textContent = 'Fond de carte indisponible (pas d’Internet) : le tracé reste exact.'; el.appendChild(n); }
+   });
    return layer.addTo(map);
   },
  };

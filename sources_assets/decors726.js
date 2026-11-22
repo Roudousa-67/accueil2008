@@ -10,10 +10,19 @@ const shift=()=>roadTravel-travelled;
 const depthQ=z=>z< -28?0:50/(z+50);
 const worldQ=z=>depthQ(z-distance());
 const rnd=i=>{const n=Math.sin(i*13.71+4.9)*31753;return n-Math.floor(n)};
-function rect(x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h)}
-function ellipse(x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,Math.abs(rx),Math.abs(ry),0,0,7);c.fill()}
+// 7.38 : quand il neige, les verts (herbe, haies, feuillages, collines) pâlissent vers le blanc.
+let snowNow738=false;const snowCache738=new Map();
+function snowTint738(col){
+ if(!snowNow738||typeof col!=='string'||col[0]!=='#'||(col.length!==7&&col.length!==9))return col;
+ let out=snowCache738.get(col);if(out)return out;
+ const r=parseInt(col.slice(1,3),16),g=parseInt(col.slice(3,5),16),b=parseInt(col.slice(5,7),16);
+ if(g>r+12&&g>b+8){const k=night?.45:.62,to=night?[150,162,180]:[236,241,246],m=[r,g,b].map((v,i)=>Math.round(v+(to[i]-v)*k).toString(16).padStart(2,'0')).join('');out='#'+m+col.slice(7);}else out=col;
+ if(snowCache738.size>600)snowCache738.clear();snowCache738.set(col,out);return out;
+}
+function rect(x,y,w,h,col){c.fillStyle=snowTint738(col);c.fillRect(x,y,w,h)}
+function ellipse(x,y,rx,ry,col){c.fillStyle=snowTint738(col);c.beginPath();c.ellipse(x,y,Math.abs(rx),Math.abs(ry),0,0,7);c.fill()}
 function line(points,col,width=1){c.strokeStyle=col;c.lineWidth=width;c.beginPath();for(let i=0;i<points.length;i++){const p=points[i];if(i)c.lineTo(p[0],p[1]);else c.moveTo(p[0],p[1]);}c.stroke()}
-function poly(points,col){c.fillStyle=col;c.beginPath();for(let i=0;i<points.length;i++){const p=points[i];if(i)c.lineTo(p[0],p[1]);else c.moveTo(p[0],p[1]);}c.closePath();c.fill()}
+function poly(points,col){c.fillStyle=snowTint738(col);c.beginPath();for(let i=0;i<points.length;i++){const p=points[i];if(i)c.lineTo(p[0],p[1]);else c.moveTo(p[0],p[1]);}c.closePath();c.fill()}
 // 7.36 : regroupement des petits éléments répétés (plants, herbes, fougères…) :
 // un seul tracé par couleur et épaisseur au lieu d'un tracé par élément.
 // Les éléments de même couleur d'un lot sont peints ensemble, dans l'ordre des couleurs.
@@ -23,8 +32,8 @@ const batch736=new Map();
 function bEntry(key,col,width,fill){let b=batch736.get(key);if(!b){b={ops:[],col,width,fill};batch736.set(key,b);}return b.ops;}
 function bLine(x0,y0,x1,y1,col,width){bEntry('s'+col+'|'+width,col,width,false).push(0,x0,y0,1,x1,y1);}
 function bStroke(points,col,width){const o=bEntry('s'+col+'|'+width,col,width,false);for(let i=0;i<points.length;i++){const q=points[i];o.push(i?1:0,q[0],q[1]);}}
-function bPoly(points,col){col=ruralSeasonColor(col);const o=bEntry('f'+col,col,0,true);for(let i=0;i<points.length;i++){const q=points[i];o.push(i?1:0,q[0],q[1]);}}
-function bEllipse(x,y,rx,ry,col){col=ruralSeasonColor(col);bEntry('f'+col,col,0,true).push(2,x,y,Math.abs(rx),Math.abs(ry));}
+function bPoly(points,col){col=snowTint738(ruralSeasonColor(col));const o=bEntry('f'+col,col,0,true);for(let i=0;i<points.length;i++){const q=points[i];o.push(i?1:0,q[0],q[1]);}}
+function bEllipse(x,y,rx,ry,col){col=snowTint738(ruralSeasonColor(col));bEntry('f'+col,col,0,true).push(2,x,y,Math.abs(rx),Math.abs(ry));}
 function bFlush(){
  for(const b of batch736.values()){
   const o=b.ops;if(!o.length)continue;c.beginPath();
@@ -1626,6 +1635,14 @@ function weatherFront738(cv,main){
   if(flash>0)rect(0,TOP,W,H,(night?'rgba(200,215,255,':'rgba(255,255,255,')+(flash*(night?.42:.26)).toFixed(3)+')');
  }
 }
+// Neige au sol : prés, champs et bas-côtés blanchis avant la chaussée et les objets
+// (la route, les voitures, les maisons et les arbres gardent leurs couleurs).
+function snowGround738(){
+ const w=wxInfo738();if(!w.snow)return;
+ const a=.58+.3*w.snow,col=night?'170,182,200':'241,245,250';
+ const g=c.createLinearGradient(0,HZ,0,BOT);g.addColorStop(0,`rgba(${col},${(a*.55).toFixed(2)})`);g.addColorStop(.22,`rgba(${col},${a.toFixed(2)})`);g.addColorStop(1,`rgba(${col},${Math.min(.93,a+.08).toFixed(2)})`);
+ rect(0,HZ-1,W,BOT-HZ+1,g);
+}
 window.Weather738={info:wxInfo738,sun:sunState738,storm:()=>storm738};
 function renderLive(cv,T,metres,speed){metres=Number.isFinite(metres)?Math.max(0,metres):0;roadTravel=metres;
  const currentScene=roadScene(),span=(LOOP736[currentScene]??400)+(LEAD736[currentScene]??0),m=loopMetres(metres,currentScene);
@@ -1649,7 +1666,7 @@ function paintLive(cv,T,metres,speed,currentScene,main){
  if(cv.width!==Math.round(width*ratio)||cv.height!==Math.round(height*ratio)){cv.width=Math.round(width*ratio);cv.height=Math.round(height*ratio)}
  }
  c=cv.getContext('2d');if(!c)return;if(!c.roundRect)c.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this};c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
- t=T;travelled=metres;scene=currentScene;ruralSeason=productionSeason730();const kind=roadKind();night=!!kind.night;
+ t=T;travelled=metres;scene=currentScene;ruralSeason=productionSeason730();const kind=roadKind();night=!!kind.night;snowNow738=kind.wx==='neige';
  const sky=window.RoadSky719&&RoadSky719.current();dusk=!night&&duskNow738(sky);
  const fresh=window.Road723&&Road723.fresh()&&Road723.match&&Date.now()-Road723.at<60000;
  const tags=fresh?Road723.match.tags:{};liveLimit=fresh&&Number.isFinite(limit)&&limit>0&&parseMax(tags.maxspeed)===limit?limit:0;
@@ -1658,7 +1675,7 @@ function paintLive(cv,T,metres,speed,currentScene,main){
  panelName=locality?locality.name.toLocaleUpperCase('fr'):'';
  roadRef=fresh?String(tags.ref||'').slice(0,12):'';euroRef=fresh?String(tags['int_ref']||'').slice(0,12):'';
  const g=skyFill738('#78b2d3','#c7dce4',night?'#091526':dusk?'#747493':'#78b2d3',night?'#283e57':dusk?'#e4b38f':'#c7dce4');rect(0,TOP,W,HZ-TOP,g);sky738();rect(0,HZ,W,BOT-HZ,night?'#253d32':'#72965d');
- if(scene==='ville')rect(0,HZ,W,BOT-HZ,night?'#38464d':'#a7afa5');countrysideBackdrop();villageBackdrop();villageLandscape();villageLanes();villageRemoteHousing();cityBackdrop();if(scene==='campagne'||scene==='autoroute')landFields();ruralLandscapeAccents();ruralFarmWorld();ruralArrival();forestGround();forestLeafFloor();drawRoad();ruralWildEdges();villageWetRoad();restArea();if(scene==='foret')improvedForestWorld();
+ if(scene==='ville')rect(0,HZ,W,BOT-HZ,night?'#38464d':'#a7afa5');countrysideBackdrop();villageBackdrop();villageLandscape();villageLanes();villageRemoteHousing();cityBackdrop();if(scene==='campagne'||scene==='autoroute')landFields();ruralLandscapeAccents();ruralFarmWorld();ruralArrival();forestGround();forestLeafFloor();snowGround738();drawRoad();ruralWildEdges();villageWetRoad();restArea();if(scene==='foret')improvedForestWorld();
  const objects=[],gap=scene==='ville'?57:scene==='village'?58:90,d=distance();
  for(let n=Math.floor((d-40)/gap);n<Math.floor((d-40)/gap)+12;n++)for(const sg of [-1,1]){const z=60+n*gap+(sg<0?gap*.48:0)-d;if(z< -30||z>480)continue;objects.push({q:depthQ(z),id:n+18+(sg<0?3:0),sg})}
  objects.sort((a,b)=>a.q-b.q);for(const o of objects)scenery(o.q,o.id,o.sg);cityWorld();villagePavement();villageLivingDetails();villageSmallLife();neighbourhoodDetails();frontageDetails();cityTraffic();trafficSignals6();barriers();sameWayTraffic();worldSigns();gantry();if(scene!=='foret')forestAccents();
@@ -2472,9 +2489,9 @@ function motorwayDraw(cv,T,metres,speed,main=true){
  }
  c=cv.getContext('2d');if(!c)return;
  c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
- t=T;travelled=metres;scene='autoroute';night=!!roadKind().night;dusk=!night&&duskNow738(window.RoadSky719&&RoadSky719.current());
+ t=T;travelled=metres;scene='autoroute';night=!!roadKind().night;snowNow738=roadKind().wx==='neige';dusk=!night&&duskNow738(window.RoadSky719&&RoadSky719.current());
  const sky=skyFill738('#8ab8c9','#d2dfcf',night?'#102132':dusk?'#9096a2':'#8ab8c9',night?'#2c423e':dusk?'#d1baa0':'#d2dfcf');rect(0,TOP,W,HZ-TOP,sky);sky738();rect(0,HZ,W,BOT-HZ,night?'#314b36':'#849d68');
- mbackdrop();mfields();mroad();mrestArea();mexit();munderpass();
+ mbackdrop();mfields();snowGround738();mroad();mrestArea();mexit();munderpass();
  const items=[...msceneryItems(),...mtrafficItems()];for(const o of items.sort((a,b)=>b.z-a.z)){c.save();c.globalAlpha=Math.min(1,Math.max(0,(750-(o.z-distance()))/160));o.draw();c.restore();}
  mbarriers();mbridge();mgantry();mgantry(930);
  // Illustrative speed limit, separate from the destinations.
