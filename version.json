@@ -1,6 +1,6 @@
 {
-  "version": "7.36",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.36/Accueil2008GT_v7.36.apk",
-  "sha256": "e34950b7c3c5a9963b751bb569b74909876e9649937e910d9b324648596e3db2",
-  "notes": "Widget voiture et décor : cadence calée sur l’écran, au même rythme d’une image à l’autre (60, 30, 20 ou 15 images/s selon ce que le poste tient), au lieu d’une image sur deux sautée irrégulièrement. Plus de saut du paysage au bouclage du décor : l’ancienne boucle s’efface en continuant d’avancer. Dessin allégé (champs, forêts, façades regroupés), même rendu.\nDétection du décor : en ville, les grands axes sont reconnus grâce aux rues résidentielles alentour, même sans zone cartographiée ; requêtes routières allégées pour aboutir en ville ; décor conservé une minute si le GPS devient imprécis. L’état du décor (route reconnue, rues, zones) est affiché dans Widgets → Vue voiture et route.\nLes fonctions de la 7.35 sont conservées. Tests sur l’autoradio restant à effectuer.\n"
+  "version": "7.37",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.37/Accueil2008GT_v7.37.apk",
+  "sha256": "0a8d03cff6f55cf595f594a238674be945cdf2d463ffbccdb544df542da2a540",
+  "notes": "Détection du décor fiabilisée : les requêtes cartographiques (routes, zones, localités) partent une par une, routes en priorité, avec pause et serveur de secours quand le serveur public Overpass sature. Sans données routières, l’adresse indique si tu es sur autoroute ou dans une rue. Le dernier décor est conservé 5 minutes au lieu de revenir sur Campagne.\nWidgets → Vue voiture et route affiche la précision du GPS et le résultat des dernières requêtes (reçues, refusées, délai dépassé).\nLes améliorations de fluidité de la 7.36 sont conservées. Tests sur l’autoradio restant à effectuer.\n"
 }
