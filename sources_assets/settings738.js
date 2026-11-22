@@ -56,6 +56,7 @@
    ['Zones de danger', P('Navigation', 'Zones de danger')],
    ['Assistant vocal', P('Navigation', 'Assistant')],
    ['Adresses', P('Navigation', 'Adresses')],
+   ['Panneaux d’autoroute', p => window.Highway738 && Highway738.settings ? Highway738.settings(p) : ''],
   ]],
   ['Véhicule', [
    ['Apprendre ma voiture', join(P('Véhicule', 'Apprentissage automatique'), P('Véhicule', 'Apprendre ma voiture'))],

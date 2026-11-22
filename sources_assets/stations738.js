@@ -182,6 +182,9 @@
   return b.map(([t, c]) => `<i class="st738-b" style="background:${c}">${esc(t)}</i>`).join('');
  }
  const chip = (p, a, l, on) => chipBtn(p, 'st738:' + a, l, on);
+ // Menus déroulants, même présentation que « Période » et « Conducteur ».
+ const select = (key, label, options, value) => `<label>${esc(label)}<select data-st738="${key}">${options.map(([v, n]) => `<option value="${esc(String(v))}" ${String(v) === String(value) ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>`;
+ document.addEventListener('change', e => { const el = e.target, key = el && el.dataset && el.dataset.st738; if (key) window.act('st738:' + key + ':' + el.value); });
  function card(p, s, f) {
   const prices = FUELS.filter(x => s.prices[x[0]] > 0).map(x => `<div><small>${esc(x[1])}</small><b>${price3(s.prices[x[0]])} €</b></div>`).join('');
   const pay = `Carte : ${s.auto24 ? 'oui, automate CB 24h/24' : s.card === true ? 'oui' : s.card === false ? 'non' : 'non renseigné'} · Espèces : ${s.cash === true ? 'oui' : s.cash === false ? 'non' : 'non renseigné'}${s.dab ? ' · distributeur de billets' : ''}`;
@@ -193,12 +196,9 @@
  function page(p) {
   const f = prefs(), rad = Number(store.get('stRad', 10)), list = rows(), known = list.filter(s => s.p > 0), low = Math.min(...known.map(s => s.p)), high = Math.max(...known.map(s => s.p));
   const pick = list.find(s => s.id === S.pickId);
-  const bar = (label, inner) => `<div class="st738-bar"><span>${label}</span>${inner}</div>`;
   const busy = !!S.busy;
-  const group = (label, inner) => `<span class="st738-g"><small>${label}</small>${inner}</span>`;
   return `<div class="j733-panel st738">
-   <div class="st738-bar">${FUELS.map(x => chip(p, 'fuel:' + x[0], x[1], f.fuel === x[0])).join('')}<span style="flex:1"></span>${chip(p, 'refresh', busy ? 'Recherche…' : 'Actualiser')}</div>
-   <div class="st738-bar">${group('Rayon', RADII.map(r => chip(p, 'rad:' + r, r + ' km', rad === r)).join(''))}${group('Paiement', [['all', 'Tous'], ['card', 'Carte'], ['auto', 'CB 24h/24'], ['cash', 'Espèces']].map(([k, l]) => chip(p, 'pay:' + k, l, f.pay === k)).join(''))}${group('Tri', [['distance', 'Plus proche'], ['price', 'Moins chère']].map(([k, l]) => chip(p, 'sort:' + k, l, f.sort === k)).join(''))}${group('Pays', [['all', 'Tous'], ['FR', 'FR'], ['DE', 'DE']].map(([k, l]) => chip(p, 'country:' + k, l, f.country === k)).join(''))}</div>
+   <div class="j733-toolbar st738-tools">${select('fuel', 'Carburant', FUELS.map(x => [x[0], x[1]]), f.fuel)}${select('rad', 'Rayon', RADII.map(r => [r, r + ' km']), rad)}${select('pay', 'Paiement', [['all', 'Tous'], ['card', 'Carte'], ['auto', 'CB 24h/24'], ['cash', 'Espèces']], f.pay)}${select('sort', 'Trier', [['distance', 'La plus proche'], ['price', 'La moins chère']], f.sort)}${select('country', 'Pays', [['all', 'Tous'], ['FR', 'France'], ['DE', 'Allemagne']], f.country)}<span style="flex:1"></span>${chip(p, 'refresh', busy ? 'Recherche…' : 'Actualiser')}</div>
    <p class="st738-note">${esc([st47.msg, st47.de, S.frError, S.osmError].filter(Boolean).join(' · '))}${st47.at ? ` Dernière recherche : ${new Date(st47.at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} · ${list.length} station${list.length > 1 ? 's' : ''} à moins de ${rad} km.` : ' Aucune recherche effectuée.'}${f.fuel === 'AdBlue' ? ' Le prix de l’AdBlue n’est publié par aucune source : seules les stations qui en vendent sont montrées.' : ''}</p>
    <div class="st738-grid"><div class="st738-mapwrap">${list.length || loc ? '<div id="stationMap733" class="j733-map st738-map"></div>' : ''}${pick ? card(p, pick, f) : ''}</div>
    <div class="st738-list">${list.map(s => `<button class="j733-row st738-row${pick && pick.id === s.id ? ' on' : ''}" data-act="st738:pick:${esc(s.id)}" style="border-left:6px solid ${color(s, low, high)}"><div><b>${esc(s.name)}</b><small>${s.c === 'DE' ? 'Allemagne · ' : ''}${km(s.dist)} · ${esc(s.addr || '')}</small><span class="st738-badges">${badges(s, f.fuel)}</span></div><b style="color:${color(s, low, high)}">${s.p > 0 ? price3(s.p) + ' €' : f.fuel === 'AdBlue' ? 'AdBlue' : '—'}</b></button>`).join('') || `<p>Aucune station pour ces critères. Élargis le rayon ou change de filtre.</p>`}</div></div>

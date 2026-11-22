@@ -124,5 +124,28 @@
   if (!H.at || Date.now() - H.at > 120000) return null;
   return { exit: H.next, station: H.station };
  }
- window.Highway738 = { state: H, signs, compute, parseExits, pickExit, pickStation, exitQuery, fetchExits, fetchStations, bearing };
+
+ // ---------- 7.39 : réglages des panneaux ----------
+ const PREF_DEF = { exits: true, stations: true, every: 'km', small: true };
+ const prefs = () => Object.assign({}, PREF_DEF, store.get('hw739', {}) || {});
+ function setPref(k, v) { const o = Object.assign({}, store.get('hw739', {}) || {}); o[k] = v; store.set('hw739', o); }
+ function settings(p) {
+  const f = prefs(), onoff = k => chipBtn(p, 'hw739:' + k + ':1', 'Activé', f[k] === true) + chipBtn(p, 'hw739:' + k + ':0', 'Désactivé', f[k] === false);
+  return setRow(p, 'Panneaux de sortie', 'Portique bleu avec le numéro de la sortie, les villes et la distance, placé à la vraie distance de la sortie.', onoff('exits'))
+   + setRow(p, 'Fréquence des panneaux', 'Tous les kilomètres : 5 km, 4 km, 3 km, 2 km et 1 km avant la sortie. Comme sur l’autoroute : 2 km et 1 km.', chipBtn(p, 'hw739:every:km', 'Tous les kilomètres', f.every === 'km') + chipBtn(p, 'hw739:every:classic', '2 km et 1 km', f.every === 'classic'))
+   + setRow(p, 'Panneaux de station avec le prix', 'Prochaine station d’autoroute devant toi avec le prix de ton carburant : 10 km, 5 km puis tous les kilomètres (ou 10, 5, 2 et 1 km).', onoff('stations'))
+   + setRow(p, 'Petit panneau à 500 m', 'Dès que la sortie ou la station est à 500 m, un petit panneau apparaît tout de suite en haut à droite de l’image, avec la distance qui diminue.', onoff('small'))
+   + `<p style="color:${p.mut};font-size:13px;line-height:1.45">Sorties : OpenStreetMap. Prix : flux officiel (France) et Tankerkönig (Allemagne). Il faut Internet. Hors autoroute ou sans données, les portiques montrent les lieux proches comme avant.</p>`;
+ }
+ const act0 = window.act;
+ window.act = function (a, long) {
+  if (typeof a === 'string' && a.startsWith('hw739:')) {
+   const [, k, v] = a.split(':');
+   if (['exits', 'stations', 'small'].includes(k)) setPref(k, v === '1');
+   else if (k === 'every' && ['km', 'classic'].includes(v)) setPref('every', v);
+   render(); return;
+  }
+  return act0.apply(this, arguments);
+ };
+ window.Highway738 = { state: H, signs, compute, parseExits, pickExit, pickStation, exitQuery, fetchExits, fetchStations, bearing, prefs, settings };
 })();
