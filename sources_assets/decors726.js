@@ -11,9 +11,19 @@ const depthQ=z=>z< -28?0:50/(z+50);
 const worldQ=z=>depthQ(z-distance());
 const rnd=i=>{const n=Math.sin(i*13.71+4.9)*31753;return n-Math.floor(n)};
 // 7.38 : quand il neige, les verts (herbe, haies, feuillages, collines) pâlissent vers le blanc.
-let snowNow738=false;const snowCache738=new Map();
+// 7.40 : hors neige, les verts suivent la saison dans tous les décors (printemps, automne, hiver).
+let snowNow738=false,season740='ete';const snowCache738=new Map();
+const SEASON740={printemps:[[120,196,90],.25],automne:[[[214,120,40],[196,82,38],[226,168,60],[170,110,50],[205,140,55]],.55],hiver:[[150,140,120],.5]};
+function seasonTint740(col){
+ const def=SEASON740[season740];if(!def||typeof col!=='string'||col[0]!=='#'||(col.length!==7&&col.length!==9))return col;
+ const key=season740+col;let out=snowCache738.get(key);if(out)return out;
+ const r=parseInt(col.slice(1,3),16),g=parseInt(col.slice(3,5),16),b=parseInt(col.slice(5,7),16);
+ if(g>r+20&&g>b+15){const to=Array.isArray(def[0][0])?def[0][(r*7+g*3+b)%def[0].length]:def[0],k=def[1];out='#'+[r,g,b].map((v,i)=>Math.round(v+(to[i]-v)*k).toString(16).padStart(2,'0')).join('')+col.slice(7);}else out=col;
+ if(snowCache738.size>600)snowCache738.clear();snowCache738.set(key,out);return out;
+}
 function snowTint738(col){
- if(!snowNow738||typeof col!=='string'||col[0]!=='#'||(col.length!==7&&col.length!==9))return col;
+ if(!snowNow738)return seasonTint740(col);
+ if(typeof col!=='string'||col[0]!=='#'||(col.length!==7&&col.length!==9))return col;
  let out=snowCache738.get(col);if(out)return out;
  const r=parseInt(col.slice(1,3),16),g=parseInt(col.slice(3,5),16),b=parseInt(col.slice(5,7),16);
  if(g>r+12&&g>b+8){const k=night?.45:.62,to=night?[150,162,180]:[236,241,246],m=[r,g,b].map((v,i)=>Math.round(v+(to[i]-v)*k).toString(16).padStart(2,'0')).join('');out='#'+m+col.slice(7);}else out=col;
@@ -111,6 +121,22 @@ function traffic(x,y,s,sg=1){
  for(let j=0;j<3;j++){const yy=y-s*(.91-j*.105);rect(xx-s*.057,yy-s*.046,s*.114,s*.027,'#101b24');const col=j===state?['#fa514a','#f5c54d','#65d49b'][j]:'#414b53';ellipse(xx,yy,s*.038,s*.032,col);if(night&&j===state)light(xx,yy,s*.13,col+'30')}
 }
 function townSign(q,name){const p=P(q,1.55),w=270*q,h=58*q,y=p.y-104*q;for(const a of [-.32,.32])line([[p.x+a*w,p.y],[p.x+a*w,y+h]],'#abb7bf',Math.max(1,3*q));rect(p.x-w/2,y,w,h,'#f6f4e8');c.strokeStyle='#bd383a';c.lineWidth=Math.max(1,3*q);c.strokeRect(p.x-w*.48,y+3*q,w*.96,h-6*q);txt(name,p.x,y+37*q,Math.max(5,24*q),'#1d2c35','center')}
+// 7.40 : panneau de sortie barré de rouge quand on quitte un village ou une ville
+// (le décor passe de ville / village à campagne ou forêt) : il passe à côté de la voiture.
+function townSignExit740(q,name){townSign(q,name);const p=P(q,1.55),w=270*q,h=58*q,y=p.y-104*q;line([[p.x-w*.46,y+h*.88],[p.x+w*.46,y+h*.12]],'#c0392b',Math.max(1.5,7*q));}
+const exit740={name:'',scene:'',S:0,shownAt:{},last:''};
+function townExit740(currentScene,main){
+ const town=currentScene==='ville'||currentScene==='village';
+ if(town){if(panelName){exit740.last=panelName;exit740.scene=currentScene;}return;}
+ if(main&&exit740.last&&currentScene!=='autoroute'){
+  const name=exit740.last;exit740.last='';
+  if(!(Date.now()-(exit740.shownAt[name]||0)<300000)){exit740.shownAt[name]=Date.now();exit740.name=name;exit740.S=roadTravel+90;}
+ }
+ if(!exit740.name||currentScene==='autoroute')return;
+ const z=exit740.S-roadTravel;if(z<-25){exit740.name='';return;}
+ const q=depthQ(z);if(q>=.1&&q<=1.6)townSignExit740(q,exit740.name);
+}
+window.TownExit740=exit740;
 function worldSigns(){const items=[];
  if(scene==='ville'||scene==='village')items.push({z:55,type:'town',name:scene==='ville'?'STRASBOURG':'VILLAGE EXEMPLE'});
  const data=scene==='ville'?[[65,50],[135,40],[205,30]]:scene==='village'?[[68,50],[195,30]]:scene==='autoroute'?[[75,110],[205,110]]:[[75,80],[195,80]];
@@ -1666,7 +1692,7 @@ function paintLive(cv,T,metres,speed,currentScene,main){
  if(cv.width!==Math.round(width*ratio)||cv.height!==Math.round(height*ratio)){cv.width=Math.round(width*ratio);cv.height=Math.round(height*ratio)}
  }
  c=cv.getContext('2d');if(!c)return;if(!c.roundRect)c.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this};c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
- t=T;travelled=metres;scene=currentScene;ruralSeason=productionSeason730();const kind=roadKind();night=!!kind.night;snowNow738=kind.wx==='neige';
+ t=T;travelled=metres;scene=currentScene;ruralSeason=productionSeason730();season740=ruralSeason;const kind=roadKind();night=!!kind.night;snowNow738=kind.wx==='neige';
  const sky=window.RoadSky719&&RoadSky719.current();dusk=!night&&duskNow738(sky);
  const fresh=window.Road723&&Road723.fresh()&&Road723.match&&Date.now()-Road723.at<60000;
  const tags=fresh?Road723.match.tags:{};liveLimit=fresh&&Number.isFinite(limit)&&limit>0&&parseMax(tags.maxspeed)===limit?limit:0;
@@ -1678,7 +1704,7 @@ function paintLive(cv,T,metres,speed,currentScene,main){
  if(scene==='ville')rect(0,HZ,W,BOT-HZ,night?'#38464d':'#a7afa5');countrysideBackdrop();villageBackdrop();villageLandscape();villageLanes();villageRemoteHousing();cityBackdrop();if(scene==='campagne'||scene==='autoroute')landFields();ruralLandscapeAccents();ruralFarmWorld();ruralArrival();forestGround();forestLeafFloor();snowGround738();drawRoad();ruralWildEdges();villageWetRoad();restArea();if(scene==='foret')improvedForestWorld();
  const objects=[],gap=scene==='ville'?57:scene==='village'?58:90,d=distance();
  for(let n=Math.floor((d-40)/gap);n<Math.floor((d-40)/gap)+12;n++)for(const sg of [-1,1]){const z=60+n*gap+(sg<0?gap*.48:0)-d;if(z< -30||z>480)continue;objects.push({q:depthQ(z),id:n+18+(sg<0?3:0),sg})}
- objects.sort((a,b)=>a.q-b.q);for(const o of objects)scenery(o.q,o.id,o.sg);cityWorld();villagePavement();villageLivingDetails();villageSmallLife();neighbourhoodDetails();frontageDetails();cityTraffic();trafficSignals6();barriers();sameWayTraffic();worldSigns();gantry();if(scene!=='foret')forestAccents();
+ objects.sort((a,b)=>a.q-b.q);for(const o of objects)scenery(o.q,o.id,o.sg);cityWorld();villagePavement();villageLivingDetails();villageSmallLife();neighbourhoodDetails();frontageDetails();cityTraffic();trafficSignals6();barriers();sameWayTraffic();worldSigns();townExit740(scene,main);gantry();if(scene!=='foret')forestAccents();
  const west=P(.92,0),east=P(.92,1);
  if(main)RoadCar731.place(cv,(west.x+east.x)/(2*W),(west.y-TOP)/(BOT-TOP),(east.x-west.x)/W);
  if((night||dusk)&&scene!=='campagne'&&scene!=='foret'){const x=P(.9,scene==='autoroute'?.815:.5).x;c.save();c.translate(x,285);c.scale(1,.42);light(0,0,100,'#fff1bb35');c.restore()}
@@ -2532,7 +2558,7 @@ function motorwayDraw(cv,T,metres,speed,main=true){
  }
  c=cv.getContext('2d');if(!c)return;
  c.setTransform(cv.width/W,0,0,cv.height/(BOT-TOP),0,-TOP*cv.height/(BOT-TOP));
- t=T;travelled=metres;scene='autoroute';night=!!roadKind().night;snowNow738=roadKind().wx==='neige';dusk=!night&&duskNow738(window.RoadSky719&&RoadSky719.current());
+ t=T;travelled=metres;scene='autoroute';season740=productionSeason730();night=!!roadKind().night;snowNow738=roadKind().wx==='neige';dusk=!night&&duskNow738(window.RoadSky719&&RoadSky719.current());
  const sky=skyFill738('#8ab8c9','#d2dfcf',night?'#102132':dusk?'#9096a2':'#8ab8c9',night?'#2c423e':dusk?'#d1baa0':'#d2dfcf');rect(0,TOP,W,HZ-TOP,sky);sky738();rect(0,HZ,W,BOT-HZ,night?'#314b36':'#849d68');
  mbackdrop();mfields();snowGround738();mroad();mrestArea();mexit();munderpass();
  const items=[...msceneryItems(),...mtrafficItems()];for(const o of items.sort((a,b)=>b.z-a.z)){c.save();c.globalAlpha=Math.min(1,Math.max(0,(750-(o.z-distance()))/160));o.draw();c.restore();}

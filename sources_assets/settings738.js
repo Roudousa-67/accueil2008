@@ -57,6 +57,7 @@
    ['Assistant vocal', P('Navigation', 'Assistant')],
    ['Adresses', P('Navigation', 'Adresses')],
    ['Panneaux d’autoroute', p => window.Highway738 && Highway738.settings ? Highway738.settings(p) : ''],
+   ['Bouchons en direct', p => window.V740 ? V740.settingsTraffic(p) : ''],
   ]],
   ['Véhicule', [
    ['Apprendre ma voiture', join(P('Véhicule', 'Apprentissage automatique'), P('Véhicule', 'Apprendre ma voiture'))],
@@ -69,11 +70,13 @@
    ['Enregistrement des trajets', P('Navigation', 'Parcours')],
    ['Carburant et stations', join(P('Véhicule', 'Carburant'), drop(P('Navigation', 'Stations essence'), ['⛽ Carburant']))],
    ['Organisation et données', P('Trajets et carburant', 'Organisation et données')],
+   ['Péages (estimation)', p => window.V740 ? V740.settingsToll(p) : ''],
    ['Transfert depuis le téléphone', P('Trajets et carburant', 'Transfert depuis le téléphone')],
   ]],
   ['Météo', [
    ['Actualisation', P('Météo', 'Actualisation')],
    ['Affichage et vigilance', P('Météo', 'Affichage et vigilance')],
+   ['Météo devant toi', p => window.V740 ? V740.settingsWeather(p) : ''],
   ]],
   ['Entretien', [
    ['Rappels', P('Entretien', 'Rappels')],

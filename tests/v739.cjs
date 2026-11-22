@@ -6,7 +6,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- assert.equal(run('APP_VERSION'),'7.39');
+ assert(Number(run('APP_VERSION'))>=7.39,'version 7.39 ou suivante');
 
  // ---------- 1. Stations : menus déroulants ----------
  run(`onLoc(48.5085,7.6545,0,6,-1,150);Stations738.state.all=Stations738.demo();Stations738.publish();st47.at=Date.now();store.set('stRad',10);store.set('st738f',{});act('tsub:fuel');tab='trips';render();act('journey733:fuel:stations');`);
