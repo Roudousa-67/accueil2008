@@ -1,6 +1,6 @@
 {
   "version": "7.41",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.41/Accueil2008GT_v7.41.apk",
-  "sha256": "",
+  "sha256": "35ffdc7c4dc79e4b1d6f9a2aa5c59a3d7d62c61e71adfc723e6e688c7c2c5d88",
   "notes": "Village et ville : en entrant, le nom s’affiche en haut à droite sous la météo ; en sortant, le même panneau barré de rouge. Durée réglable (5, 10, 20 s ou tout le temps) dans GPS et navigation → Panneaux dans l’image. Le nom est vérifié toutes les 10 s.\nAutoroute : petit panneau de la prochaine station à côté de ta vitesse, 10 s avant de passer sous le portique et 10 s après (réglable). Portiques sans flèches, texte plus grand. Le panneau « sortie à 500 m » ne cache plus la météo.\nTickets et GPX par QR en 4G : tu scannes, tu envoies, l’autoradio reçoit, sans Wi-Fi ni Bluetooth (page d’envoi à activer une fois sur GitHub Pages).\nComprend les 7.38 à 7.40. Tests sur l’autoradio restant à effectuer."
 }
