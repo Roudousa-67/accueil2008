@@ -68,7 +68,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
  w.Transfer738Native={start:()=>'',stop:()=>'',status:()=>JSON.stringify({native:true,running:true,port:8738,ips:['192.168.43.1'],used:120000,quota:1073741824,files:Object.keys(files).length,received:0}),
   newToken:(kind,min,file)=>(token='a'.repeat(48)),list:()=>JSON.stringify(Object.keys(files).map(n=>({name:n,size:files[n].length,time:Date.now(),kept:kept.has(n)}))),
   dataUrl:n=>files[n]||'',text:n=>files[n]||'',saveText:(n,txt)=>{files[n]=txt;return JSON.stringify({ok:true,path:n});},remove:n=>delete files[n],keep:(n,v)=>v?kept.add(n):kept.delete(n),keepOnly:s=>{kept.clear();String(s).split('\n').filter(Boolean).forEach(n=>kept.add(n));}};
- run("tab='home';render();act('transfer738:ticket')");
+ run("store.set('transferMode741','wifi');tab='home';render();act('transfer738:ticket')");
  assert(run("!!document.querySelector('[data-transfer738] svg')"),'QR affiché');
  assert(run("document.querySelector('[data-transfer738]').textContent.includes('192.168.43.1')"),'adresse Wi-Fi de l’autoradio indiquée');
  files['20261123-081600-ticket-ticket.jpg']='data:image/jpeg;base64,/9j/AAAA';
@@ -80,7 +80,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
  w.Transfer738Native.status=()=>JSON.stringify({native:true,running:true,port:8738,ips:[],used:0,quota:1073741824});
  run("act('transfer738:gpx')");
  assert(run("document.querySelector('[data-transfer738]').textContent.includes('point d’accès')"),'sans Wi-Fi : marche à suivre du point d’accès');
- run("act('transfer738:close')");
+ run("act('transfer738:close');store.set('transferMode741','internet');");
  console.log('OK transfert : QR local, réception du ticket, consigne du point d’accès sans Wi-Fi');
 
  // ---------- 6. Réglages rangés ----------

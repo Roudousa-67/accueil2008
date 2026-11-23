@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Envoi Accueil 2008</title>
+<style>
+ *{box-sizing:border-box}
+ body{margin:0;font:17px/1.45 -apple-system,system-ui,sans-serif;background:#eef2f7;color:#14223a}
+ main{max-width:480px;margin:0 auto;padding:24px 18px 40px;display:flex;flex-direction:column;gap:16px}
+ h1{font-size:23px;margin:4px 0 0}
+ .card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 2px 10px #0001;display:flex;flex-direction:column;gap:12px}
+ .btn{display:block;text-align:center;border-radius:14px;padding:16px;font-weight:700;font-size:18px;background:#1f6fd1;color:#fff;cursor:pointer}
+ .btn.light{background:#e4e9ef;color:#14223a}
+ .petit{font-size:13px;color:#5a6676}
+ .ok{font-size:22px;font-weight:700;color:#2f9e44;text-align:center}
+ .err{background:#fdecea;color:#a12b20;border-radius:12px;padding:12px}
+ .spin{width:46px;height:46px;border-radius:50%;border:5px solid #cfd8e3;border-top-color:#1f6fd1;margin:6px auto;animation:t 1s linear infinite}
+ @keyframes t{to{transform:rotate(360deg)}}
+ [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+ <h1 id="titre">Envoyer à ta 2008</h1>
+ <div class="card" id="choix">
+  <p id="info" style="margin:0"></p>
+  <label class="btn" id="bPhoto">Prendre la photo<input type="file" accept="image/*" capture="environment" hidden></label>
+  <label class="btn light" id="bGalerie">Choisir une photo<input type="file" accept="image/*" hidden></label>
+  <label class="btn" id="bFichier" hidden>Choisir le fichier<input type="file" hidden></label>
+ </div>
+ <div class="card" id="envoi" hidden><div class="spin"></div><p style="text-align:center;margin:0">Envoi vers l’autoradio…</p></div>
+ <div class="card" id="fini" hidden><div class="ok">✓ Envoyé</div><p style="margin:0;text-align:center">L’autoradio le reçoit dans quelques secondes.</p><label class="btn light">Envoyer autre chose<input type="file" hidden id="encore"></label></div>
+ <div class="err" id="erreur" hidden></div>
+ <p class="petit">Accueil 2008 · Le fichier passe par une boîte aux lettres sur Internet (ntfy.sh) dont l’adresse est un code secret propre à ce QR. Il s’efface tout seul au bout de quelques heures. Ce lien est valable 15 minutes.</p>
+</main>
+<script>
+(() => {
+ 'use strict';
+ const q = new URLSearchParams(location.hash.slice(1));
+ const topic = q.get('t') || '', kind = q.get('k') || 'ticket', until = Number(q.get('x')) || 0;
+ const $ = id => document.getElementById(id);
+ const show = (id, on) => { $(id).hidden = !on; };
+ const fail = msg => { $('erreur').textContent = msg; show('erreur', true); show('envoi', false); show('choix', true); };
+ const titres = { ticket: 'Envoyer un ticket à ta 2008', gpx: 'Envoyer un trajet GPX à ta 2008', fichier: 'Envoyer un fichier à ta 2008' };
+ $('titre').textContent = titres[kind] || titres.fichier;
+ if (!/^a08-[0-9a-f]{24}$/.test(topic)) { fail('Ce lien n’est pas valable. Sur l’autoradio, affiche un nouveau QR et scanne-le.'); show('choix', false); return; }
+ if (until && Date.now() > until) { fail('Ce QR a expiré. Sur l’autoradio, affiche un nouveau QR et scanne-le.'); show('choix', false); return; }
+ if (kind === 'ticket') $('info').textContent = 'Prends le ticket en photo, bien à plat et lisible.';
+ else { show('bPhoto', false); show('bGalerie', false); show('bFichier', true); $('info').textContent = kind === 'gpx' ? 'Choisis le fichier .gpx du trajet.' : 'Choisis le fichier à envoyer (photo, PDF ou GPX).'; }
+ // Photo réduite à 1600 px : plus rapide en 4G, toujours lisible.
+ function shrink(file) {
+  if (!/^image\//.test(file.type)) return Promise.resolve(file);
+  return new Promise(resolve => {
+   const url = URL.createObjectURL(file), img = new Image();
+   img.onload = () => {
+    const s = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    c.toBlob(b => resolve(b || file), 'image/jpeg', .82);
+   };
+   img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+   img.src = url;
+  });
+ }
+ async function send(file) {
+  if (!file) return;
+  if (file.size > 15 * 1024 * 1024) { fail('Fichier trop gros (15 Mo maximum).'); return; }
+  show('erreur', false); show('choix', false); show('fini', false); show('envoi', true);
+  const data = await shrink(file);
+  const name = /^image\//.test(file.type) ? (kind === 'ticket' ? 'ticket.jpg' : 'photo.jpg') : (file.name || 'fichier');
+  // Corps en « text/plain » : envoi simple, sans demande préalable du navigateur.
+  const body = new Blob([data], { type: 'text/plain' });
+  try {
+   const r = await fetch('https://ntfy.sh/' + topic + '?filename=' + encodeURIComponent(name) + '&title=accueil2008', { method: 'POST', body });
+   if (!r.ok) throw Error('réponse ' + r.status);
+   show('envoi', false); show('fini', true);
+  } catch (e) {
+   if (navigator.onLine === false) { fail('Pas d’Internet sur le téléphone : réessaie.'); return; }
+   // Envoi parti mais réponse illisible : l'autoradio l'a sans doute reçu.
+   show('envoi', false); show('fini', true);
+   $('fini').querySelector('p').textContent = 'Envoi terminé : vérifie sur l’autoradio que le fichier est bien arrivé.';
+  }
+ }
+ for (const input of document.querySelectorAll('input[type=file]')) input.addEventListener('change', () => { send(input.files && input.files[0]); input.value = ''; });
+})();
+</script>
+</body>
+</html>

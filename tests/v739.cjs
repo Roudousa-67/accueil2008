@@ -61,12 +61,12 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  // Petit panneau à 500 m : dessiné tout de suite en haut à droite (bleu).
  run("Highway738.signs=()=>({exit:{id:1,ref:'4',dest:['Kehl'],destRef:[],d:.35},station:null});");
  w.RoadDecor721.draw(cv,50,5000,110);
- const px=JSON.parse(run(`JSON.stringify([...document.querySelector('#screen canvas[data-road]').getContext('2d').getImageData(Math.round(400*.93),Math.round(400*.06),1,1).data])`));
- assert(px[2]>px[0]+40,'petit panneau bleu en haut à droite : '+px);
- run("store.set('hw739',{small:false})");w.RoadDecor721.draw(cv,50,5000,110);
- const px2=JSON.parse(run(`JSON.stringify([...document.querySelector('#screen canvas[data-road]').getContext('2d').getImageData(Math.round(400*.93),Math.round(400*.06),1,1).data])`));
- assert(!(px2[2]>px2[0]+40&&Math.abs(px2[0]-31)<12),'petit panneau absent quand il est désactivé : '+px2);
- run("store.set('hw739',{})");
+ const px=JSON.parse(run(`JSON.stringify([...(c=>c.getContext('2d').getImageData(Math.round(c.width*.48),Math.round(c.height*.09),1,1))(document.querySelector('#screen canvas[data-road]')).data])`));
+ assert(px[0]<70&&px[2]>140,'petit panneau bleu en haut, à côté de la vitesse (7.41) : '+px);
+ run("store.set('hw739',{small:false});store.set('station741Dur',0);");w.RoadDecor721.draw(cv,50,5000,110);
+ const px2=JSON.parse(run(`JSON.stringify([...(c=>c.getContext('2d').getImageData(Math.round(c.width*.48),Math.round(c.height*.09),1,1))(document.querySelector('#screen canvas[data-road]')).data])`));
+ assert(!(px2[0]<70&&px2[2]>140),'petit panneau absent quand il est désactivé : '+px2);
+ run("store.set('hw739',{});store.set('station741Dur',10);");
  console.log('OK autoroute : portiques à la vraie distance (tous les km ou 2 km / 1 km / 500 m), station avec prix, petit panneau à 500 m');
  assert.equal(t.errors.length,0,t.errors.join('\n'));
  console.log('Tests 7.39 réussis.');

@@ -8,7 +8,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- assert.equal(run('APP_VERSION'),'7.40');
+ assert(Number(run('APP_VERSION'))>=7.40,'version 7.40 ou suivante');
  assert(fs.readFileSync(path.join(__dirname,'../sources_assets/index.html'),'utf8').includes('src="v740.js"'),'v740.js chargé par index.html');
 
  // ---------- 1. Météo devant toi ----------

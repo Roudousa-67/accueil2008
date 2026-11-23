@@ -1,10 +1,11 @@
 /* Accueil 2008 GT 7.10 : lieux et géométrie GPS. Chargé après v47.js. */
 'use strict';
 const Place710 = (() => {
-  const intervals = [15, 30, 60, 120, 300];
+  const intervals = [10, 15, 30, 60, 120, 300];
   const every = () => {
-    const v = Number(store.get('placeEvery', 60));
-    return (intervals.includes(v) ? v : 60) * 1000;
+    // 7.41 : nom du village vérifié toutes les 10 s par défaut (limite du service : 1 demande par seconde).
+    const v = Number(store.get('placeEvery', 10));
+    return (intervals.includes(v) ? v : 10) * 1000;
   };
   let pending = null, attempt = 0, current = null, nearby = [], nearbyPos = null;
   let addressPos = null, addressAt = 0, nearbyAt = 0, error = '';
@@ -51,8 +52,9 @@ const Place710 = (() => {
         }
       } catch (e) { problems.push('Adresse indisponible'); }
       try {
-        if (nearbyPos && distance(p, nearbyPos) < 0.03 && Date.now() - nearbyAt < 300000) {
-          // Même cache pour la liste des centres à l'arrêt.
+        if (nearbyPos && ((distance(p, nearbyPos) < 0.03 && Date.now() - nearbyAt < 300000) || (distance(p, nearbyPos) < 2 && Date.now() - nearbyAt < 120000))) {
+          // Même cache pour la liste des centres à l'arrêt ; en roulant, liste rafraîchie après 2 km ou 2 min
+          // (le nom du village, lui, est vérifié à chaque passage).
         } else {
         // Pas de tri par taille, de préférence au cap ni d'exclusion à moins de 500 m.
         // La sélection se fait sur la distance réelle à tous les centres retournés.

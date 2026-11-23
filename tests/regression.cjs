@@ -53,8 +53,8 @@ module.exports={make};
 if(require.main===module)(async()=>{
  const t=make(),{run}=t;
  ok('chargement complet sans erreur',t.errors,[]);
- ok('version',run('APP_VERSION'),'7.40');
- ok('délai initial une minute',run('Place710.every()'),60000);
+ ok('version',run('APP_VERSION'),'7.41');
+ ok('délai initial 10 secondes',run('Place710.every()'),10000);
  t.setels([{type:'node',lat:48.5805,lon:7.74,tags:{name:'Village proche',place:'village'}},{type:'node',lat:48.59,lon:7.74,tags:{name:'Grande ville',place:'city'}}]);
  await run('Place710.refresh()');
  ok('ville à la position GPS',run('Place710.here().name'),'Strasbourg');
@@ -75,7 +75,8 @@ if(require.main===module)(async()=>{
  t.advance(61000);await run('Place710.refresh()');ok('cache à l’arrêt évite les requêtes répétées',t.calls.length,4);
  run("act('place710:every:30')");ok('réglage 30 secondes enregistré',run('store.get("placeEvery")'),30);
  run("act('place710:every:2')");ok('valeur de délai invalide ignorée',run('Place710.every()'),30000);
- t.advance(31000);t.pos(48.60,7.74);await run('Place710.refresh()');ok('nouvelle position au nouveau délai',t.calls.length,6);
+ t.advance(31000);t.pos(48.60,7.74);await run('Place710.refresh()');ok('1 km plus loin : seul le nom est revérifié, liste des villages gardée',t.calls.length,5);
+ t.advance(31000);t.pos(48.63,7.74);await run('Place710.refresh()');ok('nouvelle position au nouveau délai',t.calls.length,7);
  t.setoffline(true);t.advance(31000);t.pos(49,7.74);await run('Place710.refresh()');
  ok('hors réseau les noms éloignés sont masqués',run('roadPlace()'),null);
  run('Place710.paintSigns()');ok('indisponibilité annoncée',t.w.document.querySelector('.place710').textContent.includes('indisponible'),true);

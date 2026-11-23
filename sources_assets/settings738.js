@@ -58,6 +58,7 @@
    ['Adresses', P('Navigation', 'Adresses')],
    ['Panneaux d’autoroute', p => window.Highway738 && Highway738.settings ? Highway738.settings(p) : ''],
    ['Bouchons en direct', p => window.V740 ? V740.settingsTraffic(p) : ''],
+   ['Panneaux dans l’image', p => window.V740 ? V740.settingsPanels(p) : ''],
   ]],
   ['Véhicule', [
    ['Apprendre ma voiture', join(P('Véhicule', 'Apprentissage automatique'), P('Véhicule', 'Apprendre ma voiture'))],

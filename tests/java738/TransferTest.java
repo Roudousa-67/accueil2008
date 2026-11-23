@@ -37,6 +37,22 @@ public class TransferTest {
   t.newToken("ticket",1,"");java.lang.reflect.Field f=LocalTransfer738.class.getDeclaredField("tokenUntil");f.setAccessible(true);f.setLong(t,System.currentTimeMillis()-1);
   ok((int)call("GET",u+"/?t="+dtok,null)[0]==403,"lien expiré refusé");
   ok(LocalTransfer738.detect("<gpx>".getBytes())!=null&&LocalTransfer738.detect(new byte[]{'%','P','D','F','1'}).equals("pdf"),"signatures GPX et PDF reconnues");
+  // 7.41 : téléchargement depuis la boîte aux lettres Internet (ici un petit serveur local).
+  com.sun.net.httpserver.HttpServer relay=com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);
+  byte[] photo=new byte[50_000];photo[0]=(byte)0xFF;photo[1]=(byte)0xD8;photo[2]=(byte)0xFF;
+  relay.createContext("/file/",x->{byte[] b=x.getRequestURI().getPath().endsWith(".txt")?"pas une image".getBytes():photo;x.sendResponseHeaders(200,b.length);x.getResponseBody().write(b);x.close();});
+  relay.start();LocalTransfer738.RELAY="http://127.0.0.1:"+relay.getAddress().getPort()+"/";
+  ok(t.download("http://exemple.invalid/file/a.jpg","ticket","ticket.jpg").contains("\"ok\":false"),"téléchargement refusé hors de la boîte aux lettres");
+  int before=android.webkit.WebView.scripts.size();
+  ok(t.download(LocalTransfer738.RELAY+"file/abc.jpg","ticket","ticket.jpg").contains("\"ok\":true"),"téléchargement lancé");
+  for(int i=0;i<50&&android.webkit.WebView.scripts.size()==before;i++)Thread.sleep(100);
+  String sc=android.webkit.WebView.scripts.get(android.webkit.WebView.scripts.size()-1);
+  ok(sc.contains("\"kind\":\"ticket\"")&&sc.contains("\"via\":\"internet\"")&&sc.contains("\"type\":\"jpg\""),"photo venue d'Internet rangée et signalée à l'appli");
+  before=android.webkit.WebView.scripts.size();t.download(LocalTransfer738.RELAY+"file/x.txt","ticket","x.txt");
+  for(int i=0;i<50&&android.webkit.WebView.scripts.size()==before;i++)Thread.sleep(100);
+  ok(android.webkit.WebView.scripts.get(android.webkit.WebView.scripts.size()-1).contains("\"error\""),"fichier non conforme refusé");
+  relay.stop(0);
+  ok(LocalTransfer738.mobile("rmnet_data0")&&LocalTransfer738.mobile("ccmni1")&&!LocalTransfer738.mobile("wlan0")&&!LocalTransfer738.mobile("ap0"),"adresse 4G jamais proposée dans le QR");
   t.stop();ok(t.status().contains("\"running\":false"),"serveur arrêté");
   System.out.println(checks+" contrôles du serveur de transfert réussis.");System.exit(0);
  }

@@ -14,10 +14,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -45,11 +47,16 @@ import java.util.concurrent.Executors;
  * - Fichiers rangés dans le stockage privé de l'appli, 1 Go au maximum. Quand c'est plein,
  *   les fichiers les plus anciens non rattachés (non « gardés ») sont supprimés en premier.
  * - Le contenu est vérifié par sa signature (JPEG, PNG, PDF, GPX), 15 Mo maximum par fichier.
+ *
+ * 7.41 : envoi par Internet (4G) — le téléphone dépose le fichier dans une boîte aux lettres
+ * publique (ntfy.sh, adresse secrète par QR) et l'autoradio le télécharge avec download().
  */
 public final class LocalTransfer738 {
     static final int PORT = 8738;
     static final long QUOTA_DEFAULT = 1024L * 1024L * 1024L;
     static final int MAX_FILE = 15 * 1024 * 1024;
+    /** Seule adresse acceptée pour les téléchargements par Internet (modifiable pour les tests). */
+    static String RELAY = "https://ntfy.sh/";
     private static final int MAX_HEADER = 16 * 1024;
 
     private final Activity activity;
@@ -250,18 +257,9 @@ public final class LocalTransfer738 {
                 String type = detect(data);
                 if (type == null) { send(out, 415, "application/json", json(false, "Type de fichier non accepté (photo, GPX ou PDF)."), null); return; }
                 String kind = params.containsKey("type") ? params.get("type") : tokenKind;
-                if (kind.equals("ticket") && !(type.equals("jpg") || type.equals("png"))) { send(out, 415, "application/json", json(false, "Un ticket doit être une photo."), null); return; }
-                if (!makeRoom(data.length)) { send(out, 507, "application/json", json(false, "Stockage de l'autoradio plein."), null); return; }
-                String base = safeName(params.containsKey("nom") ? params.get("nom") : kind);
-                int dot = base.lastIndexOf('.');
-                if (dot > 0) base = base.substring(0, dot);
-                if (base.isEmpty()) base = kind;
-                String name = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + "-" + safeName(kind) + "-" + base + "." + type;
-                if (name.length() > 120) name = name.substring(0, 115) + "." + type;
-                try (FileOutputStream o = new FileOutputStream(new File(dir, name))) { o.write(data); }
-                received++;
-                notifyJs("{\"name\":" + q(name) + ",\"kind\":" + q(kind) + ",\"type\":" + q(type) + ",\"size\":" + data.length + "}");
-                send(out, 200, "application/json", ("{\"ok\":true,\"name\":" + q(name) + "}").getBytes(StandardCharsets.UTF_8), null);
+                String[] r = store(data, kind, params.containsKey("nom") ? params.get("nom") : kind, "local");
+                if (r[0] != null) { send(out, Integer.parseInt(r[0]), "application/json", json(false, r[1]), null); return; }
+                send(out, 200, "application/json", ("{\"ok\":true,\"name\":" + q(r[1]) + "}").getBytes(StandardCharsets.UTF_8), null);
                 return;
             }
             send(out, 404, "application/json", json(false, "Introuvable."), null);
@@ -270,6 +268,53 @@ public final class LocalTransfer738 {
         } finally {
             try { c.close(); } catch (IOException ignored) { }
         }
+    }
+
+    /** Range un fichier reçu. Renvoie {null, nom} si c'est bon, sinon {code HTTP, message}. */
+    private String[] store(byte[] data, String kind, String hint, String via) throws IOException {
+        String type = detect(data);
+        if (type == null) return new String[] { "415", "Type de fichier non accepté (photo, GPX ou PDF)." };
+        if (kind.equals("ticket") && !(type.equals("jpg") || type.equals("png"))) return new String[] { "415", "Un ticket doit être une photo." };
+        if (!makeRoom(data.length)) return new String[] { "507", "Stockage de l'autoradio plein." };
+        String base = safeName(hint == null || hint.isEmpty() ? kind : hint);
+        int dot = base.lastIndexOf('.');
+        if (dot > 0) base = base.substring(0, dot);
+        if (base.isEmpty()) base = kind;
+        String name = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + "-" + safeName(kind) + "-" + base + "." + type;
+        if (name.length() > 120) name = name.substring(0, 115) + "." + type;
+        try (FileOutputStream o = new FileOutputStream(new File(dir, name))) { o.write(data); }
+        received++;
+        notifyJs("{\"name\":" + q(name) + ",\"kind\":" + q(kind) + ",\"type\":" + q(type) + ",\"size\":" + data.length + ",\"via\":" + q(via) + "}");
+        return new String[] { null, name };
+    }
+
+    /**
+     * 7.41 : télécharge un fichier déposé par le téléphone dans la boîte aux lettres Internet,
+     * puis le range comme un envoi local (mêmes contrôles, même quota, même notification).
+     * Seules les adresses de la boîte aux lettres sont acceptées.
+     */
+    @JavascriptInterface public String download(final String url, final String kind, final String hint) {
+        if (url == null || !url.startsWith(RELAY)) return "{\"ok\":false,\"error\":\"adresse refusée\"}";
+        pool.execute(new Runnable() { @Override public void run() {
+            HttpURLConnection h = null;
+            try {
+                h = (HttpURLConnection) new URL(url).openConnection();
+                h.setConnectTimeout(10000); h.setReadTimeout(20000); h.setInstanceFollowRedirects(true);
+                int code = h.getResponseCode();
+                if (code != 200) throw new IOException("réponse " + code);
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                try (InputStream in = h.getInputStream()) {
+                    byte[] buf = new byte[16384]; int n;
+                    while ((n = in.read(buf)) > 0) { b.write(buf, 0, n); if (b.size() > MAX_FILE) throw new IOException("fichier trop gros (15 Mo maximum)"); }
+                }
+                String[] r = store(b.toByteArray(), kind == null || kind.isEmpty() ? "fichier" : kind, hint, "internet");
+                if (r[0] != null) { lastError = r[1]; notifyJs("{\"error\":" + q(r[1]) + ",\"via\":\"internet\"}"); }
+            } catch (Exception e) {
+                lastError = "Téléchargement impossible : " + e.getMessage();
+                notifyJs("{\"error\":" + q(lastError) + ",\"via\":\"internet\"}");
+            } finally { if (h != null) h.disconnect(); }
+        } });
+        return "{\"ok\":true}";
     }
 
     private static String readHead(InputStream in) throws IOException {
@@ -420,7 +465,7 @@ public final class LocalTransfer738 {
             Enumeration<NetworkInterface> all = NetworkInterface.getNetworkInterfaces();
             while (all != null && all.hasMoreElements()) {
                 NetworkInterface n = all.nextElement();
-                if (!n.isUp() || n.isLoopback()) continue;
+                if (!n.isUp() || n.isLoopback() || mobile(n.getName())) continue;
                 Enumeration<InetAddress> addresses = n.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress a = addresses.nextElement();
@@ -433,6 +478,12 @@ public final class LocalTransfer738 {
             }
         } catch (Exception ignored) { }
         return out;
+    }
+
+    /** Interfaces de données mobiles (4G) : jamais joignables depuis le téléphone. */
+    static boolean mobile(String name) {
+        String n = name == null ? "" : name.toLowerCase(Locale.ROOT);
+        return n.startsWith("rmnet") || n.startsWith("ccmni") || n.startsWith("wwan") || n.startsWith("pdp") || n.startsWith("rev_rmnet") || n.startsWith("v4-") || n.startsWith("clat") || n.startsWith("seth") || n.startsWith("ppp");
     }
 
     private byte[] page() {

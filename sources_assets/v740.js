@@ -226,6 +226,13 @@
    if (op === 'open') openDetail(); else if (op === 'close') dismiss(); else if (op === 'hide') closeDetail();
    return;
   }
+  if (typeof a === 'string' && a.startsWith('v741:')) {
+   const [, op, v] = a.split(':'), n = Number(v);
+   if (op === 'town' && [0, 5, 10, 20].includes(n)) store.set('town741Dur', n);
+   else if (op === 'station' && [0, 5, 10, 20].includes(n)) store.set('station741Dur', n);
+   else if (op === 'place' && [10, 15, 30, 60].includes(n)) store.set('placeEvery', n);
+   render(); return;
+  }
   if (typeof a === 'string' && a.startsWith('v740:')) {
    const [, op, v] = a.split(':');
    if (op === 'wx') { store.set('wxAhead740', v === '1'); if (v === '1') wxRefresh(true); else setAlert('meteo', null); }
@@ -260,6 +267,14 @@
   return `<p style="line-height:1.5">Pendant tes trajets, l’appli compte les kilomètres faits sur une autoroute marquée « à péage » sur la carte, et les multiplie par un prix moyen au kilomètre. Le total s’affiche dans le détail de chaque trajet, sous « Routes empruntées ».</p>`
    + setRow(p, 'Prix moyen au kilomètre', 'Ce n’est pas le tarif officiel : les prix changent selon les sociétés d’autoroute. Ajuste-le d’après tes tickets.', [0.08, 0.10, 0.12, 0.15].map(v => chipBtn(p, 'v740:toll:' + v.toFixed(2), v.toFixed(2).replace('.', ',') + ' €/km', Math.abs(r - v) < .001)).join(''));
  }
+ // 7.41 : panneaux affichés dans l'image (village, station) et vérification du nom du village.
+ function settingsPanels(p) {
+  const town = Number(store.get('town741Dur', 10)), station = Number(store.get('station741Dur', 10)), place = Number(store.get('placeEvery', 10));
+  const chips = (pre, list, cur) => list.map(([v, l]) => chipBtn(p, pre + v, l, cur === v)).join('');
+  return setRow(p, 'Panneau du village ou de la ville', 'En entrant, le nom s’affiche en haut à droite, sous la météo ; en sortant, le même panneau barré de rouge. Durée d’affichage :', chips('v741:town:', [[5, '5 s'], [10, '10 s'], [20, '20 s'], [0, 'Tout le temps']], town))
+   + setRow(p, 'Panneau de la prochaine station (autoroute)', 'Petit panneau à côté de ta vitesse : nom, prix et distance. Il apparaît avant de passer sous le portique de la station et reste après. Durée avant et après :', chips('v741:station:', [[5, '5 s'], [10, '10 s'], [20, '20 s'], [0, 'Désactivé']], station))
+   + setRow(p, 'Vérifier le nom du village toutes les', 'Plus souvent = le bon nom plus vite après l’entrée dans un village. Il faut Internet.', chips('v741:place:', [[10, '10 s'], [15, '15 s'], [30, '30 s'], [60, '1 min']], place));
+ }
  const css = document.createElement('style');
  css.textContent = `.alert740{position:absolute;left:3%;right:3%;top:27%;z-index:6;display:flex;gap:6px;align-items:stretch;pointer-events:auto}
  .alert740-main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:#0b1a3ce6;color:#fff;border-radius:12px;padding:8px 12px;font-weight:600;font-size:clamp(13px,2.2vh,19px);text-align:left;box-shadow:0 4px 12px #0006}
@@ -276,5 +291,5 @@
  .alert740-card p{margin:0}.alert740-foot{display:flex;justify-content:flex-end}
  .toll740{display:flex;flex-direction:column;gap:2px;margin-top:8px;padding:8px 10px;border-radius:10px;background:#ffffff14}.toll740 small{opacity:.75}`;
  document.head.appendChild(css);
- window.V740 = { Alerts, setAlert, current, dismiss, paintBanner, openDetail, closeDetail, W, wxRefresh, evaluate, parse, kindOf, project, T, trafficCheck, readFlow, addTrafficLayer, tollStep, tollKm, tollHTML, tollRate, settingsWeather, settingsTraffic, settingsToll };
+ window.V740 = { Alerts, setAlert, current, dismiss, paintBanner, openDetail, closeDetail, W, wxRefresh, evaluate, parse, kindOf, project, T, trafficCheck, readFlow, addTrafficLayer, tollStep, tollKm, tollHTML, tollRate, settingsWeather, settingsTraffic, settingsToll, settingsPanels };
 })();

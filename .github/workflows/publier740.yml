@@ -1,8 +1,5 @@
 name: Construire et publier APK 7.40
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/publier740.yml', 'sources_assets/**', 'module_GPS_java/**', 'outils/preparer_apk728.py', 'tests/**', 'distribution/release740.json']
   workflow_dispatch:
 permissions:
   contents: write
