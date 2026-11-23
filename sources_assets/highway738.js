@@ -22,7 +22,7 @@
 
  // ---------- Sorties ----------
  function exitQuery(lat, lon) {
-  return `[out:json][timeout:25];node(around:12000,${lat.toFixed(5)},${lon.toFixed(5)})[highway=motorway_junction]->.j;.j out body;way(bn.j)[highway=motorway_link];out body geom;way(bn.j)[highway~"^(motorway|trunk)$"];out body;`;
+  return `[out:json][timeout:25];node(around:12000,${lat.toFixed(5)},${lon.toFixed(5)})[highway=motorway_junction]->.j;.j out body;way(bn.j)[highway~"^(motorway|trunk)_link$"];out body geom;way(bn.j)[highway~"^(motorway|trunk)$"];out body;`;
  }
  function parseExits(json) {
   const els = (json && json.elements) || [], junctions = new Map(), refs = new Map(), out = [];
@@ -31,7 +31,7 @@
    for (const id of e.nodes) if (junctions.has(id) && e.tags.ref) (refs.get(id) || refs.set(id, new Set()).get(id)).add(norm(e.tags.ref));
   const byJunction = new Map();
   for (const e of els) {
-   if (e.type !== 'way' || !e.tags || e.tags.highway !== 'motorway_link' || !Array.isArray(e.nodes) || !junctions.has(e.nodes[0])) continue;
+   if (e.type !== 'way' || !e.tags || !/^(motorway|trunk)_link$/.test(e.tags.highway) || !Array.isArray(e.nodes) || !junctions.has(e.nodes[0])) continue;
    const j = junctions.get(e.nodes[0]), g = Array.isArray(e.geometry) ? e.geometry.filter(p => p && Number.isFinite(p.lat)) : [];
    if (g.length < 2) continue;
    // Sens de la bretelle au départ : il donne le sens de circulation de la chaussée concernée.
@@ -85,6 +85,34 @@
    .catch(e => { H.stError = String(e && e.message || e).slice(0, 80); })
    .finally(() => { H.stBusy = false; compute(); });
  }
+ const brands = new Map();
+ let brandBusy = false;
+ const generic = n => !n || /^(station(-service| service)?|tankstelle|carburants?|aire.*)$/i.test(String(n).trim());
+ function brandKey(s) { return s.id || s.lat.toFixed(4) + ',' + s.lon.toFixed(4); }
+ function fetchBrand(s) {
+  const k = brandKey(s);
+  if (brandBusy || brands.has(k)) return;
+  brandBusy = true; brands.set(k, '');
+  const q = `[out:json][timeout:15];nwr(around:300,${s.lat.toFixed(5)},${s.lon.toFixed(5)})["amenity"="fuel"];out center tags;`;
+  getJSON(OVERPASS + encodeURIComponent(q))
+   .then(j => {
+    let best = null, bd = .3;
+    for (const e of (j && j.elements) || []) {
+     const la = Number.isFinite(e.lat) ? e.lat : e.center && e.center.lat, lo = Number.isFinite(e.lon) ? e.lon : e.center && e.center.lon;
+     if (!Number.isFinite(la)) continue; const d = hav(s.lat, s.lon, la, lo); if (d < bd) { bd = d; best = e; }
+    }
+    const t = best && best.tags || {}, b = String(t.brand || t.operator || t.name || '').trim();
+    brands.set(k, generic(b) ? '' : b);
+   })
+   .catch(() => { setTimeout(() => brands.delete(k), 120000); })
+   .finally(() => { brandBusy = false; compute(); });
+ }
+ function withBrand(s) {
+  if (!s || !generic(s.name)) return s;
+  const b = brands.get(brandKey(s));
+  if (b) s.name = b; else if (!brands.has(brandKey(s))) fetchBrand(s);
+  return s;
+ }
  function pickStation(p, hd) {
   const fuel = store.get('fuel', 'E10');
   const de = (typeof st47 !== 'undefined' && Date.now() - (st47.deAt || 0) < 30 * 60000 ? st47.deList || [] : []).filter(s => s.highway);
@@ -107,7 +135,7 @@
   if (!loc || !Number.isFinite(loc.lat)) { H.next = H.station = null; return; }
   if (Number.isFinite(loc.brg) && loc.brg >= 0 && (loc.spd || 0) > 15) H.heading = loc.brg;
   if (!onMotorway() || H.heading == null) { H.next = H.station = null; return; }
-  H.next = pickExit(loc, H.heading); H.station = pickStation(loc, H.heading); H.at = Date.now();
+  H.next = pickExit(loc, H.heading); H.station = withBrand(pickStation(loc, H.heading)); H.at = Date.now();
  }
  const onLoc0 = window.onLoc;
  let lastCompute = 0;
@@ -147,5 +175,5 @@
   }
   return act0.apply(this, arguments);
  };
- window.Highway738 = { state: H, signs, compute, parseExits, pickExit, pickStation, exitQuery, fetchExits, fetchStations, bearing, prefs, settings };
+ window.Highway738 = { state: H, brands, withBrand, signs, compute, parseExits, pickExit, pickStation, exitQuery, fetchExits, fetchStations, bearing, prefs, settings };
 })();

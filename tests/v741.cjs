@@ -9,7 +9,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- assert.equal(run('APP_VERSION'),'7.41');
+ assert(Number(run('APP_VERSION'))>=7.41,'version 7.41 ou suivante');
  const src=fs.readFileSync(path.join(__dirname,'../sources_assets/decors726.js'),'utf8');
  const gantry=src.slice(src.indexOf('function mgantry(z=90,forced){'),src.indexOf('function mrestArea(){'));
  assert(!/downArrow\(/.test(gantry),'portiques sans flèches');
