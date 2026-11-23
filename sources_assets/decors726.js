@@ -127,10 +127,10 @@ function townSignExit740(q,name){townSign(q,name);const p=P(q,1.55),w=270*q,h=58
 const exit740={name:'',scene:'',S:0,shownAt:{},last:''};
 function townExit740(currentScene,main){
  const town=currentScene==='ville'||currentScene==='village';
- if(town){if(panelName){exit740.last=panelName;exit740.scene=currentScene;}return;}
+ if(town){if(panelName){exit740.last=panelName;exit740.scene=currentScene;if(main)townEnter741(panelName);}return;}
  if(main&&exit740.last&&currentScene!=='autoroute'){
   const name=exit740.last;exit740.last='';
-  if(!(Date.now()-(exit740.shownAt[name]||0)<300000)){exit740.shownAt[name]=Date.now();exit740.name=name;exit740.S=roadTravel+90;}
+  if(!(Date.now()-(exit740.shownAt[name]||0)<300000)){exit740.shownAt[name]=Date.now();exit740.name=name;exit740.S=roadTravel+90;townLeave741(name);}
  }
  if(!exit740.name||currentScene==='autoroute')return;
  const z=exit740.S-roadTravel;if(z<-25){exit740.name='';return;}
@@ -1709,7 +1709,7 @@ function paintLive(cv,T,metres,speed,currentScene,main){
  if(main)RoadCar731.place(cv,(west.x+east.x)/(2*W),(west.y-TOP)/(BOT-TOP),(east.x-west.x)/W);
  if((night||dusk)&&scene!=='campagne'&&scene!=='foret'){const x=P(.9,scene==='autoroute'?.815:.5).x;c.save();c.translate(x,285);c.scale(1,.42);light(0,0,100,'#fff1bb35');c.restore()}
  ruralLightPass();ruralWetAtmosphere();forestFinish();forestAir();villageRain();
- weatherFront738(cv,main);
+ weatherFront738(cv,main);townHUD741();
  c.setTransform(1,0,0,1,0,0);
 }
 const ruralTreeBase=tree;
@@ -2379,6 +2379,7 @@ function syncSigns739(main){
   if(pr.exits&&data.exit)spawn('exit',data.exit,(pr.every==='km'?[5,4,3,2,1]:[2,1]).concat(small?[]:[.5]),data.exit.id);
   if(pr.stations&&data.station)spawn('station',data.station,(pr.every==='km'?[10,5,4,3,2,1]:[10,5,2,1]).concat(small?[]:[.5]),data.station.id||data.station.name);
  }
+ for(const g of ev739.signs)if(g.kind==='station'&&!g.passed&&g.S-roadTravel<=0){g.passed=true;hud741.station=Object.assign({},g.data);hud741.stationUntil=Date.now()+stationDur741()*1000;}
  ev739.signs=ev739.signs.filter(g=>g.S-roadTravel>-30);
  if(ev739.done.size>400)ev739.done.clear();
 }
@@ -2387,21 +2388,54 @@ function drawSyncSigns739(){
 }
 // Petit panneau dès que la sortie (ou la station) est à 500 m : affiché tout de suite en haut à
 // droite de l'image, distance mise à jour, jusqu'au passage.
+// 7.41 : panneaux « dans l'image ». Petits panneaux en haut, entre la vitesse et la météo
+// (sortie à 500 m, prochaine station) et panneau du village à droite sous la météo.
+function hudBox741(x,y,w,h,fn){const m=c.getTransform(),k=m.d?m.a/m.d:1;c.save();c.translate(x,y);c.scale(1,k);fn(w,h/k);c.restore();}
+const hud741={station:null,stationUntil:0,town:null,entered:''};
+function hudSlot741(fn){hudBox741(W*.335,TOP+10,W*.3,(BOT-TOP)*.13,(w,h)=>{c.fillStyle='#00000040';c.fillRect(4,5,w,h);c.fillStyle='#1f5fa8';c.fillRect(0,0,w,h);c.strokeStyle='#ffffff';c.lineWidth=h*.04;c.strokeRect(h*.06,h*.06,w-h*.12,h-h*.12);fn(w,h);});}
 function smallSign739(){
- const pr=prefs739();if(!pr||!pr.small)return;
- const data=Highway738.signs&&Highway738.signs();if(!data)return;
- const ex=pr.exits&&data.exit&&data.exit.d<=.5&&data.exit.d>.03?data.exit:null,st=!ex&&pr.stations&&data.station&&data.station.d<=.5&&data.station.d>.03?data.station:null,o=ex||st;if(!o)return;
- const m=c.getTransform(),k=m.d?m.a/m.d:1,w=W*.36,h=w*.42,x=W-w-14,y=TOP+12;
- c.save();c.translate(x,y);c.scale(1,k);
- c.fillStyle='#00000040';c.fillRect(4,5,w,h);c.fillStyle=ex?'#1f5fa8':'#1f5fa8';c.fillRect(0,0,w,h);c.strokeStyle='#ffffff';c.lineWidth=h*.035;c.strokeRect(h*.05,h*.05,w-h*.1,h-h*.1);
- const pad=h*.12,box=h*.56;
- if(ex){c.fillStyle='#ffffff';c.fillRect(pad,pad,box,box);c.fillStyle='#1f5fa8';c.font=`bold ${box*.2}px Inter, sans-serif`;c.textAlign='center';c.fillText('SORTIE',pad+box/2,pad+box*.27);fitText738(ex.ref||'→',pad+box/2,pad+box*.86,box*.9,box*.55,'#1f5fa8','center');
-  fitText738((ex.dest[0]||'Sortie'),pad*2+box,pad+h*.2,w-pad*3-box,h*.19,'#ffffff','left');}
- else{pump738(pad,pad,box);fitText738(String(st.name||'Station'),pad*2+box,pad+h*.17,w-pad*3-box,h*.16,'#ffffff','left');if(st.price>0)fitText738(st.price.toFixed(3).replace('.',',')+' €',pad*2+box,pad+h*.42,w-pad*3-box,h*.22,'#ffd84d','left');}
- const dm=Math.max(50,Math.round(o.d*20)*50);
- fitText738(dm+' m',w-pad,h-pad*.9,w*.5,h*.3,'#ffffff','right');
+ const pr=prefs739();if(!pr||!pr.small)return false;
+ const data=Highway738.signs&&Highway738.signs();if(!data)return false;
+ const ex=pr.exits&&data.exit&&data.exit.d<=.5&&data.exit.d>.03?data.exit:null;if(!ex)return false;
+ hudSlot741((w,h)=>{const pad=h*.12,box=h*.62,x0=pad*2+box*1.05,mw=w-x0-pad;
+  c.fillStyle='#ffffff';c.fillRect(pad,(h-box)/2,box*1.05,box);c.fillStyle='#1f5fa8';c.font=`bold ${box*.22}px Inter, sans-serif`;c.textAlign='center';c.fillText('SORTIE',pad+box*.525,(h-box)/2+box*.28);
+  fitText738(ex.ref||'→',pad+box*.525,(h-box)/2+box*.88,box*.9,box*.56,'#1f5fa8','center');
+  fitText738(String(ex.dest[0]||'Sortie'),x0,pad+h*.24,mw,h*.24,'#ffffff','left');
+  fitText738(Math.max(50,Math.round(ex.d*20)*50)+' m',w-pad,h-pad*1.1,mw,h*.34,'#ffffff','right');});
+ return true;
+}
+// Prochaine station : 10 s (réglable) avant de passer sous le portique, et 10 s après.
+const stationDur741=()=>{const v=Number(store.get('station741Dur',10));return [0,5,10,20].includes(v)?v:10;};
+function stationHUD741(speed){
+ const X=stationDur741();if(!X)return;
+ const v=Math.max(1,Number(speed)||0)/3.6;let st=null;
+ for(const g of ev739.signs)if(g.kind==='station'){const rel=g.S-roadTravel;if(rel>0&&rel<=v*X){st=g.data;break;}}
+ if(!st&&Date.now()<hud741.stationUntil)st=hud741.station;
+ if(!st)return;
+ const live=window.Highway738&&Highway738.signs&&Highway738.signs(),cur=live&&live.station&&(live.station.id||live.station.name)===(st.id||st.name)?live.station:st;
+ hudSlot741((w,h)=>{const pad=h*.12,box=h*.56;pump738(pad,(h-box)/2,box);const x0=pad*2+box,mw=w-x0-pad;
+  fitText738(String(cur.name||'Station').split(' ')[0],x0,pad+h*.24,mw,h*.24,'#ffffff','left');
+  if(cur.price>0)fitText738(cur.price.toFixed(3).replace('.',',')+' €',x0,h-pad*1.1,mw*.58,h*.32,'#ffd84d','left');
+  fitText738(dist738(Math.max(0,cur.d)),w-pad,h-pad*1.1,mw*.4,h*.26,'#ffffff','right');});
+}
+// Village ou ville : panneau à droite sous la météo, à l'entrée puis barré à la sortie.
+const townDur741=()=>{const v=Number(store.get('town741Dur',10));return [0,5,10,20].includes(v)?v:10;};
+function townHUD741(){
+ const o=hud741.town;if(!o)return;const now=Date.now();
+ if(o.until!==Infinity&&now>o.until){hud741.town=null;return;}
+ const alpha=o.until===Infinity?1:Math.max(0,Math.min(1,(o.until-now)/800));
+ const w=W*.32,h=(BOT-TOP)*.12;c.save();c.globalAlpha=alpha;
+ hudBox741(W-w-16,TOP+(BOT-TOP)*.25,w,h,(w,h)=>{c.fillStyle='#00000040';c.fillRect(5,6,w,h);c.fillStyle='#f6f4e8';c.fillRect(0,0,w,h);c.strokeStyle='#c0392b';c.lineWidth=h*.09;c.strokeRect(h*.08,h*.08,w-h*.16,h-h*.16);
+  fitText738(o.name,w/2,h*.64,w*.8,h*.42,'#1b1b1b','center');
+  if(o.exit){c.strokeStyle='#c0392b';c.lineWidth=h*.1;c.beginPath();c.moveTo(w*.06,h*.88);c.lineTo(w*.94,h*.12);c.stroke();}});
  c.restore();
 }
+function townEnter741(name){
+ if(hud741.entered===name)return;hud741.entered=name;
+ const X=townDur741();hud741.town={name,exit:false,until:X?Date.now()+X*1000:Infinity};
+}
+function townLeave741(name){hud741.entered='';const X=townDur741()||10;hud741.town={name,exit:true,until:Date.now()+X*1000};}
+window.Hud741=hud741;
 const dist738=d=>d<1?Math.max(100,Math.round(d*10)*100)+' m':(Number.isInteger(d)||d>=10?String(Math.round(d)):d.toFixed(1).replace('.',','))+' km';
 // Texte ajusté à la largeur disponible (espace uniforme : 1 unité en largeur = 1 en hauteur).
 function fitText738(s,x,y,maxW,size,col,align='left',bold=true){
@@ -2437,13 +2471,13 @@ function pump738(x,y,s){
  c.fillRect(x+s*.16,y+s*.82,s*.5,s*.06);c.fillRect(x+s*.62,y+s*.3,s*.08,s*.06);c.fillRect(x+s*.68,y+s*.3,s*.06,s*.42);c.fillRect(x+s*.6,y+s*.68,s*.14,s*.06);
 }
 function stationFace738(w,h,st){
- const pad=h*.09,box=h*.5;pump738(pad,pad,box);
- const x0=pad*2+box,maxW=w-x0-pad,label={E10:'SP95-E10',GPLc:'GPL'}[st.fuel]||st.fuel;
- fitText738(String(st.name||'Station'),x0,pad+h*.17,maxW,h*.17,'#ffffff','left');
- if(st.price>0){fitText738(label,x0,pad+h*.47,maxW*.42,h*.16,'#dfe9f5','left',false);fitText738(st.price.toFixed(3).replace('.',',')+' €',w-pad,pad+h*.5,maxW*.58,h*.3,'#ffd84d','right');}
- else fitText738(label+' : prix non publié',x0,pad+h*.47,maxW,h*.15,'#dfe9f5','left',false);
- fitText738(st.c==='DE'?'Tankerkönig':'Prix officiel',pad,h-pad*1.1,w*.45,h*.12,'#c4d6ea','left',false);
- fitText738('dans '+dist738(st.d),w-pad,h-pad*1.1,w*.5,h*.19,'#ffffff','right');
+ const pad=h*.08,box=h*.46;pump738(pad,pad,box);
+ const x0=pad*2+box,mw=w-x0-pad,label={E10:'SP95-E10',GPLc:'GPL'}[st.fuel]||st.fuel;
+ fitText738(String(st.name||'Station').split(' ')[0],x0,pad+h*.26,mw,h*.28,'#ffffff','left');
+ if(st.price>0)fitText738(st.price.toFixed(3).replace('.',',')+' €',x0,pad+h*.68,mw,h*.44,'#ffd84d','left');
+ else fitText738('Prix non publié',x0,pad+h*.62,mw,h*.2,'#dfe9f5','left',false);
+ fitText738(label,pad,h-pad*.8,w*.28,h*.18,'#dfe9f5','left');
+ fitText738('dans '+dist738(st.d),w-pad,h-pad*.8,w*.5,h*.26,'#ffffff','right');
 }
 function mgantry(z=90,forced){
  const [mode,data]=forced||gantryMode738(z);
@@ -2466,7 +2500,6 @@ function mgantry(z=90,forced){
  rows.slice(0,2).forEach((row,i)=>txt(row.name+' · '+(row.km<.1?'<0,1':row.km.toLocaleString('fr',{maximumFractionDigits:1}))+' km',mid,top.y+(45+i*25)*q,Math.max(4,19*q),'#f5f4e6','center'));
  txt('à vol d’oiseau',mid,top.y+89*q,Math.max(3,11*q),'#dce8dd','center');
  }
- for(const k of [.32,.815]){const p=mp(z,k,205);downArrow(p.x,p.y,25*q);}
 }
 function mrestArea(){
  const d=distance();
@@ -2565,7 +2598,7 @@ function motorwayDraw(cv,T,metres,speed,main=true){
  syncSigns739(main);mbarriers();mbridge();mgantry();mgantry(930);drawSyncSigns739();
  // Illustrative speed limit, separate from the destinations.
  const speedLimit=productionLimit730();if(speedLimit&&mvisible(35)){const p=mp(35,1.38);sign(p.x,p.y,125*worldQ(35),speedLimit,false);}
- matmosphere();weatherFront738(cv,main);smallSign739();
+ matmosphere();weatherFront738(cv,main);if(!smallSign739())stationHUD741(speed);townHUD741();
  const depth=(TOP+.92*(BOT-TOP)-HZ)/(BOT-HZ), left=mq(depth,.555), right=mq(depth,1.08);
  if(main)RoadCar731.place(cv,(left.x+right.x)/(2*W),(left.y-TOP)/(BOT-TOP),(right.x-left.x)/W);
  c.setTransform(1,0,0,1,0,0);
