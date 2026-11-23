@@ -181,6 +181,25 @@
   })();
   return context.pending;
  }
+ // 7.42 : en ville, la position GPS peut être rattachée à une voie rapide voisine (rocade,
+ // M35, M351…) : le décor passait sur Autoroute à 15 km/h. Une voie rapide n'est retenue
+ // que si l'on a roulé vite récemment, ou si l'adresse donne cette voie (ou une autoroute).
+ // Un boulevard classé « trunk » limité à 50 n'est jamais une autoroute.
+ let fastAt=0,house742=false;
+ function cityStreet742(m){
+  const t=m.tags||{},now=Date.now(),v=(typeof curSpeed==='function'&&curSpeed()||{}).v||0;
+  if(/^trunk(_link)?$/.test(t.highway)&&t.motorroad!=='yes'){const lim=parseMax(t.maxspeed);if(Number.isFinite(lim)&&lim>0&&lim<=50)return true;}
+  if(v>=50)fastAt=now;
+  if(now-fastAt<45000)return false;
+  const h=typeof window.RoadHintRaw737==='function'&&RoadHintRaw737();
+  if(!h||now-h.at>60000||hav(h.lat,h.lon,loc.lat,loc.lon)>.15)return false;
+  if(/^(motorway|trunk)(_link)?$/.test(h.type))return false;
+  const road=String(h.road||'').toLowerCase();
+  if(road&&[t.name,t.ref,t.official_name,t.int_ref].some(x=>x&&String(x).toLowerCase()===road))return false;
+  if(/autoroute|rocade|voie rapide|voie express|bretelle|échangeur|autobahn/.test(road))return false;
+  house742=!!h.house;
+  return !!(h.house||h.type||road);
+ }
  function pick() {
   const manual=store.get('roadScene','auto');
   if(manual!==manualBefore) { active=null; candidate=null; sampled=null; manualBefore=manual; }
@@ -202,13 +221,18 @@
   sampled=key;
   Road723.apply();
   const map=context.pos && now-context.at<=150000 && distance(loc,context.pos)<CONTEXT_REUSE?context:{areas:[],places:[]};
-  const match=Road723.match,density=streetDensity(loc);
+  const raw=Road723.match,density=streetDensity(loc);
+  const match=raw&&regulated(raw.tags)&&cityStreet742(raw)?null:raw;status.city=raw!==match;
   // Sans route reconnue ni rues ni zones chargées, rien ne permet de trancher.
   const informed=!!match || density!==null || map.areas.length>0;
-  let next=informed?environment(loc,match,map,density):null,hint=null;
+  // Maison adressée à côté de la rue : zone bâtie, même si les rues chargées sont rares.
+  const dens=status.city&&house742?Math.max(Number.isFinite(density)?density:0,450):density;
+  let next=informed?environment(loc,match,map,dens):null,hint=null;
   // 7.37 : sans aucune donnée Overpass, type de la voie la plus proche donné par
   // l'adresse Nominatim (autoroute ou rue résidentielle), récent et à moins de 1 km.
   if(!informed&&typeof window.RoadHint737==='function'){hint=RoadHint737(loc);if(hint)next=hint.kind==='autoroute'?'autoroute':environment(loc,null,map,450);}
+  // 7.42 : voie rapide écartée sans autre donnée : on est dans une rue, donc en zone bâtie.
+  if(!next&&status.city)next=environment(loc,null,map,450);
   sampledScene=next;
   status.match=match?match.tags.highway:'';status.density=density;status.context=map.areas.length;status.hint=hint?hint.type:'';
   if(!next) {
@@ -227,7 +251,7 @@
   } else if(loc.ts-candidate.stamp>=confirm) {
    active=next; candidate=null;
   }
-  status.reason=(match?'Route '+match.tags.highway:'Route non identifiée')+(density!==null?' · rues '+Math.round(density)+' m':'')+(map.areas.length?' · '+map.areas.length+' zones':'')+(hint?' · indice adresse : '+hint.type:'');
+  status.reason=(match?'Route '+match.tags.highway:'Route non identifiée')+(density!==null?' · rues '+Math.round(density)+' m':'')+(map.areas.length?' · '+map.areas.length+' zones':'')+(hint?' · indice adresse : '+hint.type:'')+(status.city?' · rue en ville, voie rapide voisine ignorée':'');
   return active;
  }
  window.RoadScene731={regulated,decode,environment,refresh,context,streetDensity,status};

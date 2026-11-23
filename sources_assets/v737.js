@@ -82,8 +82,9 @@
   // 7.38 : une maison ou un bâtiment adressé à moins de 60 m signale une zone habitée.
   const rlat=Number(result.lat),rlon=Number(result.lon),near=Number.isFinite(rlat)&&Number.isFinite(rlon)&&hav(lat,lon,rlat,rlon)<=.06;
   const house=near&&(/^(building)$/.test(result.category)||/^(house|building|residential|apartments|detached|terrace|semidetached_house)$/.test(String(result.type||''))||/^(building|house)$/.test(String(result.addresstype||'')))&&!!(result.address&&(result.address.house_number||result.address.road));
-  hint={lat,lon,at:Date.now(),type,house};
+  hint={lat,lon,at:Date.now(),type,house,road:String(result.address&&result.address.road||'').trim()};
  }
+ window.RoadHintRaw737=()=>hint;
  window.RoadHint737=function(p){
   if(!hint||(!hint.type&&!hint.house)||!p||Date.now()-hint.at>90000||hav(hint.lat,hint.lon,p.lat,p.lon)>1)return null;
   if(/^(motorway|trunk)(_link)?$/.test(hint.type))return {kind:'autoroute',type:hint.type};

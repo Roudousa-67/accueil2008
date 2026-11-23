@@ -2369,12 +2369,17 @@ function syncSigns739(main){
  const pr=prefs739(),data=pr&&Highway738.signs&&Highway738.signs();
  if(main&&data){
   const look=.6;
-  const spawn=(kind,obj,list,id)=>{for(const T of list){
+  const put=(kind,obj,T)=>{let S=roadTravel+look*1000;for(const g of ev739.signs)if(Math.abs(g.S-S)<140)S=g.S+140;ev739.signs.push({S,kind,T,data:Object.assign({},obj)});ev739.log.push([kind,T,Math.round(S)]);if(ev739.log.length>40)ev739.log.shift();};
+  // 7.42 : une sortie (ou station) découverte entre deux distances rondes — sorties rapprochées,
+  // voie rapide rejointe tard — avait tous ses panneaux sautés. Un panneau tout de suite.
+  const spawn=(kind,obj,list,id)=>{const seen=kind+'|'+id+'|vu',first=!ev739.done.has(seen),rem0=obj.d-look;let made=false;ev739.done.add(seen);
+  for(const T of list){
    const key=kind+'|'+id+'|'+T;if(ev739.done.has(key))continue;
-   const rem=obj.d-look;
-   if(rem<=T&&rem>T-.25){ev739.done.add(key);let S=roadTravel+look*1000;for(const g of ev739.signs)if(Math.abs(g.S-S)<140)S=g.S+140;ev739.signs.push({S,kind,T,data:Object.assign({},obj)});ev739.log.push([kind,T,Math.round(S)]);if(ev739.log.length>40)ev739.log.shift();}
+   const rem=rem0;
+   if(rem<=T&&rem>T-.25){ev739.done.add(key);put(kind,obj,T);made=true;}
    else if(rem<=T-.25)ev739.done.add(key);
-  }};
+  }
+  if(first&&!made&&rem0>.15&&rem0<Math.max(...list))put(kind,obj,Math.max(.2,Math.round(rem0*10)/10));};
   const small=pr.small;
   if(pr.exits&&data.exit)spawn('exit',data.exit,(pr.every==='km'?[5,4,3,2,1]:[2,1]).concat(small?[]:[.5]),data.exit.id);
   if(pr.stations&&data.station)spawn('station',data.station,(pr.every==='km'?[10,5,4,3,2,1]:[10,5,2,1]).concat(small?[]:[.5]),data.station.id||data.station.name);
@@ -2414,7 +2419,7 @@ function stationHUD741(speed){
  if(!st)return;
  const live=window.Highway738&&Highway738.signs&&Highway738.signs(),cur=live&&live.station&&(live.station.id||live.station.name)===(st.id||st.name)?live.station:st;
  hudSlot741((w,h)=>{const pad=h*.12,box=h*.56;pump738(pad,(h-box)/2,box);const x0=pad*2+box,mw=w-x0-pad;
-  fitText738(String(cur.name||'Station').split(' ')[0],x0,pad+h*.24,mw,h*.24,'#ffffff','left');
+  fitText738(brand742(cur.name),x0,pad+h*.24,mw,h*.24,'#ffffff','left');
   if(cur.price>0)fitText738(cur.price.toFixed(3).replace('.',',')+' €',x0,h-pad*1.1,mw*.58,h*.32,'#ffd84d','left');
   fitText738(dist738(Math.max(0,cur.d)),w-pad,h-pad*1.1,mw*.4,h*.26,'#ffffff','right');});
 }
@@ -2460,7 +2465,7 @@ function exitFace738(w,h,e){
  lines.forEach((d,i)=>fitText738(d,x0,pad+h*.06+size*(1+i*1.12),maxW,size,'#ffffff','left'));
  const dist=dist738(e.d);c.font=`bold ${h*.19}px Inter, sans-serif`;const dw=c.measureText(dist).width;
  fitText738(dist,w-pad,h-pad*1.1,w*.3,h*.19,'#ffffff','right');
- let rx=pad+box*.95;const ch=h*.14,ry=h-pad*1.1-ch*.85;for(const r of e.destRef.slice(0,3)){c.font=`bold ${ch*.72}px Inter, sans-serif`;if(rx+c.measureText(r).width+ch*.5>w-pad-dw-ch*.3)break;rx+=refChip738(r,rx,ry,ch)+ch*.25;}
+ let rx=pad+box*.95;const ch=h*.14,ry=h-pad*1.1-ch*.85;for(const r of (e.destRef||[]).slice(0,3)){c.font=`bold ${ch*.72}px Inter, sans-serif`;if(rx+c.measureText(r).width+ch*.5>w-pad-dw-ch*.3)break;rx+=refChip738(r,rx,ry,ch)+ch*.25;}
  // Flèche de sortie vers la droite.
  c.strokeStyle='#ffffff';c.lineWidth=h*.045;c.lineCap='round';const ax=pad+box*.2,ay=h-pad*1.3;c.beginPath();c.moveTo(ax,ay);c.lineTo(ax+box*.55,ay-box*.32);c.stroke();
  c.beginPath();c.moveTo(ax+box*.55,ay-box*.32);c.lineTo(ax+box*.33,ay-box*.33);c.moveTo(ax+box*.55,ay-box*.32);c.lineTo(ax+box*.47,ay-box*.12);c.stroke();c.lineCap='butt';
@@ -2470,10 +2475,12 @@ function pump738(x,y,s){
  c.fillRect(x+s*.22,y+s*.18,s*.38,s*.66);c.fillStyle='#ffffff';c.fillRect(x+s*.28,y+s*.26,s*.26,s*.18);c.fillStyle='#1f5fa8';
  c.fillRect(x+s*.16,y+s*.82,s*.5,s*.06);c.fillRect(x+s*.62,y+s*.3,s*.08,s*.06);c.fillRect(x+s*.68,y+s*.3,s*.06,s*.42);c.fillRect(x+s*.6,y+s*.68,s*.14,s*.06);
 }
+// 7.42 : enseigne en entier (« Station U », « Carrefour Market »), raccourcie à deux mots si trop longue.
+function brand742(n){n=String(n||'').trim();if(!n)return 'Station';return n.length<=18?n:n.split(/\s+/).slice(0,2).join(' ');}
 function stationFace738(w,h,st){
  const pad=h*.08,box=h*.46;pump738(pad,pad,box);
  const x0=pad*2+box,mw=w-x0-pad,label={E10:'SP95-E10',GPLc:'GPL'}[st.fuel]||st.fuel;
- fitText738(String(st.name||'Station').split(' ')[0],x0,pad+h*.26,mw,h*.28,'#ffffff','left');
+ fitText738(brand742(st.name),x0,pad+h*.26,mw,h*.28,'#ffffff','left');
  if(st.price>0)fitText738(st.price.toFixed(3).replace('.',',')+' €',x0,pad+h*.68,mw,h*.44,'#ffd84d','left');
  else fitText738('Prix non publié',x0,pad+h*.62,mw,h*.2,'#dfe9f5','left',false);
  fitText738(label,pad,h-pad*.8,w*.28,h*.18,'#dfe9f5','left');
