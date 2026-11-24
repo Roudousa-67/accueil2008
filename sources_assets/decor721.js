@@ -192,7 +192,7 @@ window.RoadDecor721={
    const geometry=this.forest(c,W,H,T,distance,on,night);
    const items=this.slots(distance,on),slot=RoadMotion713.slot(items.filter(it=>it[0]>1.05&&it[0]<22)),el=box.querySelector('.place710'),name=preview?'FORÊT — APERÇU':el&&!el.classList.contains('waiting710')?el.textContent:'';
    if(slot&&name){const p=this.panelGeometry(slot[0],W,H,this.carRect(box,W,H),on);p.z=slot[0];this.paintPanel(c,p,name,scene,on);}
-   if(on(76)&&!preview&&!DEMO&&Road723.fresh()&&Road723.match&&Date.now()-Road723.at<60000&&Road723.pos&&hav(Road723.pos.lat,Road723.pos.lon,loc.lat,loc.lon)<.35&&Number.isFinite(limit)&&limit>0&&parseMax(Road723.match.tags.maxspeed)===limit){
+   if(on(76)&&!preview&&!DEMO&&!(window.Hud744&&Date.now()-Hud744.busyAt<400)&&Road723.fresh()&&Road723.match&&Date.now()-Road723.at<60000&&Road723.pos&&hav(Road723.pos.lat,Road723.pos.lon,loc.lat,loc.lon)<.35&&Number.isFinite(limit)&&limit>0&&parseMax(Road723.match.tags.maxspeed)===limit){
     const z=geometry.cz+30,p=geometry.project(...geometry.pos(12.5,3.2,z)),foot=geometry.project(...geometry.pos(12.5,0,z));
     const namePanel=slot&&name?this.panelGeometry(slot[0],W,H,this.carRect(box,W,H),on):null;
     if(p&&foot){const radius=p.k*1.15,clear=!namePanel||p.x+radius<namePanel.left-8||p.x-radius>namePanel.left+namePanel.width+8||p.y+radius<namePanel.top-8||p.y-radius>namePanel.ground+8;
