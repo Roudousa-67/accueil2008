@@ -2379,7 +2379,8 @@ function syncSigns739(main){
    if(rem<=T&&rem>T-.25){ev739.done.add(key);put(kind,obj,T);made=true;}
    else if(rem<=T-.25)ev739.done.add(key);
   }
-  if(first&&!made&&rem0>.15&&rem0<Math.max(...list))put(kind,obj,Math.max(.2,Math.round(rem0*10)/10));};
+  // Seulement si aucune distance ronde ne reste à venir (sinon deux portiques côte à côte).
+  if(first&&!made&&rem0>.15&&!list.some(T=>T<rem0))put(kind,obj,Math.max(.2,Math.round(rem0*10)/10));};
   const small=pr.small;
   if(pr.exits&&data.exit)spawn('exit',data.exit,(pr.every==='km'?[5,4,3,2,1]:[2,1]).concat(small?[]:[.5]),data.exit.id);
   if(pr.stations&&data.station)spawn('station',data.station,(pr.every==='km'?[10,5,4,3,2,1]:[10,5,2,1]).concat(small?[]:[.5]),data.station.id||data.station.name);
