@@ -2384,7 +2384,7 @@ function syncSigns739(main){
   const small=pr.small;
   if(pr.exits&&data.exit)spawn('exit',data.exit,(pr.every==='km'?[5,4,3,2,1]:[2,1]).concat(small?[]:[.5]),data.exit.id);
   // 7.44 : panneau « SORTIE » planté à l'endroit exact du début de la bretelle.
-  if(pr.exits&&data.exit&&data.exit.d<=.62){const key='post|'+data.exit.id;if(!ev739.done.has(key)){ev739.done.add(key);ev739.signs.push({S:roadTravel+Math.max(0,data.exit.d)*1000,kind:'post',T:0,data:Object.assign({},data.exit)});}}
+  if(pr.exits&&pr.post!==false&&data.exit&&data.exit.d<=.62){const key='post|'+data.exit.id;if(!ev739.done.has(key)){ev739.done.add(key);ev739.signs.push({S:roadTravel+Math.max(0,data.exit.d)*1000,kind:'post',T:0,data:Object.assign({},data.exit)});}}
   // 7.44 : panneau des grandes villes et de leurs distances, au bord de la route.
   if(pr.towns!==false&&data.towns&&(data.towns.list||[]).length){const key='dist|'+data.towns.id;if(!ev739.done.has(key)){ev739.done.add(key);ev739.signs.push({S:roadTravel+look*1000,kind:'dist',T:0,data:Object.assign({},data.towns)});}}
   if(pr.stations&&data.station)spawn('station',data.station,(pr.every==='km'?[10,5,4,3,2,1]:[10,5,2,1]).concat(small?[]:[.5]),data.station.id||data.station.name);
@@ -2484,7 +2484,7 @@ function distHUD744(){
 // Zone de danger (forme autorisée en France : une zone, jamais l'emplacement d'un radar).
 function dangerHUD744(){
  const z=typeof DZ!=='undefined'&&DZ.on()&&DZ.cur&&Date.now()-DZ.cur.t<20000?DZ.cur:null;
- if(!z||z.kind!=='zone'||store.get('dz744Hud',true)===false)return false;
+ if(!z||z.kind!=='zone'||store.get('dz744Hud',true)===false||(window.V743&&V743.germany()))return false;
  const v=(typeof curSpeed==='function'&&curSpeed()||{}).v||0,lim=typeof limit==='number'&&limit>0?limit:0,over=lim&&v>lim+3,blink=over&&Math.floor(Date.now()/400)%2;
  hud744.busyAt=Date.now();
  hudBox741(W*.335,TOP+10,W*.3,(BOT-TOP)*.13,(w,h)=>{

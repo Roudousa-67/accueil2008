@@ -106,11 +106,21 @@
   else toast('Enregistrement impossible : fais une photo de l’écran.');
  }
 
+ // PDF enregistré dans Téléchargements/Accueil2008 puis envoyé avec l'appli d'e-mail choisie.
+ function pdf() {
+  const n = N(), d = new Date();
+  if (!n || typeof n.sharePdf !== 'function') { S.pdf = { ok: false, erreur: 'il faut la 7.43 installée sur l’autoradio' }; redraw(); return; }
+  const name = `affichage-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
+  S.pdf = safe(() => JSON.parse(n.sharePdf(name, 'Accueil 2008 - Recherche de l’affichage', reportLines().join('\n'))), { ok: false, erreur: 'réponse illisible' });
+  redraw();
+ }
+
  function page(p) {
   const d = S.data, f = findings(d);
   const row = (t, v) => `<div style="display:flex;gap:10px;font-size:13.5px;line-height:1.4"><span style="min-width:170px;color:${p.mut}">${esc(t)}</span><span style="flex:1;min-width:0;word-break:break-word">${esc(v)}</span></div>`;
-  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre de l’accueil, comme d’habitude.<br>2. Lance la recherche (30 à 60 secondes) : modèle, droits, écrans et code du lanceur d’origine. Rien n’est modifié sur le poste.<br>3. Fais les deux essais : les Réglages Android s’ouvrent ; regarde si Waze reste visible par-dessus, reviens ici et réponds.<br>4. Envoie-moi le résultat par QR. Il est aussi ajouté au Rapport de diagnostic.</div>`;
-  const actions = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${chipBtn(p, 'display743:start', S.running ? 'Recherche en cours… ' + S.step : d ? 'Refaire la recherche' : 'Lancer la recherche', true)}${d && !S.running ? chipBtn(p, 'display743:send', 'Envoyer au téléphone (QR)', false) : ''}</div>`;
+  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre de l’accueil, comme d’habitude.<br>2. Lance la recherche (30 à 60 secondes) : modèle, droits, écrans et code du lanceur d’origine. Rien n’est modifié sur le poste.<br>3. Fais les deux essais : les Réglages Android s’ouvrent ; regarde si Waze reste visible par-dessus, reviens ici et réponds.<br>4. Crée le PDF et envoie-le-toi par e-mail (ou par QR vers le téléphone), puis envoie-le-moi. Il est aussi ajouté au Rapport de diagnostic. Cette page sera retirée une fois la solution trouvée.</div>`;
+  const actions = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${chipBtn(p, 'display743:start', S.running ? 'Recherche en cours… ' + S.step : d ? 'Refaire la recherche' : 'Lancer la recherche', true)}${d && !S.running ? chipBtn(p, 'display743:pdf', 'Créer le PDF et l’envoyer par e-mail', false) + chipBtn(p, 'display743:send', 'Envoyer au téléphone (QR)', false) : ''}</div>`;
+  const sent = S.pdf ? `<div style="font-size:13.5px;color:${S.pdf.ok ? p.mut : '#e0312b'}">${S.pdf.ok ? 'PDF créé (' + esc(S.pdf.fichier || '') + '). Choisis ton appli d’e-mail, envoie-le-toi, puis envoie-moi le PDF.' : 'PDF impossible : ' + esc(S.pdf.erreur || '') + (S.pdf.fichier ? ' — il est quand même dans ' + esc(S.pdf.fichier) : '') + '. Utilise le QR à la place.'}</div>` : '';
   const err = S.error ? `<div style="color:#e0312b;font-size:13.5px">${esc(S.error)}</div>` : '';
   let found = '';
   if (d && !d.erreur) {
@@ -130,7 +140,7 @@
    return `<div style="${box(p, 'padding:10px 12px;display:flex;flex-direction:column;gap:8px')}"><b>${title}</b><div>${chipBtn(p, 'display743:try:' + kind, 'Ouvrir les Réglages Android', false)}</div>${r ? `<div style="font-size:13px;color:${p.mut}">${r.ok ? 'Ouvert' : 'Échec'} · ${esc(r.mode || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px">Waze était caché ? ${chipBtn(p, 'display743:answer:' + kind + ':oui', 'Oui, caché', r.hidden === 'oui')}${chipBtn(p, 'display743:answer:' + kind + ':non', 'Non, toujours visible', r.hidden === 'non')}</div>` : ''}</div>`;
   };
   const tests = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">${test('normal', 'Essai 1 : ouverture normale')}${test('plein', 'Essai 2 : ouverture en plein écran')}</div>`;
-  return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${actions}${err}${found}${tests}</div>`;
+  return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${actions}${sent}${err}${found}${tests}</div>`;
  }
 
  const sys = SETCATS.find(c => c[0] === 'Système');
@@ -139,9 +149,10 @@
  window.act = function (a, long) {
   if (a === 'display743:start') { start(); return; }
   if (a === 'display743:send') { send(); return; }
+  if (a === 'display743:pdf') { pdf(); return; }
   if (a.indexOf('display743:try:') === 0) { tryOpen(a.slice(15)); return; }
   if (a.indexOf('display743:answer:') === 0) { const [kind, v] = a.slice(18).split(':'); answer(kind, v); return; }
   return act0.apply(this, arguments);
  };
- window.Display743 = { state: S, poll, start, findings, reportLines, page };
+ window.Display743 = { state: S, poll, start, findings, reportLines, page, pdf };
 })();

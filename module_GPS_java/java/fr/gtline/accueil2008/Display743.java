@@ -3,6 +3,7 @@ package fr.gtline.accueil2008;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -10,10 +11,18 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Typeface;
+import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.Display;
 import android.webkit.JavascriptInterface;
@@ -22,6 +31,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -107,6 +120,87 @@ public final class Display743 {
         } catch (Throwable t) {
             return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
         }
+    }
+
+    /**
+     * Fabrique un PDF du résultat, l'enregistre dans Téléchargements/Accueil2008 et ouvre le choix
+     * de l'appli d'envoi (Gmail…) avec le PDF en pièce jointe.
+     */
+    @JavascriptInterface
+    public String sharePdf(String name, String title, String text) {
+        String where = "";
+        try {
+            byte[] pdf = makePdf(title, text);
+            String file = String.valueOf(name).replaceAll("[^A-Za-z0-9._-]", "_");
+            if (!file.endsWith(".pdf")) file += ".pdf";
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= 29) {
+                ContentValues v = new ContentValues();
+                v.put(MediaStore.MediaColumns.DISPLAY_NAME, file);
+                v.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
+                v.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Accueil2008");
+                uri = activity.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                if (uri == null) throw new IOException("Téléchargements inaccessibles");
+                OutputStream os = activity.getContentResolver().openOutputStream(uri);
+                if (os == null) throw new IOException("écriture impossible");
+                try { os.write(pdf); } finally { os.close(); }
+                where = "Téléchargements/Accueil2008/" + file;
+            } else {
+                File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Accueil2008");
+                dir.mkdirs();
+                File f = new File(dir, file);
+                FileOutputStream fo = new FileOutputStream(f);
+                try { fo.write(pdf); } finally { fo.close(); }
+                // Android 9 et avant : lien « file:// » vers le PDF, accepté une fois la vérification levée.
+                StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
+                uri = Uri.fromFile(f);
+                where = f.getPath();
+            }
+            Intent send = new Intent(Intent.ACTION_SEND).setType("application/pdf")
+                .putExtra(Intent.EXTRA_STREAM, uri).putExtra(Intent.EXTRA_SUBJECT, title)
+                .putExtra(Intent.EXTRA_TEXT, "Résultat de la recherche de l'affichage (Accueil 2008), en pièce jointe.")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (send.resolveActivity(activity.getPackageManager()) == null)
+                return new JSONObject().put("ok", false).put("fichier", where).put("erreur", "aucune appli d'e-mail sur l'autoradio").toString();
+            Intent chooser = Intent.createChooser(send, "Envoyer le PDF");
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivity(chooser);
+            return new JSONObject().put("ok", true).put("fichier", where).put("taille", pdf.length).toString();
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"fichier\":" + JSONObject.quote(where) + ",\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
+    static byte[] makePdf(String title, String text) throws IOException {
+        final int W = 595, H = 842, M = 36;
+        PdfDocument doc = new PdfDocument();
+        Paint head = new Paint(Paint.ANTI_ALIAS_FLAG); head.setTextSize(13f); head.setFakeBoldText(true);
+        Paint body = new Paint(Paint.ANTI_ALIAS_FLAG); body.setTypeface(Typeface.MONOSPACE); body.setTextSize(7.6f);
+        List<String> lines = new ArrayList<>();
+        for (String raw : String.valueOf(text).split("\n", -1)) {
+            String rest = raw;
+            do {
+                int n = rest.isEmpty() ? 0 : body.breakText(rest, true, W - 2 * M, null);
+                if (n < rest.length()) { int sp = rest.lastIndexOf(' ', n); if (sp > n / 2) n = sp + 1; }
+                if (n <= 0 && !rest.isEmpty()) n = 1;
+                lines.add(rest.substring(0, n));
+                rest = rest.substring(n);
+            } while (!rest.isEmpty());
+        }
+        PdfDocument.Page page = null; Canvas cv = null; float y = 0; int no = 0;
+        for (String line : lines) {
+            if (page == null || y > H - M) {
+                if (page != null) doc.finishPage(page);
+                page = doc.startPage(new PdfDocument.PageInfo.Builder(W, H, ++no).create());
+                cv = page.getCanvas(); y = M + 10;
+                cv.drawText(title + (no > 1 ? " (page " + no + ")" : ""), M, y, head); y += 18;
+            }
+            cv.drawText(line, M, y, body); y += 9.6f;
+        }
+        if (page != null) doc.finishPage(page);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        doc.writeTo(out); doc.close();
+        return out.toByteArray();
     }
 
     private JSONObject scan() throws Exception {

@@ -231,6 +231,8 @@
    if (op === 'town' && [0, 5, 10, 20].includes(n)) store.set('town741Dur', n);
    else if (op === 'station' && [0, 5, 10, 20].includes(n)) store.set('station741Dur', n);
    else if (op === 'place' && [10, 15, 30, 60].includes(n)) store.set('placeEvery', n);
+   else if (op === 'dist' && [0, 5, 10, 20].includes(n)) store.set('dist744Dur', n);
+   else if (op === 'dz' && [0, 1].includes(n)) store.set('dz744Hud', n === 1);
    render(); return;
   }
   if (typeof a === 'string' && a.startsWith('v740:')) {
@@ -269,10 +271,12 @@
  }
  // 7.41 : panneaux affichés dans l'image (village, station) et vérification du nom du village.
  function settingsPanels(p) {
-  const town = Number(store.get('town741Dur', 10)), station = Number(store.get('station741Dur', 10)), place = Number(store.get('placeEvery', 10));
+  const town = Number(store.get('town741Dur', 10)), station = Number(store.get('station741Dur', 10)), place = Number(store.get('placeEvery', 10)), dist = Number(store.get('dist744Dur', 10)), dz = store.get('dz744Hud', true) !== false ? 1 : 0;
   const chips = (pre, list, cur) => list.map(([v, l]) => chipBtn(p, pre + v, l, cur === v)).join('');
   return setRow(p, 'Panneau du village ou de la ville', 'En entrant, le nom s’affiche en haut à droite, sous la météo ; en sortant, le même panneau barré de rouge. Durée d’affichage :', chips('v741:town:', [[5, '5 s'], [10, '10 s'], [20, '20 s'], [0, 'Tout le temps']], town))
    + setRow(p, 'Panneau de la prochaine station (autoroute)', 'Petit panneau à côté de ta vitesse : nom, prix et distance. Il apparaît avant de passer sous le portique de la station et reste après. Durée avant et après :', chips('v741:station:', [[5, '5 s'], [10, '10 s'], [20, '20 s'], [0, 'Désactivé']], station))
+   + setRow(p, 'Grandes villes et distances (autoroute)', 'Le panneau des villes planté au bord de la route s’affiche aussi en grand en haut, entre la vitesse et la météo. Durée :', chips('v741:dist:', [[5, '5 s'], [10, '10 s'], [20, '20 s'], [0, 'Désactivé']], dist))
+   + setRow(p, 'Zone de danger en haut de l’image', 'Panneau « Zone de danger » avec la distance qui reste ; il clignote si tu dépasses la limite. Forme autorisée en France (jamais l’emplacement d’un radar) ; coupé automatiquement en Allemagne, où c’est interdit en roulant.', chips('v741:dz:', [[1, 'Activé'], [0, 'Désactivé']], dz))
    + setRow(p, 'Vérifier le nom du village toutes les', 'Plus souvent = le bon nom plus vite après l’entrée dans un village. Il faut Internet.', chips('v741:place:', [[10, '10 s'], [15, '15 s'], [30, '30 s'], [60, '1 min']], place));
  }
  const css = document.createElement('style');
@@ -292,4 +296,17 @@
  .toll740{display:flex;flex-direction:column;gap:2px;margin-top:8px;padding:8px 10px;border-radius:10px;background:#ffffff14}.toll740 small{opacity:.75}`;
  document.head.appendChild(css);
  window.V740 = { Alerts, setAlert, current, dismiss, paintBanner, openDetail, closeDetail, W, wxRefresh, evaluate, parse, kindOf, project, T, trafficCheck, readFlow, addTrafficLayer, tollStep, tollKm, tollHTML, tollRate, settingsWeather, settingsTraffic, settingsToll, settingsPanels };
+ // 7.43 : zones de danger. En Allemagne, avertir des radars en roulant est interdit (§ 23 Abs. 1c StVO) :
+ // les zones issues des radars sont ignorées dès que la position est en Allemagne. Quand le panneau
+ // du haut de l'image est affiché, la pastille rouge sous la vitesse ne fait plus doublon.
+ const germany = () => typeof geo47 !== 'undefined' && geo47 && geo47.cc === 'de';
+ if (typeof window.dzNow === 'function') {
+  const dzNow0 = window.dzNow;
+  window.dzNow = function () { const z = dzNow0.apply(this, arguments); return z && z.kind === 'zone' && germany() ? null : z; };
+ }
+ if (typeof window.dzPill === 'function') {
+  const dzPill0 = window.dzPill;
+  window.dzPill = function (z) { if (z && z.kind === 'zone' && store.get('dz744Hud', true) !== false && document.querySelector('#screen canvas[data-road]')) return ''; return dzPill0.apply(this, arguments); };
+ }
+ window.V743 = { germany };
 })();
