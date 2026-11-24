@@ -5,7 +5,7 @@
 (() => {
  'use strict';
  const OVERPASS = 'https://overpass-api.de/api/interpreter?data=';
- const H = { exits: [], exitsAt: 0, exitsPos: null, exitError: '', exitBusy: false, stations: [], stAt: 0, stPos: null, stError: '', stBusy: false, heading: null, next: null, station: null, at: 0, source: '' };
+ const H = { cities: [], cityAt: 0, cityPos: null, cityBusy: false, cityError: '', towns: null, townsId: 0, townsPos: null, townsOnce: false, onSince: 0, passedAt: 0, exits: [], exitsAt: 0, exitsPos: null, exitError: '', exitBusy: false, stations: [], stAt: 0, stPos: null, stError: '', stBusy: false, heading: null, next: null, station: null, at: 0, source: '' };
  const rad = x => x * Math.PI / 180;
  function bearing(a, b) {
   const y = Math.sin(rad(b.lon - a.lon)) * Math.cos(rad(b.lat)), x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) - Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lon - a.lon));
@@ -130,12 +130,85 @@
   return best;
  }
 
+ // ---------- 7.43 : grandes villes et distances (panneau au bord de la route) ----------
+ // Villes (OpenStreetMap) dans ton sens de circulation ; distance par la route (OSRM),
+ // sinon à vol d'oiseau + 20 % marquée « ≈ ». Un panneau en arrivant sur l'autoroute,
+ // puis après chaque sortie passée, au plus un tous les 10 km.
+ const OSRM = 'https://router.project-osrm.org/table/v1/driving/';
+ function fetchCities(force) {
+  if (H.cityBusy || !loc) return;
+  const moved = H.cityPos ? hav(H.cityPos.lat, H.cityPos.lon, loc.lat, loc.lon) : 999;
+  if (!force && moved < 60 && Date.now() - H.cityAt < 30 * 60000) return;
+  if (!force && H.cityError && Date.now() - H.cityAt < 3 * 60000) return;
+  H.cityBusy = true; H.cityAt = Date.now(); H.cityPos = { lat: loc.lat, lon: loc.lon };
+  const la = loc.lat.toFixed(4), lo = loc.lon.toFixed(4);
+  const q = `[out:json][timeout:25];(node(around:450000,${la},${lo})[place=city][name];node(around:70000,${la},${lo})[place=town][name];);out body;`;
+  getJSON(OVERPASS + encodeURIComponent(q))
+   .then(j => {
+    if (j && j.remark && !(j.elements || []).length) throw Error(j.remark);
+    H.cities = ((j && j.elements) || []).filter(e => e.tags && e.tags.name && Number.isFinite(e.lat)).map(e => ({ name: String(e.tags['name:fr'] || e.tags.name), lat: e.lat, lon: e.lon, city: e.tags.place === 'city', pop: Number(String(e.tags.population || '').replace(/\D/g, '')) || 0 }));
+    H.cityError = '';
+   })
+   .catch(e => { H.cityError = String(e && e.message || e).slice(0, 80); })
+   .finally(() => { H.cityBusy = false; });
+ }
+ function pickTowns(p, hd) {
+  const cand = [];
+  for (const c of H.cities || []) {
+   const d = hav(p.lat, p.lon, c.lat, c.lon); if (d < 8 || d > 650) continue;
+   // Plus la ville est loin, plus la route peut s'écarter de la ligne droite.
+   if (Math.abs(diff(bearing(p, c), hd)) > (d < 60 ? 30 : d < 200 ? 25 : 35)) continue;
+   cand.push(Object.assign({ d }, c));
+  }
+  cand.sort((a, b) => a.d - b.d);
+  const out = [];
+  for (const c of cand) {
+   if (out.length >= 4) break;
+   const last = out[out.length - 1];
+   if (!last) { out.push(c); continue; }
+   if (c.d < last.d * 1.4 || c.d - last.d < 15) continue;
+   if (!c.city && out.length >= 1) continue;
+   if (out.length >= 2 && c.pop && c.pop < 100000 && cand.some(x => x.city && x.pop >= 100000 && x.d > last.d * 1.4)) continue;
+   out.push(c);
+  }
+  return out;
+ }
+ function refineTowns(t) {
+  if (!t || !t.items.length || !loc) return;
+  const pts = [[loc.lon, loc.lat]].concat(t.items.map(c => [c.lon, c.lat])).map(([a, b]) => a.toFixed(5) + ',' + b.toFixed(5)).join(';');
+  getJSON(OSRM + pts + '?sources=0&annotations=distance')
+   .then(j => {
+    const row = j && j.distances && j.distances[0];
+    if (!row) return;
+    t.list = t.items.map((c, i) => [c.name, Number.isFinite(row[i + 1]) && row[i + 1] > 0 ? String(Math.round(row[i + 1] / 1000)) : '≈ ' + Math.round(c.d * 1.2)]);
+    t.road = true;
+   }).catch(() => { /* reste à vol d'oiseau */ });
+ }
+ function maybeTowns(hd) {
+  const pr = prefs(); if (!pr.towns || !loc) return;
+  fetchCities(false);
+  const now = Date.now(), entered = !H.onSince || now - H.onSince < 25000;
+  const passed = H.passedAt && now - H.passedAt < 20000;
+  const far = !H.townsPos || hav(H.townsPos.lat, H.townsPos.lon, loc.lat, loc.lon) >= 10;
+  if (!far || (!passed && !(entered && now - H.onSince > 15000 && !H.townsOnce))) return;
+  const items = pickTowns(loc, hd); if (!items.length) return;
+  const ref = String(road().ref || '').split(';')[0].replace(/^([AMN])\s*(\d)/, '$1 $2').trim();
+  H.towns = { id: ++H.townsId, ref, at: now, items, list: items.map(c => [c.name, '≈ ' + Math.round(c.d * 1.2)]), road: false };
+  H.townsPos = { lat: loc.lat, lon: loc.lon }; H.townsOnce = true; H.passedAt = 0;
+  refineTowns(H.towns);
+ }
+
  // ---------- Calcul à chaque position ----------
  function compute() {
   if (!loc || !Number.isFinite(loc.lat)) { H.next = H.station = null; return; }
   if (Number.isFinite(loc.brg) && loc.brg >= 0 && (loc.spd || 0) > 15) H.heading = loc.brg;
-  if (!onMotorway() || H.heading == null) { H.next = H.station = null; return; }
+  if (!onMotorway() || H.heading == null) { H.next = H.station = null; H.onSince = 0; H.townsOnce = false; return; }
+  if (!H.onSince) H.onSince = Date.now();
+  const prev = H.next;
   H.next = pickExit(loc, H.heading); H.station = withBrand(pickStation(loc, H.heading)); H.at = Date.now();
+  // Sortie dépassée (la suivante prend sa place alors qu'elle était tout près) : on vient de passer un échangeur.
+  if (prev && prev.d < .4 && (!H.next || H.next.id !== prev.id)) H.passedAt = Date.now();
+  maybeTowns(H.heading);
  }
  const onLoc0 = window.onLoc;
  let lastCompute = 0;
@@ -150,11 +223,11 @@
  // Données pour les portiques du décor : rien de plus vieux que 2 minutes.
  function signs() {
   if (!H.at || Date.now() - H.at > 120000) return null;
-  return { exit: H.next, station: H.station };
+  return { exit: H.next, station: H.station, towns: H.towns && Date.now() - H.towns.at < 60000 && (H.towns.road || Date.now() - H.towns.at > 4000) ? H.towns : null };
  }
 
  // ---------- 7.39 : réglages des panneaux ----------
- const PREF_DEF = { exits: true, stations: true, every: 'km', small: true };
+ const PREF_DEF = { exits: true, stations: true, every: 'km', small: true, post: true, towns: true };
  const prefs = () => Object.assign({}, PREF_DEF, store.get('hw739', {}) || {});
  function setPref(k, v) { const o = Object.assign({}, store.get('hw739', {}) || {}); o[k] = v; store.set('hw739', o); }
  function settings(p) {
@@ -162,6 +235,8 @@
   return setRow(p, 'Panneaux de sortie', 'Portique bleu avec le numéro de la sortie, les villes et la distance, placé à la vraie distance de la sortie.', onoff('exits'))
    + setRow(p, 'Fréquence des panneaux', 'Tous les kilomètres : 5 km, 4 km, 3 km, 2 km et 1 km avant la sortie. Comme sur l’autoroute : 2 km et 1 km.', chipBtn(p, 'hw739:every:km', 'Tous les kilomètres', f.every === 'km') + chipBtn(p, 'hw739:every:classic', '2 km et 1 km', f.every === 'classic'))
    + setRow(p, 'Panneaux de station avec le prix', 'Prochaine station d’autoroute devant toi avec le prix de ton carburant : 10 km, 5 km puis tous les kilomètres (ou 10, 5, 2 et 1 km).', onoff('stations'))
+   + setRow(p, 'Panneau « SORTIE » au début de la bretelle', 'Panneau planté au bord de la route à l’endroit exact où commence la sortie, avec son numéro et les villes.', onoff('post'))
+   + setRow(p, 'Panneau des grandes villes et distances', 'En arrivant sur l’autoroute puis après chaque sortie passée (au plus un tous les 10 km) : les grandes villes devant toi et leur distance par la route (« ≈ » si elle est estimée).', onoff('towns'))
    + setRow(p, 'Petit panneau à 500 m', 'Dès que la sortie ou la station est à 500 m, un petit panneau apparaît tout de suite en haut à droite de l’image, avec la distance qui diminue.', onoff('small'))
    + `<p style="color:${p.mut};font-size:13px;line-height:1.45">Sorties : OpenStreetMap. Prix : flux officiel (France) et Tankerkönig (Allemagne). Il faut Internet. Hors autoroute ou sans données, les portiques montrent les lieux proches comme avant.</p>`;
  }
@@ -169,11 +244,11 @@
  window.act = function (a, long) {
   if (typeof a === 'string' && a.startsWith('hw739:')) {
    const [, k, v] = a.split(':');
-   if (['exits', 'stations', 'small'].includes(k)) setPref(k, v === '1');
+   if (['exits', 'stations', 'small', 'post', 'towns'].includes(k)) setPref(k, v === '1');
    else if (k === 'every' && ['km', 'classic'].includes(v)) setPref('every', v);
    render(); return;
   }
   return act0.apply(this, arguments);
  };
- window.Highway738 = { state: H, brands, withBrand, signs, compute, parseExits, pickExit, pickStation, exitQuery, fetchExits, fetchStations, bearing, prefs, settings };
+ window.Highway738 = { state: H, brands, withBrand, pickTowns, maybeTowns, fetchCities, refineTowns, signs, compute, parseExits, pickExit, pickStation, exitQuery, fetchExits, fetchStations, bearing, prefs, settings };
 })();

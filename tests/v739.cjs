@@ -30,9 +30,9 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("openSet('GPS et navigation','Panneaux d’autoroute');render();");
  const txt=run("document.querySelector('#screen').textContent");
  for(const s of ['Panneaux de sortie','Tous les kilomètres','2 km et 1 km','Panneaux de station avec le prix','Petit panneau à 500 m'])assert(txt.includes(s),'réglage affiché : '+s);
- assert.deepEqual(JSON.parse(run('JSON.stringify(Highway738.prefs())')),{exits:true,stations:true,every:'km',small:true},'réglages par défaut');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(Highway738.prefs())')),{exits:true,stations:true,every:'km',small:true,post:true,towns:true},'réglages par défaut');
  run("act('hw739:every:classic');act('hw739:small:0');act('hw739:stations:0')");
- assert.deepEqual(JSON.parse(run('JSON.stringify(Highway738.prefs())')),{exits:true,stations:false,every:'classic',small:false});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(Highway738.prefs())')),{exits:true,stations:false,every:'classic',small:false,post:true,towns:true});
  run("store.set('hw739',{})");
  console.log('OK réglages : sorties, fréquence, stations, petit panneau à 500 m');
 

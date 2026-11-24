@@ -8,7 +8,7 @@ const flush=async()=>{for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- assert.equal(run('APP_VERSION'),'7.42');
+ assert(Number(run('APP_VERSION'))>=7.42,'version 7.42 ou suivante');
 
  // ---------- 1. Décor : rue de Strasbourg à côté de la M351 ----------
  run("store.set('roadScene','auto')");t.pos(48.5905,7.7035);run('loc.spd=15');
@@ -52,6 +52,9 @@ const flush=async()=>{for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
  run("Decors726.signs739.signs.length=0;Decors726.signs739.done.clear();Highway738.signs=()=>({exit:{id:78,ref:'5',dest:['Kehl'],destRef:[],refs:[],d:5.5},station:null});");
  w.RoadDecor721.draw(cv,10,2000,110);
  assert.deepEqual(JSON.parse(run("JSON.stringify(Decors726.signs739.signs.map(g=>g.T))")),[5],'sortie vue de loin : distances rondes comme avant');
+ run("Decors726.signs739.signs.length=0;Decors726.signs739.done.clear();Highway738.signs=()=>({exit:{id:79,ref:'6',dest:['Erstein'],destRef:[],refs:[],d:2.62},station:null});");
+ w.RoadDecor721.draw(cv,10,2500,110);run("Highway738.signs=()=>({exit:{id:79,ref:'6',dest:['Erstein'],destRef:[],refs:[],d:2.6},station:null});");w.RoadDecor721.draw(cv,10,2520,110);
+ assert.deepEqual(JSON.parse(run("JSON.stringify(Decors726.signs739.signs.map(g=>g.T))")),[2],'sortie vue juste avant 2 km : un seul portique, pas de doublon');
  console.log('OK portiques : sortie rapprochée annoncée tout de suite, une seule fois ; distances rondes inchangées');
 
  // ---------- 4. Enseigne de la station ----------

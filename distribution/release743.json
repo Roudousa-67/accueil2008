@@ -1,0 +1,6 @@
+{
+  "version": "7.43",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.43/Accueil2008GT_v7.43.apk",
+  "sha256": "",
+  "notes": "Autoroute : panneau « SORTIE » planté au début exact de la bretelle ; panneau des grandes villes et de leurs distances (par la route, « ≈ » si estimée) au bord de la route, et en grand en haut entre la vitesse et la météo pendant 10 s.\nZone de danger en haut de l’image, qui clignote et bipe si tu dépasses la limite ; forme autorisée en France (jamais l’emplacement d’un radar), coupée automatiquement en Allemagne. La pastille de limitation se cache pendant les panneaux du haut.\nTout se désactive dans GPS et navigation → Panneaux d’autoroute et Panneaux dans l’image.\nCorrigé : double portique quand la sortie apparaissait juste avant 2 km.\nRéglages → Système → Rechercher l’affichage : comment l’autoradio affiche Waze, deux essais pour le cacher, résultat en PDF par e-mail (ou par QR). Page provisoire, retirée une fois la solution trouvée.\nComprend les 7.38 à 7.42."
+}
