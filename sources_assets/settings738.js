@@ -89,6 +89,7 @@
    ['Autorisations', P('Système', 'Autorisations')],
    ['Sauvegarde', P('Système', 'Sauvegarde')],
    ['Rapport de diagnostic', P('Système', 'Rapport de diagnostic')],
+   ['Rechercher l’affichage', P('Système', 'Rechercher l’affichage')],
    ['Performances', P('Système', 'Diagnostic · Performances')],
    ['Mises à jour', join(P('Mises à jour', 'Version'), clean(P('Mises à jour', 'Téléchargement et vérification')))],
    ['Nouveautés', P('Mises à jour', 'Nouveautés et historique')],

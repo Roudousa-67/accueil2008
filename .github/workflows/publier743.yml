@@ -1,0 +1,97 @@
+name: Construire et publier APK 7.43
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publier741.yml', 'sources_assets/**', 'module_GPS_java/**', 'outils/preparer_apk728.py', 'tests/**', 'distribution/release743.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publication-stable
+  cancel-in-progress: false
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --prefix tests --ignore-scripts
+      - run: npm test --prefix tests
+      - name: Exiger la clé d'origine dans les secrets GitHub
+        env:
+          ACCUEIL_KEYSTORE_BASE64: ${{ secrets.ACCUEIL_KEYSTORE_BASE64 }}
+          ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,base64,pathlib
+          if not os.getenv('ACCUEIL_KEYSTORE_BASE64') or not os.getenv('ACCUEIL_SIGNING_PASSWORD'):
+              raise SystemExit('Secrets de signature absents : publication annulée sans générer de nouvelle clé.')
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'accueil-original.p12'
+          p.write_bytes(base64.b64decode(os.environ['ACCUEIL_KEYSTORE_BASE64'],validate=True))
+          p.chmod(0o600)
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Compiler le pont Android (GPS, fichiers, serveur de transfert)
+        run: |
+          set -euo pipefail
+          # Depuis la 7.35 le pont 7.30 n'était plus embarqué : il est recompilé à chaque version.
+          PLATFORM=$(find "$ANDROID_HOME/platforms" -name android.jar | sort -V | tail -1)
+          DEX_COMPILER=$(find "$ANDROID_HOME/build-tools" -name d8 -type f | sort -V | tail -1)
+          test -n "$PLATFORM" && test -n "$DEX_COMPILER"
+          mkdir -p "$RUNNER_TEMP/pont/classes" "$RUNNER_TEMP/pont/dex"
+          javac --release 8 -encoding UTF-8 -cp "$PLATFORM" -d "$RUNNER_TEMP/pont/classes" module_GPS_java/java/fr/gtline/accueil2008/*.java
+          jar --create --file "$RUNNER_TEMP/pont/pont.jar" -C "$RUNNER_TEMP/pont/classes" .
+          "$DEX_COMPILER" --release --min-api 24 --lib "$PLATFORM" --output "$RUNNER_TEMP/pont/dex" "$RUNNER_TEMP/pont/pont.jar"
+          mv "$RUNNER_TEMP/pont/dex/classes.dex" "$RUNNER_TEMP/pont/classes3.dex"
+          sha256sum "$RUNNER_TEMP/pont/classes3.dex"
+      - name: Construire et signer 7.43
+        env:
+          ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
+          ACCUEIL_KEY_PASSWORD: ${{ secrets.ACCUEIL_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          signer="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
+          test -n "$signer"
+          python3 outils/preparer_apk728.py --version 7.43 --native-dex "$RUNNER_TEMP/pont/classes3.dex" --keystore "$RUNNER_TEMP/accueil-original.p12" --apksigner "$signer" --output "$RUNNER_TEMP/Accueil2008GT_v7.43.apk"
+      - name: Vérifier les métadonnées et publier le vrai APK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          apk="$RUNNER_TEMP/Accueil2008GT_v7.43.apk"
+          aapt="$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)"
+          "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='113' versionName='7.43'"
+          sha256sum "$apk"
+          if gh release view v7.43 >/dev/null 2>&1; then
+            echo 'La release existe déjà : ne pas écraser un APK publié.'
+            exit 1
+          fi
+          gh release create v7.43 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.43" --notes "Version 7.43 : Réglages → Système → Rechercher l’affichage : recherche complète de l’autoradio (affichage de Waze dans le cadre) et essais pour cacher Waze. Comprend les 7.38 à 7.42. Essais sur autoradio à effectuer."
+          mkdir -p "$RUNNER_TEMP/check"
+          gh release download v7.43 --pattern Accueil2008GT_v7.43.apk --dir "$RUNNER_TEMP/check"
+          cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.43.apk"
+      - name: Annoncer uniquement le fichier réellement téléchargeable
+        run: |
+          python3 - <<'PY'
+          import json,hashlib,os,pathlib
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'Accueil2008GT_v7.43.apk'
+          j=json.loads(pathlib.Path('distribution/release743.json').read_text())
+          j['sha256']=hashlib.sha256(p.read_bytes()).hexdigest()
+          for name in ('version.json','distribution/release743.json'):
+              pathlib.Path(name).write_text(json.dumps(j,ensure_ascii=False,indent=2)+'\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add version.json distribution/release743.json
+          git commit -m 'Annoncer APK 7.43 signé et téléchargé avec empreinte vérifiée'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Effacer la copie temporaire de la clé
+        if: always()
+        run: rm -f "$RUNNER_TEMP/accueil-original.p12"

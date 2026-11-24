@@ -8,7 +8,7 @@ const flush=async()=>{for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- assert.equal(run('APP_VERSION'),'7.42');
+ assert(Number(run('APP_VERSION'))>=7.42,'version 7.42 ou suivante');
 
  // ---------- 1. Décor : rue de Strasbourg à côté de la M351 ----------
  run("store.set('roadScene','auto')");t.pos(48.5905,7.7035);run('loc.spd=15');

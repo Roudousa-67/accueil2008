@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.42';
+const APP_VERSION = '7.43';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.43','Novembre 2026',['Réglages → Système → Rechercher l’affichage : recherche complète de l’autoradio pour savoir comment le lanceur d’origine affiche Waze dans le cadre, et essais pour cacher Waze quand une autre appli s’ouvre. Résultat envoyé par QR et ajouté au rapport de diagnostic']],
  ['7.42','Novembre 2026',['Décor : en ville près d’une voie rapide (M35, M351…), le décor reste Ville au lieu de passer sur Autoroute','Sorties des voies rapides annoncées, et sorties rapprochées annoncées même découvertes tard','Stations d’autoroute : enseigne écrite en entier (OpenStreetMap si le flux officiel ne la donne pas)']],
  ['7.41','Novembre 2026',['Village et ville : le nom s’affiche en haut à droite en entrant, barré en sortant (5, 10, 20 s ou tout le temps), nom vérifié toutes les 10 s','Autoroute : petit panneau de la station à côté de la vitesse, 10 s avant et après le portique (réglable) ; portiques sans flèches, texte plus grand ; panneau « sortie à 500 m » qui ne cache plus la météo','Tickets et GPX par QR en 4G : plus besoin du Wi-Fi de l’autoradio']],
  ['7.40','Novembre 2026',['Météo devant toi : petit message dans le widget (pluie, neige, orage, brouillard, verglas) avec le détail au toucher ; la croix l’enlève','Bouchons en direct avec ta clé TomTom : message « Bouchon à 2 km » et couleurs de circulation sur les cartes','Péages estimés pendant les trajets (km sur autoroute à péage × prix au km réglable)','Décor : panneau de sortie barré en quittant un village, saisons dans tous les décors']],

@@ -88,6 +88,7 @@ public final class GpsDockInit extends ContentProvider {
         AppFiles721 files=new AppFiles721(a);fileServices.put(a,files);web.addJavascriptInterface(files,"AppFiles721");
         // 7.38 : réception des tickets et fichiers du téléphone, sur le réseau local.
         LocalTransfer738 transfer=new LocalTransfer738(a,web,a.getFilesDir());transfers.put(a,transfer);web.addJavascriptInterface(transfer,"Transfer738Native");
+        web.addJavascriptInterface(new Display743(a),"Display743Native"); // 7.43 : Rechercher l'affichage
         // Le JavaScript décide quand ouvrir : pas de lancement concurrent au démarrage.
     }
 
