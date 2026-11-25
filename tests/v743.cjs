@@ -56,10 +56,21 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  await run('Diag738.run()');
  assert(run('Diag738.report.text').includes('== Recherche de l’affichage (7.43) ==')&&run('Diag738.report.text').includes('UIS7862'),'résultat dans le rapport de diagnostic');
  // PDF par e-mail.
- w.Display743Native.sharePdf=(n,title,txt)=>{w.__pdf=[n,title,txt];return JSON.stringify({ok:true,fichier:'Téléchargements/Accueil2008/'+n});};
+ w.Display743Native.sharePdf=(n,title,txt,email)=>{w.__pdf=[n,title,txt,email];return JSON.stringify({ok:true,fichier:'Téléchargements/Accueil2008/'+n});};
  run("openSet('Système','Rechercher l’affichage');act('display743:pdf')");
  assert(/^affichage-\d{8}-\d{4}\.pdf$/.test(w.__pdf[0])&&w.__pdf[2].includes('UIS7862'),'PDF fabriqué avec le résultat');
  assert(screen().includes('PDF créé')&&screen().includes('Téléchargements/Accueil2008'),'PDF annoncé');
+ // 7.44 : « Tout rechercher » enchaîne recherche + essais côté natif, puis PDF avec l'e-mail prérempli.
+ let allPolls=0;const started=[];
+ w.Display743Native.startAll=(app,navp)=>{started.push([app,navp]);allPolls=0;return JSON.stringify({ok:true});};
+ const resultAll=Object.assign({},result,{essais_auto:[{essai:'derriere',ok:true,waze:'plein écran demandé',appli:'plein écran demandé'},{essai:'horsecran',ok:true,waze:'cadre hors écran demandé',appli:'plein écran demandé'}]});
+ w.Display743Native.state=()=>JSON.stringify(++allPolls<2?{running:true,step:'Essai : horsecran',result:''}:{running:false,step:'Terminé',result:JSON.stringify(resultAll)});
+ run("store.set('display743App','com.radio.test');store.set('display743Mail','abc@exemple.com');act('display743:all')");
+ assert.deepEqual(started.slice(-1)[0],['com.radio.test','com.waze'],'startAll avec l’appli choisie et Waze');
+ run('Display743.poll()');run('Display743.poll()');
+ assert.equal((w.__pdf[3]||''),'abc@exemple.com','PDF envoyé à l’adresse préremplie, sans réponse à donner');
+ assert(w.__pdf[2].includes('Essais automatiques')&&w.__pdf[2].includes('derriere'),'essais automatiques dans le PDF');
+ assert(JSON.parse(run("JSON.stringify(Display743.reportLines())")).join('\n').includes('horsecran : ouvert'),'résultat des essais auto lisible');
  w.Display743Native.sharePdf=()=>JSON.stringify({ok:false,fichier:'Téléchargements/Accueil2008/a.pdf',erreur:'aucune appli d’e-mail sur l’autoradio'});
  run("act('display743:pdf')");assert(screen().includes('aucune appli d’e-mail')&&screen().includes('QR'),'sans appli d’e-mail : repli QR proposé');
  assert.equal(t.errors.length,0,t.errors.join('\n'));

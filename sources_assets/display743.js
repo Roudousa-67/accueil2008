@@ -16,6 +16,19 @@
   return list.slice().sort((a, b) => score(a) - score(b)).slice(0, 6);
  }
  const testApp = () => store.get('display743App', '') || (testApps()[0] || {}).p || 'com.android.settings';
+ const mail = () => store.get('display743Mail', '') || '';
+
+ // 7.44 : tout d'un coup. Recherche + 4 essais enchaînés côté natif, puis PDF et e-mail prérempli.
+ // L'utilisateur filme l'écran avec son téléphone ; rien à toucher pendant les essais.
+ function runAll() {
+  const n = N(), inp = document.getElementById('d743mail');
+  if (inp && inp.value) store.set('display743Mail', inp.value.trim());
+  if (!n || typeof n.startAll !== 'function') { S.error = 'Il faut la 7.44 installée sur l’autoradio.'; redraw(); return; }
+  S.allRunning = true; S.error = ''; S.pdf = null;
+  safe(() => n.startAll(testApp(), nav()));
+  if (!S.timer) S.timer = setInterval(poll, 800);
+  redraw();
+ }
  const last = store.get('display743', null);
  const S = { running: false, step: '', data: last && last.data || null, at: last && last.at || 0, error: '', tests: store.get('display743Tests', {}) || {}, timer: 0 };
  const redraw = () => { if (tab === 'settings') safe(() => render()); };
@@ -32,6 +45,8 @@
    if (d) { S.data = d; S.at = Date.now(); S.error = d.erreur ? 'La recherche s’est arrêtée : ' + d.erreur : ''; store.set('display743', { at: S.at, data: d }); }
    else S.error = 'Réponse illisible.';
    clearInterval(S.timer); S.timer = 0;
+   if (S.allRunning && !S.error) { S.allRunning = false; pdf(); }
+   S.allRunning = false;
   }
   redraw();
  }
@@ -105,6 +120,8 @@
   const t = (k, label) => { const r = S.tests[k]; return r ? `${label} (${r.app || '?'}) : ${r.ok ? 'ouvert' : 'échec'} (${r.mode || ''}), Waze caché : ${r.hidden || 'pas répondu'}${k === 'derriere' || k === 'horsecran' ? ', revenu dans le cadre : ' + (r.back || 'pas répondu') : ''}` : `${label} : pas fait`; };
   L.push('Essais :');
   for (const [k, label] of TESTS) L.push(' - ' + t(k, label));
+  const auto = (d.essais_auto || []);
+  if (auto.length) { L.push('Essais automatiques (ce que l’autoradio a tenté) :'); for (const e of auto) L.push(` - ${e.essai} : ${e.ok ? 'ouvert' : 'échec'}${e.waze ? ' · Waze : ' + e.waze : ''} · appli : ${e.appli || ''}`); }
   L.push(`Tous les paquets : ${(d.tous_paquets || []).join(', ') || '—'}`);
   if (d.erreur) L.push('Erreur : ' + d.erreur);
   return L;
@@ -124,14 +141,16 @@
   const n = N(), d = new Date();
   if (!n || typeof n.sharePdf !== 'function') { S.pdf = { ok: false, erreur: 'il faut la 7.43 installée sur l’autoradio' }; redraw(); return; }
   const name = `affichage-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.pdf`;
-  S.pdf = safe(() => JSON.parse(n.sharePdf(name, 'Accueil 2008 - Recherche de l’affichage', reportLines().join('\n'))), { ok: false, erreur: 'réponse illisible' });
+  S.pdf = safe(() => JSON.parse(n.sharePdf(name, 'Accueil 2008 - Recherche de l’affichage', reportLines().join('\n'), mail())), { ok: false, erreur: 'réponse illisible' });
   redraw();
  }
 
  function page(p) {
   const d = S.data, f = findings(d);
   const row = (t, v) => `<div style="display:flex;gap:10px;font-size:13.5px;line-height:1.4"><span style="min-width:170px;color:${p.mut}">${esc(t)}</span><span style="flex:1;min-width:0;word-break:break-word">${esc(v)}</span></div>`;
-  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre de l’accueil, comme d’habitude.<br>2. Lance la recherche (30 à 60 secondes) : modèle, droits, écrans et code du lanceur d’origine. Rien n’est modifié sur le poste.<br>3. Choisis l’appli pour les essais (radio, musique…), puis fais les 4 essais : regarde si Waze reste visible par-dessus, reviens ici et réponds.<br>4. Crée le PDF et envoie-le-toi par e-mail (ou par QR vers le téléphone), puis envoie-le-moi. Il est aussi ajouté au Rapport de diagnostic. Cette page sera retirée une fois la solution trouvée.</div>`;
+  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre.<br>2. Filme l’écran de l’autoradio avec ton téléphone.<br>3. Appuie sur <b>Tout rechercher</b> : l’appli fouille le poste puis fait les 4 essais toute seule (elle ouvre la radio, revient, recommence). Tu n’as rien à toucher — c’est ta vidéo qui montre si Waze s’est caché.<br>4. À la fin, le PDF se crée et ton e-mail s’ouvre déjà rempli. Tu envoies, puis tu m’envoies le PDF et ta vidéo. Page provisoire, retirée une fois la solution trouvée.</div>`;
+  const mailRow = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px"><span style="color:${p.mut}">Ton e-mail (gardé seulement sur l’autoradio) :</span><input id="d743mail" type="email" value="${esc(mail())}" placeholder="toi@exemple.com" style="flex:1;min-width:180px;padding:9px 11px;border-radius:9px;border:1px solid ${p.line || '#2b3a4f'};background:${p.card2 || '#0a0f16'};color:inherit"></div>`;
+  const allBtn = `<div style="${box(p, 'padding:12px 14px;display:flex;flex-direction:column;gap:10px')}">${mailRow}${chipBtn(p, 'display743:all', S.allRunning ? 'En cours… ' + esc(S.step) : '🔎 Tout rechercher (puis e-mail)', true)}<div style="font-size:12.5px;color:${p.mut}">Filme l’écran pendant que ça tourne.</div></div>`;
   const actions = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${chipBtn(p, 'display743:start', S.running ? 'Recherche en cours… ' + S.step : d ? 'Refaire la recherche' : 'Lancer la recherche', true)}${d && !S.running ? chipBtn(p, 'display743:pdf', 'Créer le PDF et l’envoyer par e-mail', false) + chipBtn(p, 'display743:send', 'Envoyer au téléphone (QR)', false) : ''}</div>`;
   const sent = S.pdf ? `<div style="font-size:13.5px;color:${S.pdf.ok ? p.mut : '#e0312b'}">${S.pdf.ok ? 'PDF créé (' + esc(S.pdf.fichier || '') + '). Choisis ton appli d’e-mail, envoie-le-toi, puis envoie-moi le PDF.' : 'PDF impossible : ' + esc(S.pdf.erreur || '') + (S.pdf.fichier ? ' — il est quand même dans ' + esc(S.pdf.fichier) : '') + '. Utilise le QR à la place.'}</div>` : '';
   const err = S.error ? `<div style="color:#e0312b;font-size:13.5px">${esc(S.error)}</div>` : '';
@@ -156,7 +175,7 @@
   const apps = testApps(), cur = testApp();
   const pick = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px">Appli pour les essais : ${(apps.length ? apps : [{ p: cur, l: cur }]).map(a => chipBtn(p, 'display743:app:' + a.p, a.l || a.p, a.p === cur)).join('')}</div>`;
   const tests = `${pick}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">${TESTS.map(([k, l]) => test(k, l)).join('')}</div>`;
-  return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${actions}${sent}${err}${found}${tests}</div>`;
+  return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${allBtn}${sent}${err}${found}<details style="${box(p, 'padding:8px 12px')}"><summary style="cursor:pointer;font-size:13.5px;color:${p.mut}">Le faire à la main (recherche et essais séparés)</summary><div style="margin-top:10px;display:flex;flex-direction:column;gap:12px">${actions}${tests}</div></details></div>`;
  }
 
  const sys = SETCATS.find(c => c[0] === 'Système');
@@ -165,11 +184,12 @@
  window.act = function (a, long) {
   if (a === 'display743:start') { start(); return; }
   if (a === 'display743:send') { send(); return; }
-  if (a === 'display743:pdf') { pdf(); return; }
+  if (a === 'display743:pdf') { const inp = document.getElementById('d743mail'); if (inp && inp.value) store.set('display743Mail', inp.value.trim()); pdf(); return; }
+  if (a === 'display743:all') { runAll(); return; }
   if (a.indexOf('display743:try:') === 0) { tryOpen(a.slice(15)); return; }
   if (a.indexOf('display743:answer:') === 0) { const [kind, v, what] = a.slice(18).split(':'); answer(kind, v, what); return; }
   if (a.indexOf('display743:app:') === 0) { store.set('display743App', a.slice(15)); redraw(); return; }
   return act0.apply(this, arguments);
  };
- window.Display743 = { state: S, poll, start, findings, reportLines, page, pdf };
+ window.Display743 = { state: S, poll, start, runAll, findings, reportLines, page, pdf };
 })();
