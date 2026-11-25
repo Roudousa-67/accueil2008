@@ -226,7 +226,7 @@ function fAct(v, long) {
       const pk = parts.slice(1).join(':');
       if (long && palette().layout === 'custom' && tab === 'home') { const ff = fFindApp(c, pk); fEnterEdit(ff ? ff.id : null); return; }
       if (fFolder) { fFolder = null; render(); }
-      if (!A) toast('Ouverture : ' + ((appInfo(pk) || {}).l || pk)); else if (!A.launch(pk)) toast('Appli introuvable (désinstallée ?)');
+      if (!A) toast('Ouverture : ' + ((appInfo(pk) || {}).l || pk)); else if (!launch745(pk)) toast('Appli introuvable (désinstallée ?)');
       return;
     }
     case 'fold': if (long) fEnterEdit(parts[1]); else { fFolder = parts[1]; fFolderPg = 0; fFolderEdit = false; render(); } return;
@@ -502,7 +502,7 @@ function gpsOpen(pk) {
   store.set('gpsLast', pk);
   if (gpsEmbed()) { gpsTry(pk); render(); return; }
   if (!A) { toast('Aperçu : ' + ((GPS_APPS.find((x) => x[0] === pk) || [])[1] || pk) + ' s\'ouvrirait'); render(); return; }
-  if (!A.launch(pk)) toast('Appli introuvable : ' + pk);
+  if (!launch745(pk)) toast('Appli introuvable : ' + pk);
 }
 let gpsMenu = false;
 function gpsCard(p, opts = {}) {

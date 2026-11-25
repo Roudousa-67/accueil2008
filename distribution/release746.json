@@ -1,0 +1,6 @@
+{
+  "version": "7.46",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.46/Accueil2008GT_v7.46.apk",
+  "sha256": "",
+  "notes": "Waze se cache quand tu ouvres une autre appli depuis l’accueil : l’appli s’ouvre en plein écran par-dessus (méthode testée sur ton autoradio). Quand tu reviens à l’accueil, Waze revient dans son cadre. Si le plein écran est refusé, l’ancienne méthode prend le relais.\nComprend les 7.38 à 7.45."
+}

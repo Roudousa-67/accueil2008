@@ -57,7 +57,7 @@
    return `<button data-act="nav730:${esc(d.id)}" data-dock730="${esc(d.id)}" aria-label="${esc(d.label)}" ${active?'aria-current="page"':''} class="dockButton730 ${active?'active730':''}" style="min-width:${Math.max(54,size+20)}px;min-height:${Math.max(54,size+20)}px;color:${p.txt};${active?'background:'+accent+'33;':''}">${pkg?`<span class="fic" style="--ics:${size}px;background:${hashCol(pkg)}">${esc(d.label[0])}<img data-icon="${esc(pkg)}" alt=""></span>`:ic(d.icon,size,iconColor,2)}${get('dockLabels730')?`<span>${esc(d.label)}</span>`:''}</button>`;
   }).join('')}</nav>`;
  };
- function launch(pk){if(!pk){toast('Choisis une application dans les réglages.');return false;}try{if(!A){toast('Aperçu : ouverture de l’application.');return true;}if(A.launch(pk)!==false){store.set('lastApp730',pk);return true;}}catch(e){}toast('Application indisponible. Choisis une autre application.');return false;}
+ function launch(pk){if(!pk){toast('Choisis une application dans les réglages.');return false;}try{if(!A){toast('Aperçu : ouverture de l’application.');return true;}if(launch745(pk)!==false){store.set('lastApp730',pk);return true;}}catch(e){}toast('Application indisponible. Choisis une autre application.');return false;}
  function redrawApps(query=''){
   const grid=$('appGrid'),q=query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const list=allApps().filter(a=>String(a.l||a.p).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
