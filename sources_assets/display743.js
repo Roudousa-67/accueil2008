@@ -7,7 +7,15 @@
  'use strict';
  const safe = (f, d) => { try { const v = f(); return v === undefined ? d : v; } catch (e) { return d; } };
  const N = () => window.Display743Native || null;
- const TEST_APP = 'com.android.settings';
+ // 7.44 : appli d'essai au choix (les Réglages Android n'ont pas d'icône sur certains autoradios).
+ const ME = 'fr.gtline.accueil2008';
+ const nav = () => safe(() => typeof gbPk === 'function' ? gbPk() : 'com.waze', 'com.waze') || 'com.waze';
+ function testApps() {
+  const list = safe(() => (typeof allApps === 'function' ? allApps() : []).filter(a => a && a.p && a.p !== ME && a.p !== nav()), []);
+  const score = a => /radio|music|musique|youtube|spotify|deezer|player|lecteur/i.test(a.p + ' ' + (a.l || '')) ? 0 : 1;
+  return list.slice().sort((a, b) => score(a) - score(b)).slice(0, 6);
+ }
+ const testApp = () => store.get('display743App', '') || (testApps()[0] || {}).p || 'com.android.settings';
  const last = store.get('display743', null);
  const S = { running: false, step: '', data: last && last.data || null, at: last && last.at || 0, error: '', tests: store.get('display743Tests', {}) || {}, timer: 0 };
  const redraw = () => { if (tab === 'settings') safe(() => render()); };
@@ -35,15 +43,17 @@
   redraw();
  }
  function tryOpen(kind) {
-  const n = N(); let r = null;
-  if (n) r = safe(() => JSON.parse(n.launch(TEST_APP, kind === 'plein')), null);
-  else if (kind === 'normal' && typeof A !== 'undefined' && A && A.launch) r = { ok: !!A.launch(TEST_APP), mode: 'normal' };
-  S.tests[kind] = { at: Date.now(), ok: !!(r && r.ok), mode: r ? (r.mode || r.erreur || '') : 'indisponible ici', hidden: '' };
-  store.set('display743Tests', S.tests); redraw();
+  const n = N(), app = testApp(), j = f => safe(() => JSON.parse(f()), null);
+  const save = r => { S.tests[kind] = { at: Date.now(), app, ok: !!(r && r.ok), mode: r ? (r.mode || r.erreur || '') : 'indisponible ici', hidden: '', back: '' }; store.set('display743Tests', S.tests); redraw(); };
+  if (!n) { save(kind === 'normal' && typeof A !== 'undefined' && A && A.launch ? { ok: !!A.launch(app), mode: 'normal' } : null); return; }
+  if (kind === 'normal' || kind === 'plein') { save(j(() => n.launch(app, kind === 'plein'))); return; }
+  // Essais 3 et 4 : d'abord Waze (en plein écran derrière, ou poussé hors de l'écran), puis l'appli.
+  const first = kind === 'derriere' ? j(() => n.launch(nav(), true)) : j(() => typeof n.launchOffscreen === 'function' ? n.launchOffscreen(nav()) : '{"ok":false,"erreur":"pont trop ancien"}');
+  setTimeout(() => { const r = j(() => n.launch(app, true)); save({ ok: !!(first && first.ok && r && r.ok), mode: `Waze : ${first ? first.mode || first.erreur || '' : '?'} · appli : ${r ? r.mode || r.erreur || '' : '?'}` }); }, 900);
  }
- function answer(kind, v) {
+ function answer(kind, v, what) {
   if (!S.tests[kind]) S.tests[kind] = { at: Date.now(), ok: false, mode: '' };
-  S.tests[kind].hidden = v; store.set('display743Tests', S.tests); redraw();
+  S.tests[kind][what === 'back' ? 'back' : 'hidden'] = v; store.set('display743Tests', S.tests); redraw();
  }
 
  // Ce que le code de chaque appli système trahit, en clair.
@@ -63,6 +73,7 @@
   return out;
  }
 
+ const TESTS = [['normal', 'Essai 1 : ouverture normale'], ['plein', 'Essai 2 : ouverture en plein écran'], ['derriere', 'Essai 3 : Waze en plein écran derrière, puis l’appli'], ['horsecran', 'Essai 4 : Waze poussé hors de l’écran, puis l’appli']];
  function reportLines() {
   const d = S.data, L = ['== Recherche de l’affichage (7.43) =='];
   if (!d) { L.push('Pas encore faite (Réglages → Système → Rechercher l’affichage).'); return L; }
@@ -91,8 +102,10 @@
    if (!(s.fichiers_lus || []).length) L.push('   aucun fichier de code lisible');
   }
   L.push(`Propriétés : ${(d.proprietes || []).join(' | ') || '—'}`);
-  const t = (k, label) => { const r = S.tests[k]; return r ? `${label} : ${r.ok ? 'ouvert' : 'échec'} (${r.mode || ''}), Waze caché : ${r.hidden || 'pas répondu'}` : `${label} : pas fait`; };
-  L.push('Essais : ' + t('normal', 'ouverture normale') + ' ; ' + t('plein', 'ouverture en plein écran'));
+  const t = (k, label) => { const r = S.tests[k]; return r ? `${label} (${r.app || '?'}) : ${r.ok ? 'ouvert' : 'échec'} (${r.mode || ''}), Waze caché : ${r.hidden || 'pas répondu'}${k === 'derriere' || k === 'horsecran' ? ', revenu dans le cadre : ' + (r.back || 'pas répondu') : ''}` : `${label} : pas fait`; };
+  L.push('Essais :');
+  for (const [k, label] of TESTS) L.push(' - ' + t(k, label));
+  L.push(`Tous les paquets : ${(d.tous_paquets || []).join(', ') || '—'}`);
   if (d.erreur) L.push('Erreur : ' + d.erreur);
   return L;
  }
@@ -118,7 +131,7 @@
  function page(p) {
   const d = S.data, f = findings(d);
   const row = (t, v) => `<div style="display:flex;gap:10px;font-size:13.5px;line-height:1.4"><span style="min-width:170px;color:${p.mut}">${esc(t)}</span><span style="flex:1;min-width:0;word-break:break-word">${esc(v)}</span></div>`;
-  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre de l’accueil, comme d’habitude.<br>2. Lance la recherche (30 à 60 secondes) : modèle, droits, écrans et code du lanceur d’origine. Rien n’est modifié sur le poste.<br>3. Fais les deux essais : les Réglages Android s’ouvrent ; regarde si Waze reste visible par-dessus, reviens ici et réponds.<br>4. Crée le PDF et envoie-le-toi par e-mail (ou par QR vers le téléphone), puis envoie-le-moi. Il est aussi ajouté au Rapport de diagnostic. Cette page sera retirée une fois la solution trouvée.</div>`;
+  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre de l’accueil, comme d’habitude.<br>2. Lance la recherche (30 à 60 secondes) : modèle, droits, écrans et code du lanceur d’origine. Rien n’est modifié sur le poste.<br>3. Choisis l’appli pour les essais (radio, musique…), puis fais les 4 essais : regarde si Waze reste visible par-dessus, reviens ici et réponds.<br>4. Crée le PDF et envoie-le-toi par e-mail (ou par QR vers le téléphone), puis envoie-le-moi. Il est aussi ajouté au Rapport de diagnostic. Cette page sera retirée une fois la solution trouvée.</div>`;
   const actions = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${chipBtn(p, 'display743:start', S.running ? 'Recherche en cours… ' + S.step : d ? 'Refaire la recherche' : 'Lancer la recherche', true)}${d && !S.running ? chipBtn(p, 'display743:pdf', 'Créer le PDF et l’envoyer par e-mail', false) + chipBtn(p, 'display743:send', 'Envoyer au téléphone (QR)', false) : ''}</div>`;
   const sent = S.pdf ? `<div style="font-size:13.5px;color:${S.pdf.ok ? p.mut : '#e0312b'}">${S.pdf.ok ? 'PDF créé (' + esc(S.pdf.fichier || '') + '). Choisis ton appli d’e-mail, envoie-le-toi, puis envoie-moi le PDF.' : 'PDF impossible : ' + esc(S.pdf.erreur || '') + (S.pdf.fichier ? ' — il est quand même dans ' + esc(S.pdf.fichier) : '') + '. Utilise le QR à la place.'}</div>` : '';
   const err = S.error ? `<div style="color:#e0312b;font-size:13.5px">${esc(S.error)}</div>` : '';
@@ -136,10 +149,13 @@
    </div>`;
   }
   const test = (kind, title) => {
-   const r = S.tests[kind];
-   return `<div style="${box(p, 'padding:10px 12px;display:flex;flex-direction:column;gap:8px')}"><b>${title}</b><div>${chipBtn(p, 'display743:try:' + kind, 'Ouvrir les Réglages Android', false)}</div>${r ? `<div style="font-size:13px;color:${p.mut}">${r.ok ? 'Ouvert' : 'Échec'} · ${esc(r.mode || '')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px">Waze était caché ? ${chipBtn(p, 'display743:answer:' + kind + ':oui', 'Oui, caché', r.hidden === 'oui')}${chipBtn(p, 'display743:answer:' + kind + ':non', 'Non, toujours visible', r.hidden === 'non')}</div>` : ''}</div>`;
+   const r = S.tests[kind], two = kind === 'derriere' || kind === 'horsecran';
+   const q = (what, label, yes, no) => `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px">${label} ${chipBtn(p, `display743:answer:${kind}:oui:${what}`, yes, r[what] === 'oui')}${chipBtn(p, `display743:answer:${kind}:non:${what}`, no, r[what] === 'non')}</div>`;
+   return `<div style="${box(p, 'padding:10px 12px;display:flex;flex-direction:column;gap:8px')}"><b>${title}</b><div>${chipBtn(p, 'display743:try:' + kind, 'Lancer l’essai', false)}</div>${r ? `<div style="font-size:13px;color:${p.mut}">${r.ok ? 'Ouvert' : 'Échec'} · ${esc(r.mode || '')}</div>${q('hidden', 'Waze était caché ?', 'Oui, caché', 'Non, toujours visible')}${two ? q('back', 'De retour à l’accueil, Waze est revenu dans le cadre ?', 'Oui', 'Non') : ''}` : ''}</div>`;
   };
-  const tests = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">${test('normal', 'Essai 1 : ouverture normale')}${test('plein', 'Essai 2 : ouverture en plein écran')}</div>`;
+  const apps = testApps(), cur = testApp();
+  const pick = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px">Appli pour les essais : ${(apps.length ? apps : [{ p: cur, l: cur }]).map(a => chipBtn(p, 'display743:app:' + a.p, a.l || a.p, a.p === cur)).join('')}</div>`;
+  const tests = `${pick}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">${TESTS.map(([k, l]) => test(k, l)).join('')}</div>`;
   return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${actions}${sent}${err}${found}${tests}</div>`;
  }
 
@@ -151,7 +167,8 @@
   if (a === 'display743:send') { send(); return; }
   if (a === 'display743:pdf') { pdf(); return; }
   if (a.indexOf('display743:try:') === 0) { tryOpen(a.slice(15)); return; }
-  if (a.indexOf('display743:answer:') === 0) { const [kind, v] = a.slice(18).split(':'); answer(kind, v); return; }
+  if (a.indexOf('display743:answer:') === 0) { const [kind, v, what] = a.slice(18).split(':'); answer(kind, v, what); return; }
+  if (a.indexOf('display743:app:') === 0) { store.set('display743App', a.slice(15)); redraw(); return; }
   return act0.apply(this, arguments);
  };
  window.Display743 = { state: S, poll, start, findings, reportLines, page, pdf };

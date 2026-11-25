@@ -58,7 +58,7 @@ import java.util.zip.ZipFile;
  */
 public final class Display743 {
 
-    private static final Pattern RELATED = Pattern.compile("(?i)launcher|home|desktop|syu|fyt|topway|tsui|\\.ts\\.|navi|multiwindow|freeform|float|split|carui|carlauncher|systemui|microntek|hct|joying|atoto");
+    private static final Pattern RELATED = Pattern.compile("(?i)(^|\\.)(qf|zj)(\\.|$)|hiworld|carplay|zlink|easyconn|autolink|launcher|home|desktop|syu|fyt|topway|tsui|\\.ts\\.|navi|multiwindow|freeform|float|split|carui|carlauncher|systemui|microntek|hct|joying|atoto");
     private static final Pattern PROPS = Pattern.compile("(?i)navi|gps|launcher|home|multi|freeform|window|float|split|fyt|syu|topway|customer|platform|board|model|product|mcu|ui\\.|car|sdk|build\\.version|display");
     private static final String[] PERMS = {
         "android.permission.ACTIVITY_EMBEDDING", "android.permission.MANAGE_ACTIVITY_STACKS", "android.permission.MANAGE_ACTIVITY_TASKS",
@@ -66,7 +66,9 @@ public final class Display743 {
         "android.permission.ADD_TRUSTED_DISPLAY", "android.permission.CAPTURE_VIDEO_OUTPUT", "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.WRITE_SECURE_SETTINGS", "android.permission.REAL_GET_TASKS", "android.permission.PACKAGE_USAGE_STATS"
     };
-    private static final long BUDGET_MS = 45000;
+    // 7.44 : applis du fabricant QF / ZJ (firmware de l'autoradio) lues en priorité.
+    private static final Pattern VENDOR = Pattern.compile("(?i)(^|\\.)(qf|zj)(\\.|$)|hiworld|carplay|launcher");
+    private static final long BUDGET_MS = 60000;
 
     private final Activity activity;
     private volatile boolean running;
@@ -101,6 +103,7 @@ public final class Display743 {
     public String launch(String pkg, boolean full) {
         try {
             Intent i = activity.getPackageManager().getLaunchIntentForPackage(pkg);
+            if (i == null && "com.android.settings".equals(pkg)) i = new Intent(Settings.ACTION_SETTINGS);
             if (i == null) return new JSONObject().put("ok", false).put("erreur", "appli absente : " + pkg).toString();
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Bundle options = null;
@@ -117,6 +120,31 @@ public final class Display743 {
             }
             activity.startActivity(i, options);
             return new JSONObject().put("ok", true).put("mode", how).toString();
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
+    /**
+     * 7.44 : essai « Waze hors de l'écran » : relance l'appli en fenêtre libre (mode 5) avec un cadre
+     * placé à droite, hors de l'écran visible. Si Android accepte, la fenêtre existe mais ne se voit plus.
+     */
+    @JavascriptInterface
+    public String launchOffscreen(String pkg) {
+        try {
+            Intent i = activity.getPackageManager().getLaunchIntentForPackage(pkg);
+            if (i == null) return new JSONObject().put("ok", false).put("erreur", "appli absente : " + pkg).toString();
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Point size = new Point();
+            activity.getWindowManager().getDefaultDisplay().getRealSize(size);
+            GpsDock.HiddenApi.exemptAll();
+            ActivityOptions o = ActivityOptions.makeBasic();
+            String how = "cadre hors écran demandé";
+            try { Method m = ActivityOptions.class.getMethod("setLaunchWindowingMode", int.class); m.invoke(o, 5); }
+            catch (Throwable t) { how += " (mode fenêtre libre refusé : " + t.getClass().getSimpleName() + ")"; }
+            o.setLaunchBounds(new android.graphics.Rect(size.x + 40, 0, size.x + 440, 300));
+            activity.startActivity(i, o.toBundle());
+            return new JSONObject().put("ok", true).put("mode", how + " (écran " + size.x + "x" + size.y + ")").toString();
         } catch (Throwable t) {
             return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
         }
@@ -251,9 +279,9 @@ public final class Display743 {
         o.put("lanceur_par_defaut", def != null && def.activityInfo != null ? def.activityInfo.packageName + " / " + def.activityInfo.name : "");
         LinkedHashSet<String> targets = new LinkedHashSet<>();
         JSONArray homes = new JSONArray();
-        for (ResolveInfo r : pm.queryIntentActivities(home, 0)) {
+        for (ResolveInfo r : pm.queryIntentActivities(home, PackageManager.MATCH_DISABLED_COMPONENTS)) {
             if (r.activityInfo == null) continue;
-            homes.put(r.activityInfo.packageName + " / " + r.activityInfo.name);
+            homes.put(r.activityInfo.packageName + " / " + r.activityInfo.name + (r.activityInfo.enabled && r.activityInfo.applicationInfo.enabled ? "" : " (désactivé)"));
             if (!r.activityInfo.packageName.equals(me)) targets.add(r.activityInfo.packageName);
         }
         o.put("lanceurs", homes);
@@ -261,15 +289,21 @@ public final class Display743 {
         step = "Applis système";
         JSONArray related = new JSONArray();
         List<String> extra = new ArrayList<>();
-        for (PackageInfo pi : pm.getInstalledPackages(0)) {
+        JSONArray all = new JSONArray();
+        List<String> vendor = new ArrayList<>();
+        for (PackageInfo pi : pm.getInstalledPackages(PackageManager.MATCH_DISABLED_COMPONENTS)) {
+            boolean sys = system(pi.applicationInfo), off = pi.applicationInfo != null && !pi.applicationInfo.enabled;
+            all.put(pi.packageName + (sys ? "" : " [ajoutée]") + (off ? " [désactivée]" : ""));
             if (pi.packageName.equals(me) || !RELATED.matcher(pi.packageName).find()) continue;
-            boolean sys = system(pi.applicationInfo);
-            related.put(pi.packageName + (sys ? " (système)" : ""));
-            if (sys) extra.add(pi.packageName);
+            related.put(pi.packageName + (sys ? " (système)" : "") + (off ? " (désactivée)" : ""));
+            if (VENDOR.matcher(pi.packageName).find()) vendor.add(pi.packageName);
+            else if (sys) extra.add(pi.packageName);
         }
         o.put("applis_liees", related);
+        o.put("tous_paquets", all);
+        for (String p : vendor) if (targets.size() < 12) targets.add(p);
         if (extra.remove("com.android.systemui")) targets.add("com.android.systemui");
-        for (String p : extra) if (targets.size() < 10) targets.add(p);
+        for (String p : extra) if (targets.size() < 14) targets.add(p);
 
         step = "Waze";
         o.put("waze", waze(pm));

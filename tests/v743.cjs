@@ -7,7 +7,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- assert.equal(run('APP_VERSION'),'7.43');
+ assert(Number(run('APP_VERSION'))>=7.43,'version 7.43 ou suivante');
  const index=fs.readFileSync(path.join(__dirname,'../sources_assets/index.html'),'utf8');
  assert(index.indexOf('src="display743.js"')>index.indexOf('src="diag738.js"')&&index.indexOf('src="display743.js"')<index.indexOf('src="settings738.js"'),'chargé par index.html au bon endroit');
  assert(fs.readFileSync(path.join(__dirname,'../module_GPS_java/java/fr/gtline/accueil2008/GpsDockInit.java'),'utf8').includes('"Display743Native"'),'pont natif branché');
@@ -31,8 +31,18 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("act('display743:try:plein')");assert.deepEqual(launched,[['com.android.settings',true]],'Réglages Android ouverts en plein écran');
  run("act('display743:answer:plein:non')");assert(screen().includes('Non, toujours visible'));
  run("act('display743:try:normal')");run("act('display743:answer:normal:non')");
+ // 7.44 : essais 3 et 4 (Waze derrière en plein écran, Waze hors de l'écran) avec l'appli choisie.
+ w.Display743Native.launchOffscreen=pkg=>{launched.push(['hors',pkg]);return JSON.stringify({ok:true,mode:'cadre hors écran demandé (écran 1280x720)'});};
+ run("store.set('display743App','com.radio.test')");
+ // Minuteries du banc d'essai : on exécute celle de 900 ms posée par l'essai.
+ const fire=()=>{const i=t.timers.findIndex(x=>x.ms===900);assert(i>=0,'délai de 900 ms posé');t.timers.splice(i,1)[0].fn();};
+ run("act('display743:try:derriere')");fire();
+ run("act('display743:try:horsecran')");fire();
+ assert.deepEqual(launched.slice(-4),[['com.waze',true],['com.radio.test',true],['hors','com.waze'],['com.radio.test',true]],'Waze d’abord, puis l’appli choisie : '+JSON.stringify(launched));
+ run("act('display743:answer:derriere:oui:hidden');act('display743:answer:derriere:non:back');act('display743:answer:horsecran:non:hidden')");
+ assert(screen().includes('Essai 4 : Waze poussé hors de l’écran')&&screen().includes('revenu dans le cadre'),'essais 3 et 4 affichés');
  const lines=JSON.parse(run('JSON.stringify(Display743.reportLines())')).join('\n');
- for(const s of ['FYT / Android / UIS7862','com.syu.ms.action.SHOW_NAVI_WINDOW','ActivityView×4','ACTIVITY_EMBEDDING : accordée','com.android.systemui : temps dépassé','ouverture en plein écran : ouvert (plein écran demandé), Waze caché : non'])assert(lines.includes(s),'rapport : '+s);
+ for(const s of ['FYT / Android / UIS7862','com.syu.ms.action.SHOW_NAVI_WINDOW','ActivityView×4','ACTIVITY_EMBEDDING : accordée','com.android.systemui : temps dépassé','Essai 2 : ouverture en plein écran (com.android.settings) : ouvert (plein écran demandé), Waze caché : non','Essai 3 : Waze en plein écran derrière, puis l’appli (com.radio.test) : ouvert','Waze caché : oui, revenu dans le cadre : non','Essai 4 : Waze poussé hors de l’écran, puis l’appli (com.radio.test)'])assert(lines.includes(s),'rapport : '+s+'\n'+lines);
  // Envoi au téléphone par QR.
  let savedName='';
  w.Transfer738Native={start:()=>'',stop:()=>'',status:()=>JSON.stringify({native:true,running:true,port:8738,ips:['192.168.43.1'],used:0,quota:1073741824,files:0,received:0}),newToken:()=>'c'.repeat(48),list:()=>'[]',dataUrl:()=>'',text:()=>'',saveText:(n,txt)=>{savedName=n;return JSON.stringify({ok:true,path:'/files/'+n});},remove:()=>true,keep:()=>{},keepOnly:()=>{}};
