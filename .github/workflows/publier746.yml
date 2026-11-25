@@ -72,7 +72,7 @@ jobs:
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.46 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.46" --notes "Version 7.46 : les applis s’ouvrent en plein écran par-dessus Waze, qui se cache ; retour à l’accueil, Waze revient dans son cadre. Comprend les 7.38 à 7.45. Essais sur autoradio à effectuer."
+          gh release create v7.46 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.46" --notes "Version 7.46 : Waze passe derrière sur les pages Trajets, Entretien, Réglages et revient dans son cadre sur l’Accueil ; applis ouvertes en plein écran par-dessus Waze. Comprend les 7.38 à 7.45. Essais sur autoradio à effectuer."
           mkdir -p "$RUNNER_TEMP/check"
           gh release download v7.46 --pattern Accueil2008GT_v7.46.apk --dir "$RUNNER_TEMP/check"
           cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.46.apk"
