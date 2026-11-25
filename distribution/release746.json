@@ -1,0 +1,6 @@
+{
+  "version": "7.46",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.46/Accueil2008GT_v7.46.apk",
+  "sha256": "",
+  "notes": "Waze ne reste plus affiché sur les autres pages de l’appli : en passant sur Trajets, Entretien ou Réglages, l’appli se remet au premier plan et Waze passe derrière ; en revenant sur l’Accueil, Waze reprend sa place dans le cadre.\nLes applis ouvertes depuis l’accueil s’ouvrent en plein écran par-dessus Waze (méthode testée sur ton autoradio le 25/11).\nComprend les 7.38 à 7.45."
+}

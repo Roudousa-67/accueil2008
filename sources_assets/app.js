@@ -6,6 +6,19 @@
 const FRESH08 = (() => { try { return !Object.keys(localStorage).some((k) => k.startsWith('a08_') && k !== 'a08_arDefDone'); } catch (e) { return false; } })();
 const $ = (id) => document.getElementById(id);
 const A = window.Android || null;
+// 7.46 : les applis s'ouvrent en plein écran par le pont natif. Essai filmé sur le poste (7.45) :
+// une appli ouverte ainsi passe par-dessus Waze, qui disparaît ; retour à l'accueil = Waze revient
+// dans son cadre. Sans le pont natif (ou s'il échoue), ancienne méthode de l'appli.
+function launch745(pk) {
+  try {
+    const n = window.Display743Native;
+    if (n && typeof n.launch === 'function' && pk && String(pk).indexOf(',') < 0 && store.get('fullLaunch745', true) !== false) {
+      const r = JSON.parse(n.launch(String(pk), true));
+      if (r && r.ok) return true;
+    }
+  } catch (e) { /* repli */ }
+  return !!(A && A.launch(pk));
+}
 const DEMO = !A;
 
 // ================= stockage =================
@@ -1244,10 +1257,10 @@ function launchDock(item) {
   if (item.special === 'drawer') { openDrawer(null); return; }
   if (!A) { toast('Ouverture : ' + item.label); return; }
   const custom2 = store.get('dock_' + item.id, '');
-  if (custom2 && A.launch(custom2)) return;
-  if (A.launch(item.pk)) return;
+  if (custom2 && launch745(custom2)) return;
+  if (launch745(item.pk)) return;
   const found = allApps().find((a) => item.re.test(a.l) || item.re.test(a.p));
-  if (found && A.launch(found.p)) return;
+  if (found && launch745(found.p)) return;
   if (item.id === 'phone' && A.dial()) return;
   toast(`Appli pour « ${item.label} » non trouvée : choisis-la dans la liste`);
   openDrawer(item);
@@ -1301,14 +1314,14 @@ function act(a, long) {
     case 'toggleImmersive': if (A && A.setImmersive) { A.setImmersive(!A.immersive()); setTimeout(() => { fit(); openSettings(); }, 400); } break;
     case 'open': if (A) A.openSettings(v); else toast('Réglage Android : ' + v); break;
     case 'dock': { const it = DOCK.find((d) => d.id === v); if (long && !it.special) openDrawer(it); else launchDock(it); break; }
-    case 'app': if (assignFor) { store.set('dock_' + assignFor.id, v); toast(`« ${assignFor.label} » ouvrira ${(allApps().find((x) => x.p === v) || {}).l || v}`); closeOverlays(); } else { closeOverlays(); if (A) A.launch(v); } break;
+    case 'app': if (assignFor) { store.set('dock_' + assignFor.id, v); toast(`« ${assignFor.label} » ouvrira ${(allApps().find((x) => x.p === v) || {}).l || v}`); closeOverlays(); } else { closeOverlays(); if (A) launch745(v); } break;
     case 'mHome': case 'mWork': { const key = k === 'mHome' ? 'addrHome' : 'addrWork'; const ad = store.get(key, ''); if (long || !ad) { toast('Indique l\'adresse dans les réglages'); openSettings(k === 'mHome' ? 'aHome' : 'aWork'); } else wazeTo(ad); break; }
-    case 'mWaze': if (!A || !A.launch(store.get('dock_gps', '') || 'com.waze,com.google.android.apps.maps')) launchDock(DOCK[0]); break;
+    case 'mWaze': if (!A || !launch745(store.get('dock_gps', '') || 'com.waze,com.google.android.apps.maps')) launchDock(DOCK[0]); break;
     case 'recenter': follow = true; if (loc && map) map.setView([loc.lat, loc.lon], Math.max(map.getZoom(), 15)); paint(); break;
     case 'mPrev': if (A) A.media('prev'); break;
     case 'mNext': if (A) A.media('next'); break;
     case 'mPlay': if (!media) launchDock(DOCK[1]); else { if (A) A.media(media.playing ? 'pause' : 'play'); media.playing = !media.playing; paint(); } break;
-    case 'mArt': if (media && media.pkg && A) A.launch(media.pkg); else launchDock(DOCK[1]); break;
+    case 'mArt': if (media && media.pkg && A) launch745(media.pkg); else launchDock(DOCK[1]); break;
     case 'stGo': if (!station || !station.lat) toast('Station pas encore trouvée'); else if (!A || !A.openUrl(`https://waze.com/ul?ll=${station.lat},${station.lon}&navigate=yes`)) toast('Waze introuvable'); break;
     case 'clearTrips': if (clearArm) { store.set('trips', []); clearArm = false; toast('Historique effacé'); } else clearArm = true; render(); break;
     case 'addLog': {

@@ -309,4 +309,26 @@
   window.dzPill = function (z) { if (z && z.kind === 'zone' && store.get('dz744Hud', true) !== false && document.querySelector('#screen canvas[data-road]')) return ''; return dzPill0.apply(this, arguments); };
  }
  window.V743 = { germany };
+ // 7.46 : Waze reste par-dessus les autres pages de l'appli (Trajets, Entretien, Réglages…) parce que
+ // c'est une fenêtre à part posée sur le cadre de l'accueil. En quittant l'accueil, l'appli se remet au
+ // premier plan (Waze passe derrière, vu sur la vidéo du 25/11) ; au retour, Waze reprend son cadre.
+ let lastTab746 = typeof tab !== 'undefined' ? tab : 'home', hidden746 = false;
+ const render746 = window.render;
+ window.render = function () {
+  const out = render746.apply(this, arguments);
+  try {
+   if (tab !== lastTab746) {
+    const was = lastTab746, n = window.Display743Native; lastTab746 = tab;
+    const framed = typeof gbKey !== 'undefined' && gbKey && (typeof gbMode !== 'function' || gbMode() === 'cadre');
+    if (was === 'home' && tab !== 'home' && framed && n && typeof n.front === 'function' && store.get('hideNav746', true) !== false) {
+     n.front(); hidden746 = true; if (typeof dlogAdd === 'function') dlogAdd('cadre', 'page ' + tab + ' : Waze passé derrière');
+    } else if (tab === 'home' && hidden746) {
+     hidden746 = false;
+     if (typeof gbLaunch === 'function') setTimeout(() => { if (tab === 'home') gbLaunch(true, 'retour sur l’accueil'); }, 350);
+    }
+   }
+  } catch (e) { /* jamais bloquant */ }
+  return out;
+ };
+ window.V746 = { hidden: () => hidden746 };
 })();

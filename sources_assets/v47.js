@@ -387,7 +387,7 @@ function amAct(v) {
   const op = v.split(':')[0], pk = v.slice(op.length + 1);
   if (op === 'noop') return;
   amClose();
-  if (op === 'open') { if (!A) toast('Ouverture : ' + ((appInfo(pk) || {}).l || pk)); else if (!A.launch(pk)) toast('Appli introuvable (désinstallée ?)'); return; }
+  if (op === 'open') { if (!A) toast('Ouverture : ' + ((appInfo(pk) || {}).l || pk)); else if (!launch745(pk)) toast('Appli introuvable (désinstallée ?)'); return; }
   if (op === 'edit') { const f = fFindApp(fCfg(), pk); if (f) { const ff = fFind(fCfg(), f.id); if (ff) homePage = ff.pg; fEnterEdit(f.id); } return; }
   if (op === 'add') { const c = fClone(); const n = { id: nid(), t: 'a', p: pk, w: 1, h: 1 }; const pg = fPlace(c, n, 0); fSave(c); homePage = pg; fEnterEdit(n.id); toast(`Ajoutée en page ${pg + 1} : glisse-la où tu veux`); }
 }
@@ -462,7 +462,7 @@ function gbLaunch(force, why, loose) {
     if (gbFlipClear(gbLastWhy)) ch = true;                                       // v7.3 : de nouveau dans le cadre → plus d'alerte
     if (ch && tab === 'home') render(); } } }, 5000);
 }
-function gbFull() { const pk = gbPk(); try { if (!A) { toast('Aperçu : ' + gbName(pk) + ' en plein écran'); return; } const ok = A.launch(pk); dlogAdd('cadre', `ouverture plein écran : ${pk} → ${ok ? 'OK' : 'appli introuvable'}`); if (!ok) toast('Appli introuvable : ' + gbName(pk)); } catch (e) { dlogAdd('cadre', 'ouverture plein écran impossible : ' + (e && e.message || e)); toast('Impossible d\'ouvrir ' + gbName(pk)); } }
+function gbFull() { const pk = gbPk(); try { if (!A) { toast('Aperçu : ' + gbName(pk) + ' en plein écran'); return; } const ok = launch745(pk); dlogAdd('cadre', `ouverture plein écran : ${pk} → ${ok ? 'OK' : 'appli introuvable'}`); if (!ok) toast('Appli introuvable : ' + gbName(pk)); } catch (e) { dlogAdd('cadre', 'ouverture plein écran impossible : ' + (e && e.message || e)); toast('Impossible d\'ouvrir ' + gbName(pk)); } }
 let gbActAt = 0, gbActName = '', gbHidAt = 0, gbRedockAt = 0, gbRedockOff = 0, gbLastWhy = '';
 document.addEventListener('visibilitychange', () => {
   const now = Date.now();
@@ -2363,7 +2363,7 @@ function arPickHtml(p) {
 { const a1 = window.act; window.act = function (a, long) {
   if (a.indexOf('arapp:') !== 0) return a1.apply(this, arguments);
   const [, k, v] = a.split(':'), L = arApps().slice(), i = +v, key = a.slice(('arapp:' + k + ':').length);
-  if (k === 'open') { if (long) { arEdit = true; render(); return; } const it = L[i] || ''; if (it.indexOf('d:') === 0) return a1.call(this, 'dock:' + it.slice(2)); if (A && A.launch) A.launch(it.slice(2)); else toast('Aperçu : ouvrirait ' + it.slice(2)); return; }
+  if (k === 'open') { if (long) { arEdit = true; render(); return; } const it = L[i] || ''; if (it.indexOf('d:') === 0) return a1.call(this, 'dock:' + it.slice(2)); if (A && A.launch) launch745(it.slice(2)); else toast('Aperçu : ouvrirait ' + it.slice(2)); return; }
   if (k === 'del') { L.splice(i, 1); store.set('arApps_' + profIdx(), L); render(); return; }
   if (k === 'pick') { arPick = v === 'new' ? 'new' : i; render(); return; }
   if (k === 'set') { if (arPick === 'new') L.push(key); else if (arPick != null) L[arPick] = key; store.set('arApps_' + profIdx(), L.slice(0, 6)); arPick = null; render(); return; }

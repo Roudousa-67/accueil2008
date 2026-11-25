@@ -162,6 +162,10 @@ public final class Display743 {
         } });
     }
 
+    /** 7.46 : remet l'accueil au premier plan ; la fenêtre libre de Waze passe derrière (vidéo du 25/11). */
+    @JavascriptInterface
+    public String front() { bringSelfToFront(); return "{\"ok\":true}"; }
+
     // Ramène notre appli au premier plan entre deux essais (sans droit spécial : nos propres tâches).
     private void bringSelfToFront() {
         try {

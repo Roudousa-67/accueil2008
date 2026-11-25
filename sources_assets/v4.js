@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.45';
+const APP_VERSION = '7.46';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.46','Novembre 2026',['Waze se cache quand tu ouvres une autre appli : les applis s’ouvrent maintenant en plein écran par-dessus (méthode validée sur ton autoradio, vidéo du 25/11). Retour à l’accueil : Waze revient dans son cadre','Dans l’appli, Trajets, Entretien, Réglages… : Waze passe derrière au lieu de rester affiché, et revient dans son cadre sur l’Accueil']],
  ['7.45','Novembre 2026',['Rechercher l’affichage : « Tout rechercher » ouvre Waze lui-même avant chaque essai, tu n’as plus à l’ouvrir (il te cachait l’écran). Tu filmes, tu touches un seul bouton, et un pop-up te demande d’accepter si besoin. À la fin, un bandeau vert et un bip te disent quand arrêter de filmer']],
  ['7.44','Novembre 2026',['Rechercher l’affichage : bouton « Tout rechercher » qui enchaîne tout seul la recherche puis les essais pour cacher Waze ; tu filmes l’écran avec ton téléphone, rien à toucher. PDF envoyé par e-mail, ton adresse préremplie (gardée seulement sur l’autoradio). Applis du fabricant (QF, ZJ) lues en profondeur']],
  ['7.43','Novembre 2026',['Autoroute : panneau « SORTIE » planté au début exact de la bretelle ; panneau des grandes villes et de leurs distances au bord de la route, et en grand en haut pendant 10 s','Zone de danger en haut de l’image (clignote si trop vite), coupée en Allemagne ; la pastille de limitation se cache pendant les panneaux du haut','Tout se désactive : GPS et navigation → Panneaux d’autoroute et Panneaux dans l’image','Plus de double portique quand la sortie apparaît juste avant 2 km','Réglages → Système → Rechercher l’affichage : comment l’autoradio affiche Waze, essais pour le cacher, résultat en PDF par e-mail ou par QR']],
@@ -810,7 +811,7 @@ async function checkUpdate(manual) {
 
 // ---------- applis de la voiture (réglages d'origine) ----------
 const CARAPPS = [['Paramètres de voiture', 'com.qf.carsettings', /param[eè]tres de voiture|carsetting/i], ['Applications de la voiture', 'com.qf.vehicle', /automobiles|vehicle/i], ['Son (DSP)', 'com.qf.soundeffect', /^dsp$|dsp/i], ['Ventilateur', 'com.qf.fancontrol', /ventilateur|fan/i], ['Pression des pneus (TPMS)', 'com.syt.tmps', /tpms/i], ['Caméra de recul / 360', 'com.qf.backcar', /360|panorama|recul/i], ['Test usine (工厂测试)', 'com.qf.test', /工厂|factory/i], ['Enregistreur (dashcam)', '', /enregistreur|dvr|record/i]];
-function launchCarApp(i) { const [n, pk, re] = CARAPPS[i]; if (!A) { toast('Ouverture : ' + n); return; } if (pk && A.launch(pk)) return; const f = allApps().find((a) => re.test(a.l) || re.test(a.p)); if (f && A.launch(f.p)) return; toast(`« ${n} » introuvable sur l'autoradio`); }
+function launchCarApp(i) { const [n, pk, re] = CARAPPS[i]; if (!A) { toast('Ouverture : ' + n); return; } if (pk && launch745(pk)) return; const f = allApps().find((a) => re.test(a.l) || re.test(a.p)); if (f && launch745(f.p)) return; toast(`« ${n} » introuvable sur l'autoradio`); }
 
 // ---------- Paramètres ----------
 let setCat = 0, setSub = 0, setCaptureFrame = false, setText = '';
@@ -1234,7 +1235,7 @@ function ffLaunch() {
   const r = ffRect();
   if (!A) { toast(`Aperçu : ${pk} s'ouvrirait dans le cadre (${r ? r.join(', ') : '?'})`); return; }
   if (A.launchIn && r && A.launchIn(pk, r[0], r[1], r[2], r[3])) return;
-  if (!A.launch(pk)) toast('Appli introuvable : ' + pk);
+  if (!launch745(pk)) toast('Appli introuvable : ' + pk);
 }
 function ffDialog(p) {
   const kind = store.get('ffType', 'navi'), list = ffApps(kind), cur = store.get(kind === 'dvr' ? 'ffDvr' : 'ffNavi', kind === 'dvr' ? '' : 'com.waze');

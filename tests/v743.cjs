@@ -136,6 +136,22 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("act('v741:dist:0');act('v741:dz:0')");assert(run("store.get('dist744Dur')===0&&store.get('dz744Hud')===false"));run("act('v741:dist:10');act('v741:dz:1')");
  assert.equal(t.errors.length,0,t.errors.join('\n'));
  console.log('OK autoroute : villes et distances au bord de la route et en haut, SORTIE au début de la bretelle, zone de danger (coupée en Allemagne), tout désactivable');
+ // 7.46 : ouverture des applis en plein écran par le pont natif (cache Waze), repli sur l'ancienne méthode.
+ const opened=[];w.Display743Native.launch=(pk,full)=>{opened.push([pk,full]);return JSON.stringify({ok:pk!=='absent.app',mode:'plein écran demandé'});};
+ assert.equal(run("launch745('com.radio.test')"),true);assert.deepEqual(opened.slice(-1)[0],['com.radio.test',true],'appli ouverte en plein écran');
+ const old=[];w.Android.launch=pk=>{old.push(pk);return true;};
+ run("launch745('absent.app')");assert.deepEqual(old,['absent.app'],'repli sur l’ancienne méthode si le plein écran échoue');
+ run("launch745('com.waze,com.google.android.apps.maps')");assert.equal(old.length,2,'liste d’applis : ancienne méthode');
+ console.log('OK applis ouvertes en plein écran (Waze caché), repli sinon');
+ // 7.46 : changer de page dans l'appli met Waze derrière ; revenir à l'accueil le remet dans son cadre.
+ let fronts=0;w.Display743Native.front=()=>{fronts++;return '{"ok":true}';};
+ run("tab='home';render();gbKey='com.waze|1,2,3,4';store.set('gbMode','cadre');");
+ run("tab='trips';render();");assert.equal(fronts,1,'Trajets : Waze passé derrière');assert(run('V746.hidden()'));
+ run("tab='maint';render();");assert.equal(fronts,1,'pas deux fois');
+ const before=t.timers.length;run("tab='home';render();");
+ assert(!run('V746.hidden()')&&t.timers.length>before,'retour à l’accueil : Waze relancé dans le cadre');
+ run("store.set('hideNav746',false);tab='trips';render();");assert.equal(fronts,1,'désactivable');run("store.set('hideNav746',true);tab='home';render();");
+ console.log('OK pages de l’appli : Waze derrière hors de l’accueil, revient sur l’accueil');
  console.log('Tests 7.43 réussis.');
  process.exit(0);
 })().catch(e=>{console.error(e);process.exit(1);});
