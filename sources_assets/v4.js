@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.44';
+const APP_VERSION = '7.45';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.45','Novembre 2026',['Rechercher l’affichage : « Tout rechercher » ouvre Waze lui-même avant chaque essai, tu n’as plus à l’ouvrir (il te cachait l’écran). Tu filmes, tu touches un seul bouton, et un pop-up te demande d’accepter si besoin']],
  ['7.44','Novembre 2026',['Rechercher l’affichage : bouton « Tout rechercher » qui enchaîne tout seul la recherche puis les essais pour cacher Waze ; tu filmes l’écran avec ton téléphone, rien à toucher. PDF envoyé par e-mail, ton adresse préremplie (gardée seulement sur l’autoradio). Applis du fabricant (QF, ZJ) lues en profondeur']],
  ['7.43','Novembre 2026',['Autoroute : panneau « SORTIE » planté au début exact de la bretelle ; panneau des grandes villes et de leurs distances au bord de la route, et en grand en haut pendant 10 s','Zone de danger en haut de l’image (clignote si trop vite), coupée en Allemagne ; la pastille de limitation se cache pendant les panneaux du haut','Tout se désactive : GPS et navigation → Panneaux d’autoroute et Panneaux dans l’image','Plus de double portique quand la sortie apparaît juste avant 2 km','Réglages → Système → Rechercher l’affichage : comment l’autoradio affiche Waze, essais pour le cacher, résultat en PDF par e-mail ou par QR']],
  ['7.42','Novembre 2026',['Décor : en ville près d’une voie rapide (M35, M351…), le décor reste Ville au lieu de passer sur Autoroute','Sorties des voies rapides annoncées, et sorties rapprochées annoncées même découvertes tard','Stations d’autoroute : enseigne écrite en entier (OpenStreetMap si le flux officiel ne la donne pas)']],

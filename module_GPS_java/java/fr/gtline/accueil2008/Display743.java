@@ -183,20 +183,27 @@ public final class Display743 {
             try {
                 JSONObject o = scan();
                 JSONArray essais = new JSONArray();
+                // L'appli ouvre Waze elle-même : l'utilisateur n'a pas à le faire (il ne pourrait plus
+                // atteindre l'écran). Chaque essai : ouvrir Waze, le laisser s'afficher, ouvrir l'appli
+                // par-dessus selon la méthode, laisser voir, revenir. L'utilisateur filme.
                 String[] kinds = { "normal", "plein", "derriere", "horsecran" };
                 for (String k : kinds) {
-                    step = "Essai : " + k; bringSelfToFront(); sleep(700);
+                    step = "Essai : " + k;
                     JSONObject res = new JSONObject().put("essai", k);
-                    JSONObject first = null, second;
-                    if ("derriere".equals(k)) { first = launchInternal(navPkg, true); sleep(1600); second = launchInternal(appPkg, true); }
-                    else if ("horsecran".equals(k)) { first = launchOffscreenInternal(navPkg); sleep(1600); second = launchInternal(appPkg, true); }
-                    else second = launchInternal(appPkg, "plein".equals(k));
-                    res.put("appli", second.optBoolean("ok") ? second.optString("mode") : second.optString("erreur"));
-                    if (first != null) res.put("waze", first.optBoolean("ok") ? first.optString("mode") : first.optString("erreur"));
-                    res.put("ok", second.optBoolean("ok"));
-                    essais.put(res); sleep(3600);
+                    // 1. Waze à l'écran (hors écran pour le dernier essai).
+                    JSONObject waze = "horsecran".equals(k) ? launchOffscreenInternal(navPkg) : launchInternal(navPkg, "derriere".equals(k));
+                    sleep(2600);
+                    // 2. L'appli d'essai par-dessus.
+                    JSONObject app = launchInternal(appPkg, !"normal".equals(k));
+                    sleep(3600);
+                    // 3. Retour à l'accueil pour voir si Waze est encore là.
+                    bringSelfToFront(); sleep(1800);
+                    res.put("waze", waze.optBoolean("ok") ? waze.optString("mode") : waze.optString("erreur"));
+                    res.put("appli", app.optBoolean("ok") ? app.optString("mode") : app.optString("erreur"));
+                    res.put("ok", app.optBoolean("ok"));
+                    essais.put(res);
                 }
-                step = "Retour"; bringSelfToFront();
+                step = "Retour"; bringSelfToFront(); sleep(500);
                 o.put("essais_auto", essais);
                 r = o.toString();
             } catch (Throwable t) { r = "{\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}"; }
