@@ -1,0 +1,6 @@
+{
+  "version": "7.44",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.44/Accueil2008GT_v7.44.apk",
+  "sha256": "",
+  "notes": "Rechercher l’affichage (Réglages → Système) : un seul bouton « Tout rechercher ». L’appli fouille le poste en profondeur (fichiers système, droits, applis du fabricant QF/ZJ, Waze) puis fait les 4 essais pour cacher Waze toute seule. Tu filmes l’écran de l’autoradio avec ton téléphone : rien à toucher pendant ce temps. À la fin, le PDF se crée et ton e-mail s’ouvre déjà rempli (ton adresse est gardée seulement sur l’autoradio). Tu envoies le PDF et ta vidéo.\nComprend les 7.38 à 7.43."
+}

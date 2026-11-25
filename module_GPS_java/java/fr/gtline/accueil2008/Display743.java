@@ -1,6 +1,7 @@
 package fr.gtline.accueil2008;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -58,7 +59,7 @@ import java.util.zip.ZipFile;
  */
 public final class Display743 {
 
-    private static final Pattern RELATED = Pattern.compile("(?i)launcher|home|desktop|syu|fyt|topway|tsui|\\.ts\\.|navi|multiwindow|freeform|float|split|carui|carlauncher|systemui|microntek|hct|joying|atoto");
+    private static final Pattern RELATED = Pattern.compile("(?i)(^|\\.)(qf|zj)(\\.|$)|hiworld|carplay|zlink|easyconn|autolink|launcher|home|desktop|syu|fyt|topway|tsui|\\.ts\\.|navi|multiwindow|freeform|float|split|carui|carlauncher|systemui|microntek|hct|joying|atoto");
     private static final Pattern PROPS = Pattern.compile("(?i)navi|gps|launcher|home|multi|freeform|window|float|split|fyt|syu|topway|customer|platform|board|model|product|mcu|ui\\.|car|sdk|build\\.version|display");
     private static final String[] PERMS = {
         "android.permission.ACTIVITY_EMBEDDING", "android.permission.MANAGE_ACTIVITY_STACKS", "android.permission.MANAGE_ACTIVITY_TASKS",
@@ -66,7 +67,9 @@ public final class Display743 {
         "android.permission.ADD_TRUSTED_DISPLAY", "android.permission.CAPTURE_VIDEO_OUTPUT", "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.WRITE_SECURE_SETTINGS", "android.permission.REAL_GET_TASKS", "android.permission.PACKAGE_USAGE_STATS"
     };
-    private static final long BUDGET_MS = 45000;
+    // 7.44 : applis du fabricant QF / ZJ (firmware de l'autoradio) lues en priorité.
+    private static final Pattern VENDOR = Pattern.compile("(?i)(^|\\.)(qf|zj)(\\.|$)|hiworld|carplay|launcher");
+    private static final long BUDGET_MS = 60000;
 
     private final Activity activity;
     private volatile boolean running;
@@ -98,10 +101,13 @@ public final class Display743 {
 
     /** Ouvre une appli normalement, ou en forçant le plein écran (mode de fenêtre 1). */
     @JavascriptInterface
-    public String launch(String pkg, boolean full) {
+    public String launch(String pkg, boolean full) { return launchInternal(pkg, full).toString(); }
+
+    private JSONObject launchInternal(String pkg, boolean full) {
         try {
             Intent i = activity.getPackageManager().getLaunchIntentForPackage(pkg);
-            if (i == null) return new JSONObject().put("ok", false).put("erreur", "appli absente : " + pkg).toString();
+            if (i == null && "com.android.settings".equals(pkg)) i = new Intent(Settings.ACTION_SETTINGS);
+            if (i == null) return new JSONObject().put("ok", false).put("erreur", "appli absente : " + pkg);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Bundle options = null;
             String how = "normal";
@@ -115,19 +121,101 @@ public final class Display743 {
                 } catch (Throwable t) { how = "plein écran refusé par Android : " + t.getClass().getSimpleName(); }
                 options = o.toBundle();
             }
-            activity.startActivity(i, options);
-            return new JSONObject().put("ok", true).put("mode", how).toString();
+            startOnUi(i, options);
+            return new JSONObject().put("ok", true).put("mode", how);
         } catch (Throwable t) {
-            return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+            try { return new JSONObject().put("ok", false).put("erreur", String.valueOf(t)); } catch (Throwable x) { return new JSONObject(); }
         }
     }
+
+    /**
+     * 7.44 : essai « Waze hors de l'écran » : relance l'appli en fenêtre libre (mode 5) avec un cadre
+     * placé à droite, hors de l'écran visible. Si Android accepte, la fenêtre existe mais ne se voit plus.
+     */
+    @JavascriptInterface
+    public String launchOffscreen(String pkg) { return launchOffscreenInternal(pkg).toString(); }
+
+    private JSONObject launchOffscreenInternal(String pkg) {
+        try {
+            Intent i = activity.getPackageManager().getLaunchIntentForPackage(pkg);
+            if (i == null) return new JSONObject().put("ok", false).put("erreur", "appli absente : " + pkg);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Point size = new Point();
+            activity.getWindowManager().getDefaultDisplay().getRealSize(size);
+            GpsDock.HiddenApi.exemptAll();
+            ActivityOptions o = ActivityOptions.makeBasic();
+            String how = "cadre hors écran demandé";
+            try { Method m = ActivityOptions.class.getMethod("setLaunchWindowingMode", int.class); m.invoke(o, 5); }
+            catch (Throwable t) { how += " (mode fenêtre libre refusé : " + t.getClass().getSimpleName() + ")"; }
+            o.setLaunchBounds(new android.graphics.Rect(size.x + 40, 0, size.x + 440, 300));
+            startOnUi(i, o.toBundle());
+            return new JSONObject().put("ok", true).put("mode", how + " (écran " + size.x + "x" + size.y + ")");
+        } catch (Throwable t) {
+            try { return new JSONObject().put("ok", false).put("erreur", String.valueOf(t)); } catch (Throwable x) { return new JSONObject(); }
+        }
+    }
+
+    // startActivity sur le fil principal (une séquence tourne sur un fil de travail).
+    private void startOnUi(final Intent i, final Bundle options) {
+        activity.runOnUiThread(new Runnable() { @Override public void run() {
+            try { activity.startActivity(i, options); } catch (Throwable t) { /* refus géré par l'appelant */ }
+        } });
+    }
+
+    // Ramène notre appli au premier plan entre deux essais (sans droit spécial : nos propres tâches).
+    private void bringSelfToFront() {
+        try {
+            ActivityManager am = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+            for (ActivityManager.AppTask t : am.getAppTasks()) { t.moveToFront(); break; }
+        } catch (Throwable t) { /* sans effet */ }
+    }
+
+    /**
+     * 7.44 : tout d'un coup. La recherche, puis les quatre essais enchaînés tout seuls (entre chaque,
+     * on revient au premier plan). L'utilisateur filme l'écran avec son téléphone ; rien à toucher.
+     */
+    @JavascriptInterface
+    public String startAll(final String appPkg, final String navPkg) {
+        if (running) return "{\"ok\":true,\"running\":true}";
+        running = true; result = ""; step = "Démarrage";
+        new Thread(new Runnable() { @Override public void run() {
+            String r;
+            try {
+                JSONObject o = scan();
+                JSONArray essais = new JSONArray();
+                String[] kinds = { "normal", "plein", "derriere", "horsecran" };
+                for (String k : kinds) {
+                    step = "Essai : " + k; bringSelfToFront(); sleep(700);
+                    JSONObject res = new JSONObject().put("essai", k);
+                    JSONObject first = null, second;
+                    if ("derriere".equals(k)) { first = launchInternal(navPkg, true); sleep(1600); second = launchInternal(appPkg, true); }
+                    else if ("horsecran".equals(k)) { first = launchOffscreenInternal(navPkg); sleep(1600); second = launchInternal(appPkg, true); }
+                    else second = launchInternal(appPkg, "plein".equals(k));
+                    res.put("appli", second.optBoolean("ok") ? second.optString("mode") : second.optString("erreur"));
+                    if (first != null) res.put("waze", first.optBoolean("ok") ? first.optString("mode") : first.optString("erreur"));
+                    res.put("ok", second.optBoolean("ok"));
+                    essais.put(res); sleep(3600);
+                }
+                step = "Retour"; bringSelfToFront();
+                o.put("essais_auto", essais);
+                r = o.toString();
+            } catch (Throwable t) { r = "{\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}"; }
+            result = r; running = false; step = "Terminé";
+        } }, "Display743All").start();
+        return "{\"ok\":true}";
+    }
+
+    private static void sleep(long ms) { try { Thread.sleep(ms); } catch (InterruptedException e) { /* ignore */ } }
 
     /**
      * Fabrique un PDF du résultat, l'enregistre dans Téléchargements/Accueil2008 et ouvre le choix
      * de l'appli d'envoi (Gmail…) avec le PDF en pièce jointe.
      */
     @JavascriptInterface
-    public String sharePdf(String name, String title, String text) {
+    public String sharePdf(String name, String title, String text) { return sharePdf(name, title, text, ""); }
+
+    @JavascriptInterface
+    public String sharePdf(String name, String title, String text, String email) {
         String where = "";
         try {
             byte[] pdf = makePdf(title, text);
@@ -157,8 +245,9 @@ public final class Display743 {
                 where = f.getPath();
             }
             Intent send = new Intent(Intent.ACTION_SEND).setType("application/pdf")
-                .putExtra(Intent.EXTRA_STREAM, uri).putExtra(Intent.EXTRA_SUBJECT, title)
-                .putExtra(Intent.EXTRA_TEXT, "Résultat de la recherche de l'affichage (Accueil 2008), en pièce jointe.")
+                .putExtra(Intent.EXTRA_STREAM, uri).putExtra(Intent.EXTRA_SUBJECT, title);
+            if (email != null && email.contains("@")) send.putExtra(Intent.EXTRA_EMAIL, new String[]{ email });
+            send.putExtra(Intent.EXTRA_TEXT, "Résultat de la recherche de l'affichage (Accueil 2008), en pièce jointe.")
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             if (send.resolveActivity(activity.getPackageManager()) == null)
                 return new JSONObject().put("ok", false).put("fichier", where).put("erreur", "aucune appli d'e-mail sur l'autoradio").toString();
@@ -251,9 +340,9 @@ public final class Display743 {
         o.put("lanceur_par_defaut", def != null && def.activityInfo != null ? def.activityInfo.packageName + " / " + def.activityInfo.name : "");
         LinkedHashSet<String> targets = new LinkedHashSet<>();
         JSONArray homes = new JSONArray();
-        for (ResolveInfo r : pm.queryIntentActivities(home, 0)) {
+        for (ResolveInfo r : pm.queryIntentActivities(home, PackageManager.MATCH_DISABLED_COMPONENTS)) {
             if (r.activityInfo == null) continue;
-            homes.put(r.activityInfo.packageName + " / " + r.activityInfo.name);
+            homes.put(r.activityInfo.packageName + " / " + r.activityInfo.name + (r.activityInfo.enabled && r.activityInfo.applicationInfo.enabled ? "" : " (désactivé)"));
             if (!r.activityInfo.packageName.equals(me)) targets.add(r.activityInfo.packageName);
         }
         o.put("lanceurs", homes);
@@ -261,15 +350,21 @@ public final class Display743 {
         step = "Applis système";
         JSONArray related = new JSONArray();
         List<String> extra = new ArrayList<>();
-        for (PackageInfo pi : pm.getInstalledPackages(0)) {
+        JSONArray all = new JSONArray();
+        List<String> vendor = new ArrayList<>();
+        for (PackageInfo pi : pm.getInstalledPackages(PackageManager.MATCH_DISABLED_COMPONENTS)) {
+            boolean sys = system(pi.applicationInfo), off = pi.applicationInfo != null && !pi.applicationInfo.enabled;
+            all.put(pi.packageName + (sys ? "" : " [ajoutée]") + (off ? " [désactivée]" : ""));
             if (pi.packageName.equals(me) || !RELATED.matcher(pi.packageName).find()) continue;
-            boolean sys = system(pi.applicationInfo);
-            related.put(pi.packageName + (sys ? " (système)" : ""));
-            if (sys) extra.add(pi.packageName);
+            related.put(pi.packageName + (sys ? " (système)" : "") + (off ? " (désactivée)" : ""));
+            if (VENDOR.matcher(pi.packageName).find()) vendor.add(pi.packageName);
+            else if (sys) extra.add(pi.packageName);
         }
         o.put("applis_liees", related);
+        o.put("tous_paquets", all);
+        for (String p : vendor) if (targets.size() < 12) targets.add(p);
         if (extra.remove("com.android.systemui")) targets.add("com.android.systemui");
-        for (String p : extra) if (targets.size() < 10) targets.add(p);
+        for (String p : extra) if (targets.size() < 14) targets.add(p);
 
         step = "Waze";
         o.put("waze", waze(pm));
