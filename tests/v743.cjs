@@ -68,6 +68,8 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("store.set('display743App','com.radio.test');store.set('display743Mail','abc@exemple.com');act('display743:all')");
  assert.deepEqual(started.slice(-1)[0],['com.radio.test','com.waze'],'startAll avec l’appli choisie et Waze');
  run('Display743.poll()');run('Display743.poll()');
+ assert(screen().includes('Terminé — tu peux arrêter de filmer'),'bandeau de fin affiché pour savoir quand arrêter de filmer');
+ const tfin=t.timers.find(x=>x.ms===2600);assert(tfin,'e-mail ouvert après le bandeau');tfin.fn();
  assert.equal((w.__pdf[3]||''),'abc@exemple.com','PDF envoyé à l’adresse préremplie, sans réponse à donner');
  assert(w.__pdf[2].includes('Essais automatiques')&&w.__pdf[2].includes('derriere'),'essais automatiques dans le PDF');
  assert(JSON.parse(run("JSON.stringify(Display743.reportLines())")).join('\n').includes('horsecran : ouvert'),'résultat des essais auto lisible');

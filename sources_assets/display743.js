@@ -45,7 +45,12 @@
    if (d) { S.data = d; S.at = Date.now(); S.error = d.erreur ? 'La recherche s’est arrêtée : ' + d.erreur : ''; store.set('display743', { at: S.at, data: d }); }
    else S.error = 'Réponse illisible.';
    clearInterval(S.timer); S.timer = 0;
-   if (S.allRunning && !S.error) { S.allRunning = false; pdf(); }
+   if (S.allRunning && !S.error) {
+    // Signal de fin clair : bandeau vert + bip. L'e-mail s'ouvre après, pour que la vidéo le montre.
+    S.done = Date.now();
+    safe(() => window.dzSound && dzSound('fin'));
+    setTimeout(() => { pdf(); redraw(); }, 2600);
+   }
    S.allRunning = false;
   }
   redraw();
@@ -148,12 +153,13 @@
  function page(p) {
   const d = S.data, f = findings(d);
   const row = (t, v) => `<div style="display:flex;gap:10px;font-size:13.5px;line-height:1.4"><span style="min-width:170px;color:${p.mut}">${esc(t)}</span><span style="flex:1;min-width:0;word-break:break-word">${esc(v)}</span></div>`;
-  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. Ouvre Waze dans le cadre.<br>2. Filme l’écran de l’autoradio avec ton téléphone.<br>3. Appuie sur <b>Tout rechercher</b> : l’appli fouille le poste puis fait les 4 essais toute seule (elle ouvre la radio, revient, recommence). Tu n’as rien à toucher — c’est ta vidéo qui montre si Waze s’est caché.<br>4. À la fin, le PDF se crée et ton e-mail s’ouvre déjà rempli. Tu envoies, puis tu m’envoies le PDF et ta vidéo. Page provisoire, retirée une fois la solution trouvée.</div>`;
+  const intro = `<div style="font-size:13.5px;color:${p.mut};line-height:1.5">1. N’ouvre pas Waze toi-même : l’appli s’en occupe.<br>2. Filme l’écran de l’autoradio avec ton téléphone.<br>3. Appuie une fois sur <b>Tout rechercher</b> : l’appli fouille le poste puis fait les 4 essais toute seule — elle ouvre Waze, ouvre la radio par-dessus, revient, recommence. Tu ne touches plus à rien. Si Android affiche un pop-up, touche « Accepter ».<br>4. Quand c’est fini, un grand bandeau vert « Terminé » s’affiche et un bip sonne : tu peux arrêter de filmer. Ton e-mail s’ouvre déjà rempli, tu envoies, puis tu m’envoies le PDF et ta vidéo. Page provisoire, retirée une fois la solution trouvée.</div>`;
   const mailRow = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px"><span style="color:${p.mut}">Ton e-mail (gardé seulement sur l’autoradio) :</span><input id="d743mail" type="email" value="${esc(mail())}" placeholder="toi@exemple.com" style="flex:1;min-width:180px;padding:9px 11px;border-radius:9px;border:1px solid ${p.line || '#2b3a4f'};background:${p.card2 || '#0a0f16'};color:inherit"></div>`;
   const allBtn = `<div style="${box(p, 'padding:12px 14px;display:flex;flex-direction:column;gap:10px')}">${mailRow}${chipBtn(p, 'display743:all', S.allRunning ? 'En cours… ' + esc(S.step) : '🔎 Tout rechercher (puis e-mail)', true)}<div style="font-size:12.5px;color:${p.mut}">Filme l’écran pendant que ça tourne.</div></div>`;
   const actions = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${chipBtn(p, 'display743:start', S.running ? 'Recherche en cours… ' + S.step : d ? 'Refaire la recherche' : 'Lancer la recherche', true)}${d && !S.running ? chipBtn(p, 'display743:pdf', 'Créer le PDF et l’envoyer par e-mail', false) + chipBtn(p, 'display743:send', 'Envoyer au téléphone (QR)', false) : ''}</div>`;
   const sent = S.pdf ? `<div style="font-size:13.5px;color:${S.pdf.ok ? p.mut : '#e0312b'}">${S.pdf.ok ? 'PDF créé (' + esc(S.pdf.fichier || '') + '). Choisis ton appli d’e-mail, envoie-le-toi, puis envoie-moi le PDF.' : 'PDF impossible : ' + esc(S.pdf.erreur || '') + (S.pdf.fichier ? ' — il est quand même dans ' + esc(S.pdf.fichier) : '') + '. Utilise le QR à la place.'}</div>` : '';
   const err = S.error ? `<div style="color:#e0312b;font-size:13.5px">${esc(S.error)}</div>` : '';
+  const done = S.done && Date.now() - S.done < 60000 ? `<div style="background:#143a24;border:2px solid #2b8a3e;border-radius:14px;padding:16px;font-size:18px;font-weight:800;color:#8ce99a;text-align:center">✓ Terminé — tu peux arrêter de filmer.<div style="font-size:13.5px;font-weight:600;color:${p.mut};margin-top:6px">Ton e-mail s’ouvre : envoie-le, puis envoie-moi le PDF et ta vidéo.</div></div>` : '';
   let found = '';
   if (d && !d.erreur) {
    const P = d.poste || {}, F = d.fenetres || {}, M = d.appli || {}, W = d.waze || {};
@@ -175,7 +181,7 @@
   const apps = testApps(), cur = testApp();
   const pick = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px">Appli pour les essais : ${(apps.length ? apps : [{ p: cur, l: cur }]).map(a => chipBtn(p, 'display743:app:' + a.p, a.l || a.p, a.p === cur)).join('')}</div>`;
   const tests = `${pick}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">${TESTS.map(([k, l]) => test(k, l)).join('')}</div>`;
-  return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${allBtn}${sent}${err}${found}<details style="${box(p, 'padding:8px 12px')}"><summary style="cursor:pointer;font-size:13.5px;color:${p.mut}">Le faire à la main (recherche et essais séparés)</summary><div style="margin-top:10px;display:flex;flex-direction:column;gap:12px">${actions}${tests}</div></details></div>`;
+  return `<div style="display:flex;flex-direction:column;gap:12px;max-width:1000px">${intro}${allBtn}${done}${sent}${err}${found}<details style="${box(p, 'padding:8px 12px')}"><summary style="cursor:pointer;font-size:13.5px;color:${p.mut}">Le faire à la main (recherche et essais séparés)</summary><div style="margin-top:10px;display:flex;flex-direction:column;gap:12px">${actions}${tests}</div></details></div>`;
  }
 
  const sys = SETCATS.find(c => c[0] === 'Système');
