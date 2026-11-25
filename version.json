@@ -1,6 +1,6 @@
 {
-  "version": "7.44",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.44/Accueil2008GT_v7.44.apk",
-  "sha256": "cf0724bab7e2d510380ab8a88191985bb514b57488440ce446a8a6b616747452",
-  "notes": "Rechercher l’affichage (Réglages → Système) : un seul bouton « Tout rechercher ». L’appli fouille le poste en profondeur (fichiers système, droits, applis du fabricant QF/ZJ, Waze) puis fait les 4 essais pour cacher Waze toute seule. Tu filmes l’écran de l’autoradio avec ton téléphone : rien à toucher pendant ce temps. À la fin, le PDF se crée et ton e-mail s’ouvre déjà rempli (ton adresse est gardée seulement sur l’autoradio). Tu envoies le PDF et ta vidéo.\nComprend les 7.38 à 7.43."
+  "version": "7.45",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.45/Accueil2008GT_v7.45.apk",
+  "sha256": "134f48953e1e09ad94709bd1f650da7b5a7f7792c0f107febc17947938ce6dd0",
+  "notes": "Rechercher l’affichage (Réglages → Système) : tu n’ouvres plus Waze toi-même. Tu filmes l’écran avec ton téléphone, tu appuies une fois sur « Tout rechercher », et l’appli fait tout : elle ouvre Waze, ouvre la radio par-dessus, revient, recommence pour chaque essai. Si Android affiche un pop-up, touche « Accepter ». À la fin, un grand bandeau vert « Terminé » et un bip te disent quand arrêter de filmer. Le PDF se crée et ton e-mail s’ouvre prérempli ; tu envoies le PDF et ta vidéo.\nComprend les 7.38 à 7.44."
 }

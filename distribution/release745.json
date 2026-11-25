@@ -1,6 +1,6 @@
 {
   "version": "7.45",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.45/Accueil2008GT_v7.45.apk",
-  "sha256": "",
+  "sha256": "134f48953e1e09ad94709bd1f650da7b5a7f7792c0f107febc17947938ce6dd0",
   "notes": "Rechercher l’affichage (Réglages → Système) : tu n’ouvres plus Waze toi-même. Tu filmes l’écran avec ton téléphone, tu appuies une fois sur « Tout rechercher », et l’appli fait tout : elle ouvre Waze, ouvre la radio par-dessus, revient, recommence pour chaque essai. Si Android affiche un pop-up, touche « Accepter ». À la fin, un grand bandeau vert « Terminé » et un bip te disent quand arrêter de filmer. Le PDF se crée et ton e-mail s’ouvre prérempli ; tu envoies le PDF et ta vidéo.\nComprend les 7.38 à 7.44."
 }
