@@ -4,7 +4,7 @@ const extras=['traffic730.js','decors726.js','driver728.js','near728.js','v728.j
 const t=make({canvas:true,extraScripts:extras}),r=t.run,w=t.w;let checks=0;
 function check(name,condition){assert.equal(!!condition,true,name);console.log('OK '+name);checks++;}
 check('chargement complet',!t.errors.length);
-check('version',r('APP_VERSION')==='7.56');
+check('version',r('APP_VERSION')==='7.57');
 check('décor par défaut disponible',r('Driver728.enabled()')===false);
 check('catégorie Widgets',r("SETCATS.some(c=>c[0]==='Widgets'&&c[1].length===4)"));
 r("openSet('Widgets','Vue voiture et route')");
