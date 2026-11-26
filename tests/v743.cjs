@@ -151,6 +151,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  const before=t.timers.length;run("tab='home';render();");
  assert(!run('V746.hidden()')&&t.timers.length>before,'retour à l’accueil : Waze relancé dans le cadre');
  run("store.set('hideNav746',false);tab='trips';render();");assert.equal(fronts,1,'désactivable');run("store.set('hideNav746',true);tab='home';render();");
+ run("gbKey='';tab='trips';render();");assert.equal(fronts,2,'Waze ouvert avant le redémarrage de l’appli : caché quand même');run("tab='home';render();");
  console.log('OK pages de l’appli : Waze derrière hors de l’accueil, revient sur l’accueil');
  console.log('Tests 7.43 réussis.');
  process.exit(0);

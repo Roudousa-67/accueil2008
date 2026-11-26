@@ -25,6 +25,11 @@ public final class SettingsVoiceActivity extends Activity {
  }
  private void hideNav(){
   overridePendingTransition(0,0);
+  // 7.48 : page opaque (noire). Transparente, Android la traitait comme une vitre : Waze restait visible
+  // et rien n'était réordonné. Sur la vidéo du 25/11, c'est une appli opaque qui cachait Waze.
+  try{getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF000000));
+   android.view.View v=new android.view.View(this);v.setBackgroundColor(0xFF000000);setContentView(v);}catch(Throwable ignored){}
+  try{GpsDock.HiddenApi.exemptAll();java.lang.reflect.Method m=android.app.Activity.class.getDeclaredMethod("convertFromTranslucent");m.setAccessible(true);m.invoke(this);}catch(Throwable ignored){}
   final android.os.Handler h=new android.os.Handler();
   h.postDelayed(new Runnable(){@Override public void run(){
    try{android.app.ActivityManager am=(android.app.ActivityManager)getSystemService(ACTIVITY_SERVICE);

@@ -319,7 +319,9 @@
   try {
    if (tab !== lastTab746) {
     const was = lastTab746, n = window.Display743Native; lastTab746 = tab;
-    const framed = typeof gbKey !== 'undefined' && gbKey && (typeof gbMode !== 'function' || gbMode() === 'cadre');
+    // 7.48 : Waze peut être resté ouvert dans le cadre d'une session précédente (appli redémarrée après une
+    // mise à jour) : on ne demande plus que l'appli l'ait ouvert elle-même, seulement le mode « cadre ».
+    const framed = typeof gbMode !== 'function' || gbMode() === 'cadre';
     if (was === 'home' && tab !== 'home' && framed && n && (typeof n.hideNav === 'function' || typeof n.front === 'function') && store.get('hideNav746', true) !== false) {
      const r = typeof n.hideNav === 'function' ? n.hideNav() : n.front(); hidden746 = true; if (typeof dlogAdd === 'function') dlogAdd('cadre', 'page ' + tab + ' : Waze caché (' + r + ')');
     } else if (tab === 'home' && hidden746) {
