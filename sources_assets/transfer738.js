@@ -135,7 +135,8 @@
   const net = s.ip ? `Wi-Fi de l’autoradio : ${esc(s.url)}` : 'Aucun Wi-Fi : active le point d’accès de l’autoradio et connecte ton téléphone dessus.';
   if (pageOK === null) checkPage().then(() => { if (tab === 'settings') render(); });
   const pageState = pageOK === true ? 'En ligne.' : pageOK === false ? 'Pas encore en ligne : sur GitHub, ton dépôt accueil2008 → Settings → Pages → Source « Deploy from a branch », branche main, dossier /docs → Save.' : 'Vérification…';
-  return setRow(p, 'Mode d’envoi', 'Par Internet : le téléphone et l’autoradio passent chacun par leur 4G, rien à connecter. Par le Wi-Fi : le téléphone doit être connecté au point d’accès de l’autoradio.', chipBtn(p, 'transfer738:mode:internet', 'Par Internet (4G)', internetMode()) + chipBtn(p, 'transfer738:mode:wifi', 'Par le Wi-Fi de l’autoradio', !internetMode()))
+  // 7.50 : le choix « Mode d’envoi » est retiré ; l’envoi passe par Internet (Wi-Fi en secours automatique).
+  return ''
    + setRow(p, 'Page d’envoi pour le téléphone', esc(pageState), chipBtn(p, 'transfer738:checkpage', 'Vérifier'))
    + `<p style="line-height:1.5;color:${p.mut}">Par Internet, le fichier passe par une boîte aux lettres gratuite (ntfy.sh) dont l’adresse est un code secret propre à chaque QR ; il s’efface au bout de quelques heures. Par le Wi-Fi, il va directement du téléphone à l’autoradio.</p>`
    + row('Serveur de l’autoradio', state, s.native ? (s.running ? chipBtn(p, 'transfer738:stop', 'Arrêter') : chipBtn(p, 'transfer738:start', 'Démarrer', true)) : '')

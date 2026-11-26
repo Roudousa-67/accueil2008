@@ -106,7 +106,7 @@ const flush=()=>new Promise(r=>setImmediate(r));
  run("act('transfer738:close');Transfer738.setPageOK(true);");
  // Réglage du mode d'envoi.
  run("openSet('Trajets et carburant','Transfert depuis le téléphone');render();");
- assert(run("document.querySelector('#screen').textContent").includes('Mode d’envoi'),'mode d’envoi dans les réglages');
+ assert(!run("document.querySelector('#screen').textContent").includes('Mode d’envoi'),'mode d’envoi retiré en 7.50');
  run("act('transfer738:mode:wifi')");assert.equal(run("store.get('transferMode741')"),'wifi');
  run("act('transfer738:mode:internet')");
  console.log('OK QR en 4G : adresse secrète, boîte aux lettres consultée, photo téléchargée une fois, plein ouvert ; explications et repli Wi-Fi');

@@ -174,7 +174,7 @@
     const head = `RAPPORT COMPLET ACCUEIL 2008 GT ${APP_VERSION} — ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     const lines = [head, `Résumé : ${count('bad')} problème(s), ${count('todo')} à vérifier, ${count('ok')} OK`, ''];
     for (const c of cats) { lines.push(`== ${c.title} : ${LABEL[c.lvl]} ==`); for (const f of c.items) lines.push(`${ICON[f.lvl]} ${f.t}${f.fix ? '\n   → ' + f.fix : ''}`); lines.push(''); }
-    lines.push('== Données techniques 7.38 ==', ...tech, '', ...(window.Display743 ? safe(() => Display743.reportLines(), []) : []), '', '== Détails (vérification de base) ==', base.text || '');
+    lines.push('== Données techniques 7.38 ==', ...tech, '', ...(window.Display743 ? safe(() => Display743.reportLines(), []) : []), '', ...(window.Try750 ? safe(() => Try750.reportLines(), []) : []), '', '== Détails (vérification de base) ==', base.text || '');
     const text = lines.join('\n');
     this.report = { at: Date.now(), name: `rapport-${stamp(d)}.html`, cats, text, counts: { bad: count('bad'), todo: count('todo'), ok: count('ok') } };
     // L'envoi existant (e-mail, WhatsApp, copie, affichage plein écran) utilise ce texte complet.
