@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.46';
+const APP_VERSION = '7.47';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.47','Novembre 2026',['Waze caché sur Trajets, Entretien, Réglages : une page invisible s’ouvre une demi-seconde en plein écran pour le faire passer derrière, puis l’accueil revient devant (la 7.46 ne suffisait pas)']],
  ['7.46','Novembre 2026',['Waze se cache quand tu ouvres une autre appli : les applis s’ouvrent maintenant en plein écran par-dessus (méthode validée sur ton autoradio, vidéo du 25/11). Retour à l’accueil : Waze revient dans son cadre','Dans l’appli, Trajets, Entretien, Réglages… : Waze passe derrière au lieu de rester affiché, et revient dans son cadre sur l’Accueil']],
  ['7.45','Novembre 2026',['Rechercher l’affichage : « Tout rechercher » ouvre Waze lui-même avant chaque essai, tu n’as plus à l’ouvrir (il te cachait l’écran). Tu filmes, tu touches un seul bouton, et un pop-up te demande d’accepter si besoin. À la fin, un bandeau vert et un bip te disent quand arrêter de filmer']],
  ['7.44','Novembre 2026',['Rechercher l’affichage : bouton « Tout rechercher » qui enchaîne tout seul la recherche puis les essais pour cacher Waze ; tu filmes l’écran avec ton téléphone, rien à toucher. PDF envoyé par e-mail, ton adresse préremplie (gardée seulement sur l’autoradio). Applis du fabricant (QF, ZJ) lues en profondeur']],

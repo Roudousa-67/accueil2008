@@ -320,8 +320,8 @@
    if (tab !== lastTab746) {
     const was = lastTab746, n = window.Display743Native; lastTab746 = tab;
     const framed = typeof gbKey !== 'undefined' && gbKey && (typeof gbMode !== 'function' || gbMode() === 'cadre');
-    if (was === 'home' && tab !== 'home' && framed && n && typeof n.front === 'function' && store.get('hideNav746', true) !== false) {
-     n.front(); hidden746 = true; if (typeof dlogAdd === 'function') dlogAdd('cadre', 'page ' + tab + ' : Waze passé derrière');
+    if (was === 'home' && tab !== 'home' && framed && n && (typeof n.hideNav === 'function' || typeof n.front === 'function') && store.get('hideNav746', true) !== false) {
+     const r = typeof n.hideNav === 'function' ? n.hideNav() : n.front(); hidden746 = true; if (typeof dlogAdd === 'function') dlogAdd('cadre', 'page ' + tab + ' : Waze caché (' + r + ')');
     } else if (tab === 'home' && hidden746) {
      hidden746 = false;
      if (typeof gbLaunch === 'function') setTimeout(() => { if (tab === 'home') gbLaunch(true, 'retour sur l’accueil'); }, 350);

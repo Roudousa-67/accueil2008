@@ -144,7 +144,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("launch745('com.waze,com.google.android.apps.maps')");assert.equal(old.length,2,'liste d’applis : ancienne méthode');
  console.log('OK applis ouvertes en plein écran (Waze caché), repli sinon');
  // 7.46 : changer de page dans l'appli met Waze derrière ; revenir à l'accueil le remet dans son cadre.
- let fronts=0;w.Display743Native.front=()=>{fronts++;return '{"ok":true}';};
+ let fronts=0;w.Display743Native.hideNav=()=>{fronts++;return '{"ok":true}';};
  run("tab='home';render();gbKey='com.waze|1,2,3,4';store.set('gbMode','cadre');");
  run("tab='trips';render();");assert.equal(fronts,1,'Trajets : Waze passé derrière');assert(run('V746.hidden()'));
  run("tab='maint';render();");assert.equal(fronts,1,'pas deux fois');
