@@ -1,0 +1,6 @@
+{
+  "version": "7.48",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.48/Accueil2008GT_v7.48.apk",
+  "sha256": "",
+  "notes": "Waze caché sur Trajets, Entretien et Réglages, même s’il était déjà ouvert avant que l’appli démarre. En quittant l’Accueil, un bref écran noir (une demi-seconde) fait passer Waze derrière ; sur l’Accueil, Waze reprend son cadre.\nComprend les 7.38 à 7.47."
+}

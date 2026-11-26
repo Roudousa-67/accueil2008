@@ -162,6 +162,37 @@ public final class Display743 {
         } });
     }
 
+    static final String COMPANION = "fr.gtline.accueil2008.masque";
+
+    /** 7.49 : l'appli compagnon est-elle installée ? */
+    @JavascriptInterface
+    public boolean hasCompanion() {
+        try { activity.getPackageManager().getPackageInfo(COMPANION, 0); return true; } catch (Throwable t) { return false; }
+    }
+
+    /**
+     * 7.49 : cache Waze avec l'appli compagnon. Le système du fabricant (QF) range la fenêtre GPS quand une AUTRE
+     * appli passe devant en plein écran ; une page de l'accueil lui-même ne suffit pas (essais des 7.46 à 7.48).
+     * L'écran noir de la compagnon se ferme seul ; par sécurité l'accueil se remet ensuite devant.
+     */
+    @JavascriptInterface
+    public String hideViaCompanion() {
+        try {
+            Intent i = new Intent("fr.gtline.accueil2008.MASQUER").setPackage(COMPANION)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("ms", 350L);
+            if (i.resolveActivity(activity.getPackageManager()) == null)
+                return new JSONObject().put("ok", false).put("erreur", "appli compagnon absente").toString();
+            GpsDock.HiddenApi.exemptAll();
+            ActivityOptions o = ActivityOptions.makeBasic();
+            try { Method m = ActivityOptions.class.getMethod("setLaunchWindowingMode", int.class); m.invoke(o, 1); } catch (Throwable t) { /* mode par défaut */ }
+            startOnUi(i, o.toBundle());
+            new Thread(new Runnable() { @Override public void run() { sleep(750); bringSelfToFront(); } }, "Masque743").start();
+            return new JSONObject().put("ok", true).toString();
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
     /** 7.47 : cache Waze en ouvrant la page invisible SettingsVoiceActivity en plein écran (voir celle-ci). */
     @JavascriptInterface
     public String hideNav() {

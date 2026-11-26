@@ -319,9 +319,17 @@
   try {
    if (tab !== lastTab746) {
     const was = lastTab746, n = window.Display743Native; lastTab746 = tab;
-    const framed = typeof gbKey !== 'undefined' && gbKey && (typeof gbMode !== 'function' || gbMode() === 'cadre');
+    // 7.48 : Waze peut être resté ouvert dans le cadre d'une session précédente (appli redémarrée après une
+    // mise à jour) : on ne demande plus que l'appli l'ait ouvert elle-même, seulement le mode « cadre ».
+    const framed = typeof gbMode !== 'function' || gbMode() === 'cadre';
     if (was === 'home' && tab !== 'home' && framed && n && (typeof n.hideNav === 'function' || typeof n.front === 'function') && store.get('hideNav746', true) !== false) {
-     const r = typeof n.hideNav === 'function' ? n.hideNav() : n.front(); hidden746 = true; if (typeof dlogAdd === 'function') dlogAdd('cadre', 'page ' + tab + ' : Waze caché (' + r + ')');
+     // 7.49 : d'abord l'appli compagnon (seule méthode que le système du fabricant prend en compte).
+     let r = typeof n.hideViaCompanion === 'function' ? n.hideViaCompanion() : '{"ok":false}';
+     if (!/"ok":true/.test(r)) {
+      r += ' ; ' + (typeof n.hideNav === 'function' ? n.hideNav() : n.front());
+      if (!store.get('companionHint749', 0) || Date.now() - store.get('companionHint749', 0) > 86400000) { store.set('companionHint749', Date.now()); if (typeof toast === 'function') toast('Pour cacher Waze ici, installe l’appli compagnon : GPS et navigation → Cacher Waze hors de l’accueil.'); }
+     }
+     hidden746 = true; if (typeof dlogAdd === 'function') dlogAdd('cadre', 'page ' + tab + ' : Waze caché (' + r + ')');
     } else if (tab === 'home' && hidden746) {
      hidden746 = false;
      if (typeof gbLaunch === 'function') setTimeout(() => { if (tab === 'home') gbLaunch(true, 'retour sur l’accueil'); }, 350);
@@ -331,4 +339,21 @@
   return out;
  };
  window.V746 = { hidden: () => hidden746 };
+ // 7.49 : réglage et installation de l'appli compagnon.
+ const COMPANION_APK = 'https://github.com/Roudousa-67/accueil2008/releases/download/compagnon-1/Accueil2008Masque.apk';
+ function settingsCompanion(p) {
+  const n = window.Display743Native, has = !!(n && typeof n.hasCompanion === 'function' && n.hasCompanion()), on = store.get('hideNav746', true) !== false;
+  return setRow(p, 'Cacher Waze hors de l’accueil', 'Quand tu passes sur Trajets, Entretien ou Réglages, Waze est rangé (un bref écran noir) et revient dans son cadre sur l’Accueil.', chipBtn(p, 'v749:on:1', 'Activé', on) + chipBtn(p, 'v749:on:0', 'Désactivé', !on))
+   + setRow(p, 'Appli compagnon « Accueil 2008 Masque »', has ? 'Installée. Le système de l’autoradio ne range Waze que quand une autre appli passe devant : c’est son rôle. Pas d’icône, aucun droit.' : 'Pas encore installée. Elle est nécessaire : le système de l’autoradio ne range Waze que quand une autre appli passe devant. À installer une seule fois (comme une mise à jour). Pas d’icône, aucun droit.', has ? '<span style="font-weight:700;color:#2f9e44">✓ Installée</span>' : chipBtn(p, 'v749:install', 'Télécharger et installer', true));
+ }
+ const act749 = window.act;
+ window.act = function (a, long) {
+  if (typeof a === 'string' && a.startsWith('v749:')) {
+   if (a === 'v749:install') { if (typeof A !== 'undefined' && A && A.openUrl) A.openUrl(COMPANION_APK); else if (typeof toast === 'function') toast('Aperçu : téléchargement de l’appli compagnon'); return; }
+   if (a.startsWith('v749:on:')) store.set('hideNav746', a.endsWith(':1'));
+   render(); return;
+  }
+  return act749.apply(this, arguments);
+ };
+ window.V740 = Object.assign(window.V740 || {}, { settingsCompanion });
 })();
