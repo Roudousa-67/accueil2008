@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Jeux Accueil 2008</title>
+<style>
+ *{box-sizing:border-box}
+ body{margin:0;font:17px/1.45 -apple-system,system-ui,sans-serif;background:#0f1622;color:#eef2f7}
+ main{max-width:520px;margin:0 auto;padding:18px 14px 50px;display:flex;flex-direction:column;gap:14px}
+ h1{font-size:22px;margin:0}
+ .card{background:#1a2433;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+ .tabs{display:flex;gap:8px}.tabs button{flex:1}
+ button{font:inherit;border:0;border-radius:12px;padding:12px;background:#2a3648;color:#eef2f7;font-weight:700}
+ button.on{background:#e0312b;color:#fff}
+ .grid{display:flex;flex-wrap:wrap;gap:6px}.grid button{min-width:54px;padding:10px 4px}
+ .petit{font-size:13px;color:#9fb0c4}
+ input{font:inherit;padding:12px;border-radius:12px;border:0;width:100%}
+ .bar{height:10px;border-radius:5px;background:#2a3648;overflow:hidden}.bar i{display:block;height:100%;background:#e0312b}
+ [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+ <h1>Jeux de la 2008 🚗</h1>
+ <div class="card" id="nom"><label>Ton prénom<input id="n" maxlength="20" placeholder="Prénom"></label><button id="go" class="on">Jouer</button></div>
+ <div id="jeux" hidden>
+  <div class="tabs"><button id="t1" class="on">Plaques</button><button id="t2">Devine la ville</button></div>
+  <div class="card" id="plaques"></div>
+  <div class="card" id="ville" hidden></div>
+  <p class="petit" id="etat"></p>
+ </div>
+</main>
+<script>
+(() => {
+ 'use strict';
+ // Départements : [numéro, nom, région].
+ const DEPS = [['01','Ain','ARA'],['02','Aisne','HDF'],['03','Allier','ARA'],['04','Alpes-de-Haute-Provence','PACA'],['05','Hautes-Alpes','PACA'],['06','Alpes-Maritimes','PACA'],['07','Ardèche','ARA'],['08','Ardennes','GE'],['09','Ariège','OCC'],['10','Aube','GE'],['11','Aude','OCC'],['12','Aveyron','OCC'],['13','Bouches-du-Rhône','PACA'],['14','Calvados','NOR'],['15','Cantal','ARA'],['16','Charente','NA'],['17','Charente-Maritime','NA'],['18','Cher','CVL'],['19','Corrèze','NA'],['2A','Corse-du-Sud','COR'],['2B','Haute-Corse','COR'],['21','Côte-d’Or','BFC'],['22','Côtes-d’Armor','BRE'],['23','Creuse','NA'],['24','Dordogne','NA'],['25','Doubs','BFC'],['26','Drôme','ARA'],['27','Eure','NOR'],['28','Eure-et-Loir','CVL'],['29','Finistère','BRE'],['30','Gard','OCC'],['31','Haute-Garonne','OCC'],['32','Gers','OCC'],['33','Gironde','NA'],['34','Hérault','OCC'],['35','Ille-et-Vilaine','BRE'],['36','Indre','CVL'],['37','Indre-et-Loire','CVL'],['38','Isère','ARA'],['39','Jura','BFC'],['40','Landes','NA'],['41','Loir-et-Cher','CVL'],['42','Loire','ARA'],['43','Haute-Loire','ARA'],['44','Loire-Atlantique','PDL'],['45','Loiret','CVL'],['46','Lot','OCC'],['47','Lot-et-Garonne','NA'],['48','Lozère','OCC'],['49','Maine-et-Loire','PDL'],['50','Manche','NOR'],['51','Marne','GE'],['52','Haute-Marne','GE'],['53','Mayenne','PDL'],['54','Meurthe-et-Moselle','GE'],['55','Meuse','GE'],['56','Morbihan','BRE'],['57','Moselle','GE'],['58','Nièvre','BFC'],['59','Nord','HDF'],['60','Oise','HDF'],['61','Orne','NOR'],['62','Pas-de-Calais','HDF'],['63','Puy-de-Dôme','ARA'],['64','Pyrénées-Atlantiques','NA'],['65','Hautes-Pyrénées','OCC'],['66','Pyrénées-Orientales','OCC'],['67','Bas-Rhin','GE'],['68','Haut-Rhin','GE'],['69','Rhône','ARA'],['70','Haute-Saône','BFC'],['71','Saône-et-Loire','BFC'],['72','Sarthe','PDL'],['73','Savoie','ARA'],['74','Haute-Savoie','ARA'],['75','Paris','IDF'],['76','Seine-Maritime','NOR'],['77','Seine-et-Marne','IDF'],['78','Yvelines','IDF'],['79','Deux-Sèvres','NA'],['80','Somme','HDF'],['81','Tarn','OCC'],['82','Tarn-et-Garonne','OCC'],['83','Var','PACA'],['84','Vaucluse','PACA'],['85','Vendée','PDL'],['86','Vienne','NA'],['87','Haute-Vienne','NA'],['88','Vosges','GE'],['89','Yonne','BFC'],['90','Territoire de Belfort','BFC'],['91','Essonne','IDF'],['92','Hauts-de-Seine','IDF'],['93','Seine-Saint-Denis','IDF'],['94','Val-de-Marne','IDF'],['95','Val-d’Oise','IDF'],['971','Guadeloupe','OM'],['972','Martinique','OM'],['973','Guyane','OM'],['974','La Réunion','OM'],['976','Mayotte','OM']];
+ const REGIONS = { GE: 'Grand Est', HDF: 'Hauts-de-France', IDF: 'Île-de-France', NOR: 'Normandie', BRE: 'Bretagne', PDL: 'Pays de la Loire', CVL: 'Centre-Val de Loire', BFC: 'Bourgogne-Franche-Comté', ARA: 'Auvergne-Rhône-Alpes', NA: 'Nouvelle-Aquitaine', OCC: 'Occitanie', PACA: 'Provence-Alpes-Côte d’Azur', COR: 'Corse', OM: 'Outre-mer' };
+ // Villes d'Europe : [ville, pays, indice 1, indice 2, indice 3].
+ const CITIES = [['Paris','France','Capitale au bord de la Seine','Une tour de fer de 330 m','Le Louvre'],['Rome','Italie','Ville aux sept collines','Le Colisée','Fontaine de Trevi'],['Londres','Royaume-Uni','Traversée par la Tamise','Big Ben','Bus rouges à deux étages'],['Berlin','Allemagne','Un mur la coupait en deux','Porte de Brandebourg','Capitale fédérale'],['Madrid','Espagne','Au centre du pays','Musée du Prado','Le Real joue au Bernabéu'],['Barcelone','Espagne','Au bord de la Méditerranée','La Sagrada Família','Gaudí'],['Amsterdam','Pays-Bas','Des canaux partout','Vélos par milliers','Maison d’Anne Frank'],['Bruxelles','Belgique','Siège de l’Union européenne','L’Atomium','Manneken-Pis'],['Lisbonne','Portugal','Sur le Tage','Tramway jaune n° 28','Pastéis de nata'],['Vienne','Autriche','Sur le Danube','Valses et Mozart','Palais de Schönbrunn'],['Prague','Tchéquie','La ville aux cent clochers','Pont Charles','Horloge astronomique'],['Venise','Italie','Pas de voitures','Gondoles','Place Saint-Marc'],['Athènes','Grèce','Berceau de la démocratie','L’Acropole','Le Parthénon'],['Dublin','Irlande','Sur la Liffey','Trèfle vert','Une bière noire célèbre'],['Copenhague','Danemark','La Petite Sirène','Tivoli','Capitale nordique des vélos'],['Stockholm','Suède','Bâtie sur 14 îles','Remise des prix Nobel','Musée Vasa'],['Budapest','Hongrie','Deux villes réunies par le Danube','Parlement au bord de l’eau','Bains thermaux'],['Strasbourg','France','Siège du Parlement européen','Cathédrale de grès rose','Marché de Noël'],['Marseille','France','Le Vieux-Port','Notre-Dame-de-la-Garde','La bouillabaisse'],['Lyon','France','Rhône et Saône','Fête des Lumières','Bouchons et quenelles'],['Bordeaux','France','Port de la Lune','Le miroir d’eau','Capitale du vin'],['Nice','France','Promenade des Anglais','Baie des Anges','Carnaval'],['Genève','Suisse','Au bout d’un grand lac','Jet d’eau de 140 m','Siège de nombreuses organisations'],['Munich','Allemagne','Capitale de la Bavière','Oktoberfest','BMW'],['Milan','Italie','Capitale de la mode','Le Duomo','La Scala'],['Florence','Italie','Berceau de la Renaissance','Le Ponte Vecchio','Le David de Michel-Ange'],['Édimbourg','Royaume-Uni','Capitale de l’Écosse','Château sur un volcan','Festival d’été'],['Cracovie','Pologne','Ancienne capitale royale','Château du Wawel','Grande place du marché'],['Séville','Espagne','Flamenco','La Giralda','Orangers dans les rues'],['Luxembourg','Luxembourg','Capitale d’un grand-duché','Casemates du Bock','Une des plus riches d’Europe']];
+ const topic = (location.hash.match(/t=(a08j-[0-9a-f]{8,40})/) || [])[1] || '';
+ const $ = id => document.getElementById(id), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+ const ls = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }, save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+ let name = ls('j751n', ''), found = ls('j751f', []), city = ls('j751c', 0), cur = null;
+ $('n').value = name;
+ let timer = 0;
+ function send() { clearTimeout(timer); timer = setTimeout(() => { if (!topic) { $('etat').textContent = 'QR incomplet : rescanne le QR de l’autoradio.'; return; } fetch('https://ntfy.sh/' + topic, { method: 'POST', body: JSON.stringify({ name, found, city }) }).then(r => { $('etat').textContent = r.ok ? 'Score envoyé à l’autoradio ✓' : 'Envoi impossible, on réessaie au prochain point.'; }).catch(() => { $('etat').textContent = 'Pas de réseau : le score partira au prochain point.'; }); }, 800); }
+ function plaques() {
+  const n = found.length;
+  $('plaques').innerHTML = `<b>${n} / ${DEPS.length} départements</b><div class="bar"><i style="width:${Math.round(n / DEPS.length * 100)}%"></i></div><div class="petit">Touche le numéro que tu vois sur une plaque.</div>` + Object.keys(REGIONS).map(g => `<div class="petit">${REGIONS[g]}</div><div class="grid">${DEPS.filter(d => d[2] === g).map(d => `<button data-d="${d[0]}" class="${found.includes(d[0]) ? 'on' : ''}" title="${esc(d[1])}">${d[0]}</button>`).join('')}</div>`).join('');
+ }
+ $('plaques').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (!b) return; const k = b.dataset.d; found = found.includes(k) ? found.filter(x => x !== k) : found.concat(k); save('j751f', found); plaques(); send(); });
+ function nouvelle() { const i = Math.floor(Math.random() * CITIES.length), o = CITIES.map((c, k) => k).filter(k => k !== i).sort(() => Math.random() - .5).slice(0, 3); cur = { i, clue: 1, ch: [i, ...o].sort(() => Math.random() - .5), pick: null }; ville(); }
+ function ville() {
+  const C = CITIES[cur.i], done = cur.pick != null;
+  $('ville').innerHTML = `<b>Score : ${city}</b>` + [C[2], C[3], C[4]].slice(0, cur.clue).map((t, k) => `<div>Indice ${k + 1} : <b>${esc(t)}</b></div>`).join('') + (!done && cur.clue < 3 ? '<button id="ind">Un autre indice</button>' : '') + `<div class="grid">${cur.ch.map(k => `<button data-v="${k}" style="flex:1 1 45%;${done ? (k === cur.i ? 'background:#2f9e44' : k === cur.pick ? 'background:#c62828' : '') : ''}">${esc(CITIES[k][0])}</button>`).join('')}</div>` + (done ? `<div>${cur.pick === cur.i ? '✓ Bravo !' : '✗ C’était ' + esc(C[0])}</div><button id="suiv" class="on">Ville suivante</button>` : '');
+ }
+ $('ville').addEventListener('click', e => { if (e.target.id === 'ind') { cur.clue++; ville(); return; } if (e.target.id === 'suiv') { nouvelle(); return; } const b = e.target.closest('[data-v]'); if (!b || cur.pick != null) return; cur.pick = +b.dataset.v; if (cur.pick === cur.i) { city += 4 - cur.clue; save('j751c', city); send(); } ville(); });
+ function onglet(v) { $('t1').classList.toggle('on', !v); $('t2').classList.toggle('on', !!v); $('plaques').hidden = !!v; $('ville').hidden = !v; if (v && !cur) nouvelle(); }
+ $('t1').onclick = () => onglet(0); $('t2').onclick = () => onglet(1);
+ $('go').onclick = () => { name = $('n').value.trim().slice(0, 20) || 'Passager'; save('j751n', name); $('nom').hidden = true; $('jeux').hidden = false; plaques(); send(); };
+ if (!topic) $('etat').textContent = 'Ouvre cette page en scannant le QR de l’autoradio (onglet Jeux).';
+})();
+</script>
+<p style="display:none">Accueil 2008</p>
+</body>
+</html>

@@ -73,7 +73,7 @@ jobs:
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.51 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.51" --notes "Version 7.51 : désinstaller par appui long, 18 fonds d’espace animés, ciel réel, fond qui suit la journée, Voie lactée dans le décor. Essais sur autoradio à effectuer."
+          gh release create v7.51 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.51" --notes "Version 7.51 : tout ce qui a été choisi dans l’Atelier (stats, alertes de la route, décor, onglet Jeux, musique, entretien, réglages en 5 rubriques, fonds d’espace, désinstaller par appui long). Essais sur autoradio à effectuer."
           mkdir -p "$RUNNER_TEMP/check"
           gh release download v7.51 --pattern Accueil2008GT_v7.51.apk --dir "$RUNNER_TEMP/check"
           cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.51.apk"

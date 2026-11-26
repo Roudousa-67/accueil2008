@@ -27,9 +27,13 @@
   const now = Date.now();
   return Alerts.list.filter(a => !(Alerts.dismissed[a.key] > now)).sort((a, b) => b.priority - a.priority)[0] || null;
  }
+ // 7.51 : alertes regroupées : une seule pastille « 3 alertes : ZFE · bouchon · météo ».
+ const LBL751 = { meteo: 'météo', trafic: 'bouchon', zfe751: 'ZFE', tunnel751: 'tunnel', aire751: 'aire', sortie751: 'sortie' };
+ const grouped = () => (!window.Try750 || Try750.on('group751')) && store.get('on_group751', true) !== false;
+ function active() { const now = Date.now(); return Alerts.list.filter(a => !(Alerts.dismissed[a.key] > now)).sort((a, b) => b.priority - a.priority); }
  function dismiss() {
-  const a = current(); if (!a) return;
-  Alerts.dismissed[a.key] = Date.now() + (a.hours || 3) * 3600000; saveDismissed(); closeDetail(); paintBanner();
+  const all = grouped() ? active() : [current()].filter(Boolean); if (!all.length) return;
+  for (const a of all) Alerts.dismissed[a.key] = Date.now() + (a.hours || 3) * 3600000; saveDismissed(); closeDetail(); paintBanner();
  }
  function paintBanner() {
   const a = current();
@@ -38,10 +42,11 @@
    let el = box.querySelector('.alert740');
    if (!a) { if (el) el.remove(); return; }
    if (!el) { el = document.createElement('div'); el.className = 'alert740'; box.appendChild(el); }
-   const sig = a.key + '|' + a.text;
+   const all = grouped() ? active() : [a], text = all.length > 1 ? `${all.length} alertes : ${all.map(x => LBL751[x.source] || x.title || x.source).join(' · ')}` : a.text;
+   const sig = all.map(x => x.key + '|' + x.text).join('#');
    if (el.dataset.sig !== sig) {
     el.dataset.sig = sig;
-    el.innerHTML = `<button class="alert740-main" data-act="alert740:open"><span class="alert740-ic" style="background:${a.color}">${a.icon}</span><span class="alert740-t">${esc(a.text)}</span></button><button class="alert740-x" data-act="alert740:close" aria-label="Enlever le message">×</button>`;
+    el.innerHTML = `<button class="alert740-main" data-act="alert740:open"><span class="alert740-ic" style="background:${a.color}">${all.length > 1 ? all.length : a.icon}</span><span class="alert740-t">${esc(text)}</span></button><button class="alert740-x" data-act="alert740:close" aria-label="Enlever le message">×</button>`;
    }
   });
  }
@@ -50,7 +55,7 @@
  function openDetail() {
   const a = current(); if (!a) return; closeDetail();
   detail = document.createElement('div'); detail.className = 'alert740-pop'; detail.setAttribute('role', 'dialog');
-  detail.innerHTML = `<div class="alert740-card"><div class="alert740-head"><b>${esc(a.title || 'Alerte')}</b><button data-act="alert740:hide">Fermer</button></div>${a.detail ? a.detail() : `<p>${esc(a.text)}</p>`}<div class="alert740-foot"><button data-act="alert740:close">Enlever ce message</button></div></div>`;
+  detail.innerHTML = `<div class="alert740-card"><div class="alert740-head"><b>${esc(a.title || 'Alerte')}</b><button data-act="alert740:hide">Fermer</button></div>${(grouped() ? active() : [a]).map((x, i, l) => (l.length > 1 ? `<h3 style="margin:${i ? 16 : 0}px 0 6px;font-size:17px">${x.icon} ${esc(x.title || x.text)}</h3>` : '') + (x.detail ? x.detail() : `<p>${esc(x.text)}</p>`)).join('')}<div class="alert740-foot"><button data-act="alert740:close">Enlever ce message</button></div></div>`;
   ($('screen') || document.body).appendChild(detail);
  }
 
@@ -295,7 +300,7 @@
  .alert740-card p{margin:0}.alert740-foot{display:flex;justify-content:flex-end}
  .toll740{display:flex;flex-direction:column;gap:2px;margin-top:8px;padding:8px 10px;border-radius:10px;background:#ffffff14}.toll740 small{opacity:.75}`;
  document.head.appendChild(css);
- window.V740 = { Alerts, setAlert, current, dismiss, paintBanner, openDetail, closeDetail, W, wxRefresh, evaluate, parse, kindOf, project, T, trafficCheck, readFlow, addTrafficLayer, tollStep, tollKm, tollHTML, tollRate, settingsWeather, settingsTraffic, settingsToll, settingsPanels };
+ window.V740 = { Alerts, setAlert, current, active, dismiss, paintBanner, openDetail, closeDetail, W, wxRefresh, evaluate, parse, kindOf, project, T, trafficCheck, readFlow, addTrafficLayer, tollStep, tollKm, tollHTML, tollRate, settingsWeather, settingsTraffic, settingsToll, settingsPanels };
  // 7.43 : zones de danger. En Allemagne, avertir des radars en roulant est interdit (§ 23 Abs. 1c StVO) :
  // les zones issues des radars sont ignorées dès que la position est en Allemagne. Quand le panneau
  // du haut de l'image est affiché, la pastille rouge sous la vitesse ne fait plus doublon.

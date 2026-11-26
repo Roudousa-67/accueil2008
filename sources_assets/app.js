@@ -859,6 +859,7 @@ function render() {
   if (tab === 'trips') html = pageTrips(p);
   else if (tab === 'service') html = pageService(p);
   else if (tab === 'eco') html = pageEco(p);
+  else if (tab === 'games' && window.pageGames) html = pageGames(p);   // 7.51 : onglet Jeux
   else if (tab === 'themes') html = moving() ? lockedPage(p) : pageThemes(p);
   else if (tab === 'calib') html = pageCalib(p);
   else {

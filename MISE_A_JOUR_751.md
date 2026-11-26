@@ -8,3 +8,11 @@ Toutes les applications : appui long sur une appli → menu Désinstaller / Ajou
 
 ## Ménage
 Page « Rechercher l’affichage » retirée des réglages (Waze se cache bien avec le compagnon).
+
+## Tout l’Atelier en une version
+- `stats751.js` : Trajets → Mes stats (bouchons ≥ 90 s sous 15 km/h en avançant, carte de chaleur et exploration par cases de ~160 m depuis les tracés, frais kilométriques au barème officiel des voitures avec PDF, classement des stations depuis les pleins) ; Éco-conduite : classement de la famille du mois (`driver733` ajouté aux trajets).
+- `route751.js` : ZFE (`boundary=low_emission_zone`, vignette Crit’Air réglable), tunnel devant (feux), aires de repos et services, commerce à la prochaine sortie (boulangerie, McDo, pharmacie, supermarché), monuments à l’horizon, trafic TomTom dans le décor, panneau de limitation planté, panneau d’entrée de département. `decors726.js` expose `Decor751` (panneaux, horizon, densité). `v740.js` : alertes regroupées.
+- `games751.js` : onglet Jeux (plaques, devine la ville, blind test, téléphones des passagers via `docs/jeux.html` + ntfy.sh), pochette en fond, égaliseur, logos des radios (radio-browser.info), mode concert à l’arrêt.
+- `garage751.js` : Entretien → Pneus et Factures ; Pleins → Lire un ticket (tesseract.js chargé à la demande).
+- `settings751.js` : réglages en 5 rubriques (anciens liens redirigés), taille du widget route, fluidité du décor (`Fluid751` dans la boucle du décor), nettoyage et sauvegarde hebdomadaires (natif `saveText` / `shareText`).
+- Tout est déclaré dans « Nouveautés à tester ». Tests : `tests/v751b.cjs`.
