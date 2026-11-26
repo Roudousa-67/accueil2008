@@ -91,6 +91,7 @@
    ['Rapport de diagnostic', join(P('Système', 'Rapport de diagnostic'), p => `<details style="margin-top:16px"><summary style="cursor:pointer;color:${p.mut}">Avancé : performances et écran d’accueil du poste</summary><div style="margin-top:10px">${run(P('Système', 'Diagnostic · Performances'), p)}${run(P('Système', 'Écran d\'accueil'), p)}</div></details>`)],
    ['Nouveautés à tester', P('Système', 'Nouveautés à tester')],
    ['Rechercher l’affichage', P('Système', 'Rechercher l’affichage')],
+   ['Analyser le lanceur d’origine', P('Système', 'Analyser le lanceur d’origine')],
    ['Mises à jour', join(P('Mises à jour', 'Version'), clean(P('Mises à jour', 'Téléchargement et vérification')))],
    ['Nouveautés', p => window.V750 ? V750.changelog(p) : run(P('Mises à jour', 'Nouveautés et historique'), p)],
    ['Stockage et nettoyage', clean(P('Mises à jour', 'Stockage et nettoyage'))],

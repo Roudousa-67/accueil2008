@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.50';
+const APP_VERSION = '7.51';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.51','Novembre 2026',['Analyser le lanceur d’origine (Système) : le code de l’appli Thème part par e-mail pour préparer la séparation en deux applis (Waze caché sur les autres pages)']],
  ['7.50','Novembre 2026',['Nouveautés à tester (Système) : chaque nouveauté s’active, se coupe ou se marque « Je n’aime pas » pour être supprimée','Mise à jour téléchargée en roulant, installation proposée au prochain arrêt','Ménage : barre du bas sans doublons, plus de pastille rouge, plus de bouton Dicter, plus de choix Wi-Fi pour l’envoi, ancien cadre encastré abandonné, pages techniques rangées dans le rapport, nouveautés : 3 dernières versions']],
  ['7.49','Novembre 2026',['Waze rangé sur Trajets, Entretien, Réglages grâce à l’appli compagnon « Accueil 2008 Masque » (à installer une fois : GPS et navigation → Cacher Waze hors de l’accueil) : le système de l’autoradio ne range Waze que quand une autre appli passe devant']],
  ['7.48','Novembre 2026',['Waze caché sur Trajets, Entretien, Réglages, même s’il était déjà ouvert avant le démarrage de l’appli ; la page qui le fait passer derrière est maintenant opaque (un bref écran noir)']],

@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 7.43 : « Rechercher l'affichage ». Fouille l'autoradio pour comprendre comment le lanceur
@@ -486,6 +487,147 @@ public final class Display743 {
     }
 
     /** L'APK, et le code précompilé à côté (oat/<arch>/*.odex, *.vdex) des applis système. */
+    // ---------- 7.51 : extraire le code du lanceur d'origine (« Thème ») pour l'analyser ----------
+    private static final Pattern THEME = Pattern.compile("(?i)th[eè]me|launcher|lanceur|bureau|desktop|home|qfos|skin|ui\\.");
+
+    @JavascriptInterface
+    public String themeCandidates() {
+        JSONArray out = new JSONArray();
+        try {
+            PackageManager pm = activity.getPackageManager();
+            LinkedHashSet<String> homes = new LinkedHashSet<>();
+            Intent h = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+            for (ResolveInfo r : pm.queryIntentActivities(h, PackageManager.MATCH_DISABLED_COMPONENTS)) homes.add(r.activityInfo.packageName);
+            for (ApplicationInfo ai : pm.getInstalledApplications(0)) {
+                if (ai.packageName.equals(activity.getPackageName())) continue;
+                String label = String.valueOf(pm.getApplicationLabel(ai));
+                boolean home = homes.contains(ai.packageName), named = THEME.matcher(label).find() || THEME.matcher(ai.packageName).find();
+                boolean vendor = VENDOR.matcher(ai.packageName).find();
+                if (!home && !(named && (vendor || system(ai) || label.toLowerCase().contains("th")))) continue;
+                if (ai.packageName.startsWith("com.android.theme.icon_pack") || ai.packageName.startsWith("com.android.internal.systemui")) continue;
+                long size = 0; for (File f : codeFiles(ai.sourceDir)) size += f.length();
+                String ver = ""; try { ver = pm.getPackageInfo(ai.packageName, 0).versionName; } catch (Throwable t) { /* ignore */ }
+                out.put(new JSONObject().put("pkg", ai.packageName).put("label", label).put("version", ver).put("home", home)
+                    .put("theme", label.matches("(?i).*th[eè]me.*") || ai.packageName.toLowerCase().contains("theme"))
+                    .put("system", system(ai)).put("mo", Math.round(size / 104857.6) / 10.0));
+            }
+        } catch (Throwable t) { return "{\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}"; }
+        return out.toString();
+    }
+
+    /** Range dans un .zip, pour chaque appli : le manifeste, le code (classes*.dex, .odex/.vdex) et la fiche
+     *  (activités, services, récepteurs, permissions). Les images et sons sont laissés de côté. */
+    @JavascriptInterface
+    public String exportCode(String csv, String email) {
+        String where = "";
+        try {
+            PackageManager pm = activity.getPackageManager();
+            String stamp = new java.text.SimpleDateFormat("yyyyMMdd-HHmm", java.util.Locale.FRANCE).format(new java.util.Date());
+            String file = "code-launcher-" + stamp + ".zip";
+            Uri uri; OutputStream os;
+            if (Build.VERSION.SDK_INT >= 29) {
+                ContentValues v = new ContentValues();
+                v.put(MediaStore.MediaColumns.DISPLAY_NAME, file);
+                v.put(MediaStore.MediaColumns.MIME_TYPE, "application/zip");
+                v.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Accueil2008");
+                uri = activity.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                if (uri == null) throw new IOException("Téléchargements inaccessibles");
+                os = activity.getContentResolver().openOutputStream(uri);
+                where = "Téléchargements/Accueil2008/" + file;
+            } else {
+                File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Accueil2008");
+                dir.mkdirs(); File f = new File(dir, file);
+                os = new FileOutputStream(f);
+                StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
+                uri = Uri.fromFile(f); where = f.getPath();
+            }
+            if (os == null) throw new IOException("écriture impossible");
+            final long[] written = { 0 };
+            final OutputStream base = os;
+            OutputStream counting = new OutputStream() {
+                @Override public void write(int b) throws IOException { base.write(b); written[0]++; }
+                @Override public void write(byte[] b, int o, int l) throws IOException { base.write(b, o, l); written[0] += l; }
+                @Override public void flush() throws IOException { base.flush(); }
+                @Override public void close() throws IOException { base.close(); }
+            };
+            final long LIMIT = 23L * 1024 * 1024;
+            StringBuilder skipped = new StringBuilder();
+            ZipOutputStream zip = new ZipOutputStream(counting);
+            try {
+                for (String pkg : String.valueOf(csv).split(",")) {
+                    pkg = pkg.trim(); if (pkg.isEmpty()) continue;
+                    ApplicationInfo ai;
+                    try { ai = pm.getApplicationInfo(pkg, 0); } catch (Throwable t) { skipped.append(pkg).append(" : introuvable\n"); continue; }
+                    putText(zip, pkg + "/fiche.txt", fiche(pm, pkg));
+                    try {
+                        ZipFile apk = new ZipFile(ai.sourceDir);
+                        try {
+                            Enumeration<? extends ZipEntry> en = apk.entries();
+                            while (en.hasMoreElements()) {
+                                ZipEntry e = en.nextElement(); String n = e.getName();
+                                boolean keep = n.equals("AndroidManifest.xml") || (n.startsWith("classes") && n.endsWith(".dex")) || (n.startsWith("assets/") && e.getSize() < 300_000 && !n.matches("(?i).*\\.(png|jpe?g|webp|gif|mp3|ogg|wav|mp4|ttf|otf)$")) || n.startsWith("res/xml/");
+                                if (!keep) continue;
+                                if (written[0] + e.getCompressedSize() > LIMIT) { skipped.append(pkg).append("/").append(n).append(" : trop gros pour l'e-mail\n"); continue; }
+                                InputStream in = apk.getInputStream(e);
+                                try { copy(zip, pkg + "/apk/" + n, in); } finally { in.close(); }
+                            }
+                        } finally { apk.close(); }
+                    } catch (Throwable t) { skipped.append(pkg).append(" : apk illisible (").append(t).append(")\n"); }
+                    for (File f : codeFiles(ai.sourceDir)) {
+                        if (f.getPath().equals(ai.sourceDir)) continue;
+                        if (written[0] + f.length() / 2 > LIMIT) { skipped.append(f.getPath()).append(" : trop gros pour l'e-mail\n"); continue; }
+                        try { InputStream in = new FileInputStream(f); try { copy(zip, pkg + "/oat/" + f.getParentFile().getName() + "/" + f.getName(), in); } finally { in.close(); } }
+                        catch (Throwable t) { skipped.append(f.getPath()).append(" : illisible\n"); }
+                    }
+                }
+                putText(zip, "LISEZMOI.txt", "Code extrait par Accueil 2008 " + stamp + "\nLaissés de côté :\n" + (skipped.length() > 0 ? skipped : "rien\n"));
+            } finally { zip.close(); }
+            Intent send = new Intent(Intent.ACTION_SEND).setType("application/zip")
+                .putExtra(Intent.EXTRA_STREAM, uri).putExtra(Intent.EXTRA_SUBJECT, "Accueil 2008 - code du lanceur d'origine")
+                .putExtra(Intent.EXTRA_TEXT, "Code du lanceur d'origine (Accueil 2008), en pièce jointe.")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (email != null && email.contains("@")) send.putExtra(Intent.EXTRA_EMAIL, new String[]{ email });
+            JSONObject r = new JSONObject().put("fichier", where).put("mo", Math.round(written[0] / 104857.6) / 10.0).put("laisses", skipped.toString());
+            if (send.resolveActivity(pm) == null) return r.put("ok", false).put("erreur", "aucune appli d'e-mail sur l'autoradio").toString();
+            Intent chooser = Intent.createChooser(send, "Envoyer le code");
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivity(chooser);
+            return r.put("ok", true).toString();
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"fichier\":" + JSONObject.quote(where) + ",\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
+    private static void copy(ZipOutputStream zip, String name, InputStream in) throws IOException {
+        zip.putNextEntry(new ZipEntry(name));
+        byte[] buf = new byte[65536]; int n;
+        while ((n = in.read(buf)) > 0) zip.write(buf, 0, n);
+        zip.closeEntry();
+    }
+
+    private static void putText(ZipOutputStream zip, String name, String text) throws IOException {
+        zip.putNextEntry(new ZipEntry(name)); zip.write(text.getBytes("UTF-8")); zip.closeEntry();
+    }
+
+    private static String fiche(PackageManager pm, String pkg) {
+        StringBuilder b = new StringBuilder();
+        try {
+            int fl = PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_RECEIVERS | PackageManager.GET_PROVIDERS
+                | PackageManager.GET_PERMISSIONS | PackageManager.GET_META_DATA | PackageManager.MATCH_DISABLED_COMPONENTS;
+            PackageInfo pi = pm.getPackageInfo(pkg, fl);
+            b.append(pkg).append(' ').append(pi.versionName).append(" (").append(pi.versionCode).append(")\nsource : ").append(pi.applicationInfo.sourceDir)
+             .append("\nuid partagé : ").append(pi.sharedUserId).append("\nsystème : ").append(system(pi.applicationInfo)).append(" · privilégiée : ").append(privileged(pi.applicationInfo)).append('\n');
+            if (pi.requestedPermissions != null) { b.append("\nPermissions demandées :\n"); for (String x : pi.requestedPermissions) b.append("  ").append(x).append('\n'); }
+            if (pi.activities != null) { b.append("\nActivités :\n"); for (ActivityInfo a : pi.activities) b.append("  ").append(a.name).append(a.exported ? " (exportée)" : "").append(" launchMode=").append(a.launchMode).append(" affinité=").append(a.taskAffinity).append('\n'); }
+            if (pi.services != null) { b.append("\nServices :\n"); for (android.content.pm.ServiceInfo x : pi.services) b.append("  ").append(x.name).append(x.exported ? " (exporté)" : "").append(x.permission != null ? " perm=" + x.permission : "").append('\n'); }
+            if (pi.receivers != null) { b.append("\nRécepteurs :\n"); for (ActivityInfo x : pi.receivers) b.append("  ").append(x.name).append(x.exported ? " (exporté)" : "").append('\n'); }
+            if (pi.providers != null) { b.append("\nFournisseurs :\n"); for (android.content.pm.ProviderInfo x : pi.providers) b.append("  ").append(x.name).append(" autorité=").append(x.authority).append(x.exported ? " (exporté)" : "").append('\n'); }
+            Bundle md = pi.applicationInfo.metaData;
+            if (md != null) { b.append("\nMétadonnées :\n"); for (String k : md.keySet()) b.append("  ").append(k).append(" = ").append(md.get(k)).append('\n'); }
+        } catch (Throwable t) { b.append("erreur : ").append(t); }
+        return b.toString();
+    }
+
     private static List<File> codeFiles(String apk) {
         List<File> out = new ArrayList<>();
         if (apk == null) return out;
