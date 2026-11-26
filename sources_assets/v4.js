@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.53';
+const APP_VERSION = '7.54';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.54','Novembre 2026',['Barre d’applis du bas : taille « Barre » de nouveau possible (Modifier l’accueil), remise à sa place si elle avait disparu, bouton ✎ pour changer les applis directement depuis l’accueil']],
  ['7.53','Novembre 2026',['Toutes les applications : appui long sur une appli → Désinstaller','Revenir comme avant : « Tout couper » dans Nouveautés à tester, mode secours (relance l’appli 3 fois en 3 minutes) et coupure à distance']],
  ['7.52','Novembre 2026',['Retour à la 7.50 : la 7.51 bloquait l’écran. Les nouveautés reviendront une par une, testées à chaque fois.']],
  ['7.50','Novembre 2026',['Nouveautés à tester (Système) : chaque nouveauté s’active, se coupe ou se marque « Je n’aime pas » pour être supprimée','Mise à jour téléchargée en roulant, installation proposée au prochain arrêt','Ménage : barre du bas sans doublons, plus de pastille rouge, plus de bouton Dicter, plus de choix Wi-Fi pour l’envoi, ancien cadre encastré abandonné, pages techniques rangées dans le rapport, nouveautés : 3 dernières versions']],
