@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "test": "node regression.cjs && node decor721.cjs && node native721.cjs && node address722.cjs && node features723.cjs && node widget-decor.cjs && node perf725.cjs && node model725.cjs && node decors726.cjs && node widget728.cjs && node audit729.cjs && node accueil730.cjs && node route731.cjs && node floating732.cjs && node journeys733.cjs && node motion734.cjs && node fluidite736.cjs && node decor737.cjs && node v738.cjs && node meteo738.cjs && node v739.cjs && node v740.cjs && node v741.cjs && node v742.cjs && node v743.cjs && node v750.cjs && node native738.cjs && node native743.cjs"
+    "test": "node regression.cjs && node decor721.cjs && node native721.cjs && node address722.cjs && node features723.cjs && node widget-decor.cjs && node perf725.cjs && node model725.cjs && node decors726.cjs && node widget728.cjs && node audit729.cjs && node accueil730.cjs && node route731.cjs && node floating732.cjs && node journeys733.cjs && node motion734.cjs && node fluidite736.cjs && node decor737.cjs && node v738.cjs && node meteo738.cjs && node v739.cjs && node v740.cjs && node v741.cjs && node v742.cjs && node v743.cjs && node v750.cjs && node v751.cjs && node v751b.cjs && node native738.cjs && node native743.cjs"
   },
   "dependencies": {
     "jsdom": "31.0.1",

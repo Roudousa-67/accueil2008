@@ -486,6 +486,77 @@ public final class Display743 {
     }
 
     /** L'APK, et le code précompilé à côté (oat/<arch>/*.odex, *.vdex) des applis système. */
+    // ---------- 7.51 : fichiers texte (sauvegarde) dans Téléchargements/Accueil2008, envoi par e-mail ----------
+    private Object[] writeDownload(String name, String mime, byte[] data) throws IOException {
+        String file = String.valueOf(name).replaceAll("[^A-Za-z0-9._-]", "_");
+        if (Build.VERSION.SDK_INT >= 29) {
+            ContentValues v = new ContentValues();
+            v.put(MediaStore.MediaColumns.DISPLAY_NAME, file);
+            v.put(MediaStore.MediaColumns.MIME_TYPE, mime);
+            v.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Accueil2008");
+            Uri uri = activity.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+            if (uri == null) throw new IOException("Téléchargements inaccessibles");
+            OutputStream os = activity.getContentResolver().openOutputStream(uri);
+            if (os == null) throw new IOException("écriture impossible");
+            try { os.write(data); } finally { os.close(); }
+            return new Object[]{ uri, "Téléchargements/Accueil2008/" + file };
+        }
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Accueil2008");
+        dir.mkdirs(); File f = new File(dir, file);
+        FileOutputStream fo = new FileOutputStream(f);
+        try { fo.write(data); } finally { fo.close(); }
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
+        return new Object[]{ Uri.fromFile(f), f.getPath() };
+    }
+
+    @JavascriptInterface
+    public String saveText(String name, String mime, String text) {
+        try { Object[] r = writeDownload(name, mime, String.valueOf(text).getBytes("UTF-8")); return new JSONObject().put("ok", true).put("fichier", r[1]).toString(); }
+        catch (Throwable t) { return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}"; }
+    }
+
+    @JavascriptInterface
+    public String shareText(String name, String mime, String text, String subject, String email) {
+        try {
+            Object[] r = writeDownload(name, mime, String.valueOf(text).getBytes("UTF-8"));
+            Intent send = new Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, (Uri) r[0])
+                .putExtra(Intent.EXTRA_SUBJECT, subject).putExtra(Intent.EXTRA_TEXT, subject + " (Accueil 2008), en pièce jointe.")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (email != null && email.contains("@")) send.putExtra(Intent.EXTRA_EMAIL, new String[]{ email });
+            if (send.resolveActivity(activity.getPackageManager()) == null) return new JSONObject().put("ok", false).put("fichier", r[1]).put("erreur", "aucune appli d'e-mail sur l'autoradio").toString();
+            Intent chooser = Intent.createChooser(send, "Envoyer");
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivity(chooser);
+            return new JSONObject().put("ok", true).put("fichier", r[1]).toString();
+        } catch (Throwable t) { return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}"; }
+    }
+
+    // ---------- 7.51 : désinstaller une appli depuis le tiroir (appui long) ----------
+    /** Ouvre la fenêtre Android « Désinstaller cette appli ? ». Les applis du système ne se désinstallent pas :
+     *  on ouvre alors leur fiche (Désactiver / Forcer l'arrêt). */
+    @JavascriptInterface
+    public String uninstall(String pkg) {
+        try {
+            if (pkg == null || pkg.isEmpty() || pkg.equals(activity.getPackageName())) return "{\"ok\":false,\"erreur\":\"interdit\"}";
+            ApplicationInfo ai = activity.getPackageManager().getApplicationInfo(pkg, 0);
+            if (system(ai) && (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0) {
+                Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(i);
+                return "{\"ok\":true,\"systeme\":true}";
+            }
+            Intent i = new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity.startActivity(i);
+            return "{\"ok\":true,\"systeme\":false}";
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
+    @JavascriptInterface
+    public boolean installed(String pkg) {
+        try { activity.getPackageManager().getApplicationInfo(pkg, 0); return true; } catch (Throwable t) { return false; }
+    }
+
     private static List<File> codeFiles(String apk) {
         List<File> out = new ArrayList<>();
         if (apk == null) return out;
