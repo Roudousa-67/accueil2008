@@ -1,6 +1,6 @@
 {
   "version": "7.57",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.57/Accueil2008GT_v7.57.apk",
-  "sha256": "",
+  "sha256": "8e3e0affc34f670e05410239c635e986795438f96a857f7426a492ad2eec3eff",
   "notes": "Ticket lu automatiquement : scanne le QR du ticket, prends la photo ; le téléphone lit la date, les litres, le prix au litre et le total, tu vérifies, et l’autoradio remplit « Ajouter un plein ». Tu n’as plus qu’à enregistrer."
 }
