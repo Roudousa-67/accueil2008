@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Appli compagnon d'Accueil 2008 GT : un écran noir d'une fraction de seconde, ouvert par l'accueil quand
+     on quitte la page d'accueil. Le système du fabricant (QF) range la fenêtre GPS (Waze) quand une AUTRE
+     appli passe devant ; tout ce qui vient de l'accueil lui-même est ignoré. Pas d'icône, pas de droits. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fr.gtline.accueil2008.masque"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="29" />
+    <application android:label="Accueil 2008 Masque" android:allowBackup="false" android:hasCode="true">
+        <activity
+            android:name=".Masque"
+            android:exported="true"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="fr.gtline.accueil2008.masque">
+            <intent-filter>
+                <action android:name="fr.gtline.accueil2008.MASQUER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

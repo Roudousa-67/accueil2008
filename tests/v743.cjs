@@ -144,7 +144,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("launch745('com.waze,com.google.android.apps.maps')");assert.equal(old.length,2,'liste d’applis : ancienne méthode');
  console.log('OK applis ouvertes en plein écran (Waze caché), repli sinon');
  // 7.46 : changer de page dans l'appli met Waze derrière ; revenir à l'accueil le remet dans son cadre.
- let fronts=0;w.Display743Native.hideNav=()=>{fronts++;return '{"ok":true}';};
+ let fronts=0,nav0=0;w.Display743Native.hideViaCompanion=()=>{fronts++;return '{"ok":true}';};w.Display743Native.hideNav=()=>{nav0++;return '{"ok":true}';};
  run("tab='home';render();gbKey='com.waze|1,2,3,4';store.set('gbMode','cadre');");
  run("tab='trips';render();");assert.equal(fronts,1,'Trajets : Waze passé derrière');assert(run('V746.hidden()'));
  run("tab='maint';render();");assert.equal(fronts,1,'pas deux fois');
@@ -152,6 +152,17 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(!run('V746.hidden()')&&t.timers.length>before,'retour à l’accueil : Waze relancé dans le cadre');
  run("store.set('hideNav746',false);tab='trips';render();");assert.equal(fronts,1,'désactivable');run("store.set('hideNav746',true);tab='home';render();");
  run("gbKey='';tab='trips';render();");assert.equal(fronts,2,'Waze ouvert avant le redémarrage de l’appli : caché quand même');run("tab='home';render();");
+ assert.equal(nav0,0,'appli compagnon utilisée en premier');
+ // Sans l'appli compagnon : ancienne méthode + conseil d'installation, une fois par jour.
+ w.Display743Native.hideViaCompanion=()=>'{"ok":false,"erreur":"appli compagnon absente"}';
+ run("store.set('companionHint749',0);tab='trips';render();");assert.equal(nav0,1,'repli sans compagnon');run("tab='home';render();");
+ // Réglage : état et installation.
+ w.Display743Native.hasCompanion=()=>false;const urls=[];w.Android.openUrl=u=>urls.push(u);
+ run("openSet('GPS et navigation','Cacher Waze hors de l’accueil');render();");
+ assert(screen().includes('Accueil 2008 Masque')&&screen().includes('Télécharger et installer'),'page de réglage de la compagnon');
+ run("act('v749:install')");assert(/releases\/download\/compagnon-1\/Accueil2008Masque\.apk$/.test(urls[0]||''),'lien de téléchargement');
+ w.Display743Native.hasCompanion=()=>true;run('render()');assert(screen().includes('✓ Installée'));
+ run("act('v749:on:0')");assert.equal(run("store.get('hideNav746')"),false);run("act('v749:on:1');tab='home';render();");
  console.log('OK pages de l’appli : Waze derrière hors de l’accueil, revient sur l’accueil');
  console.log('Tests 7.43 réussis.');
  process.exit(0);

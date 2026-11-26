@@ -1,0 +1,53 @@
+name: Construire et publier l'appli compagnon
+on:
+  push:
+    branches: [main]
+    paths: ['compagnon/**', 'outils/construire_masque.sh', '.github/workflows/compagnon.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publication-compagnon
+  cancel-in-progress: false
+jobs:
+  compagnon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Préparer la clé d'origine
+        env:
+          ACCUEIL_KEYSTORE_BASE64: ${{ secrets.ACCUEIL_KEYSTORE_BASE64 }}
+          ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,base64,pathlib
+          if not os.getenv('ACCUEIL_KEYSTORE_BASE64') or not os.getenv('ACCUEIL_SIGNING_PASSWORD'):
+              raise SystemExit('Secrets de signature absents : publication annulée sans générer de nouvelle clé.')
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'accueil-original.p12'
+          p.write_bytes(base64.b64decode(os.environ['ACCUEIL_KEYSTORE_BASE64'],validate=True))
+          p.chmod(0o600)
+          PY
+      - name: Construire et signer
+        env:
+          ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
+          ACCUEIL_KEY_PASSWORD: ${{ secrets.ACCUEIL_KEY_PASSWORD }}
+        run: ACCUEIL_KEYSTORE="$RUNNER_TEMP/accueil-original.p12" bash outils/construire_masque.sh "$RUNNER_TEMP/sortie"
+      - name: Publier (sans écraser une version existante)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          apk="$RUNNER_TEMP/sortie/Accueil2008Masque.apk"
+          sha256sum "$apk"
+          if gh release view compagnon-1 >/dev/null 2>&1; then
+            echo 'La release compagnon-1 existe déjà : rien à faire.'
+            exit 0
+          fi
+          gh release create compagnon-1 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 Masque 1.0 (appli compagnon)" --notes "Appli compagnon d’Accueil 2008 GT : écran noir d’une fraction de seconde qui fait ranger Waze par l’autoradio quand tu quittes la page d’accueil. À installer une fois. Pas d’icône, aucun droit demandé."
+      - name: Effacer la copie temporaire de la clé
+        if: always()
+        run: rm -f "$RUNNER_TEMP/accueil-original.p12"

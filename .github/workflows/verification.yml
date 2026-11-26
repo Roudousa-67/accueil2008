@@ -62,3 +62,6 @@ jobs:
           test -n "$platform"
           mkdir -p "$RUNNER_TEMP/native725"
           javac -encoding UTF-8 -source 8 -target 8 -cp "$platform" -d "$RUNNER_TEMP/native725" module_GPS_java/java/fr/gtline/accueil2008/*.java
+      - name: Construire l'appli compagnon (sans signature)
+        if: hashFiles('compagnon/AndroidManifest.xml') != ''
+        run: bash outils/construire_masque.sh "$RUNNER_TEMP/masque"
