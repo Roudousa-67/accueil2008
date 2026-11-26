@@ -1,6 +1,6 @@
 {
   "version": "7.53",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.53/Accueil2008GT_v7.53.apk",
-  "sha256": "",
+  "sha256": "99e8534fb4bada38342fce523cc56c794efa9d98d3c25f332fc5c19a7fe87cc6",
   "notes": "Nouveau : appui long sur une appli dans « Toutes les applications » → Désinstaller. Revenir comme avant : Système → Nouveautés à tester → « Tout couper » ; et si l’écran ne répond plus, relance l’appli 3 fois en 3 minutes : les nouveautés se coupent toutes seules."
 }
