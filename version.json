@@ -1,6 +1,6 @@
 {
-  "version": "7.55",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.55/Accueil2008GT_v7.55.apk",
-  "sha256": "ffa3d34296cc8c4ae2b2ad53f75f262b3bf3e3041f1df0bffd46cfd9350e9fd2",
-  "notes": "Nouveaux fonds (Réglages → Fond d’écran) : 18 fonds d’espace animés, Ciel réel et Fond qui suit la journée, animation Lente ou Fixe. Décor de la route : Voie lactée la nuit par temps clair. Tout se coupe dans Nouveautés à tester."
+  "version": "7.56",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.56/Accueil2008GT_v7.56.apk",
+  "sha256": "9df1a15c2eb56c1779f4ed85665052da236fe048a7648dbec5a97b895e9fe3eb",
+  "notes": "Tickets reçus du téléphone jamais perdus : Réglages › Trajets et carburant › Transfert depuis le téléphone → « Joindre au plein » à côté de chaque photo reçue ; et un rappel « Ticket non enregistré » si un ticket n’a pas été enregistré avec un plein."
 }
