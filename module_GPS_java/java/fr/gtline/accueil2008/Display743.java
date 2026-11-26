@@ -162,6 +162,24 @@ public final class Display743 {
         } });
     }
 
+    /** 7.47 : cache Waze en ouvrant la page invisible SettingsVoiceActivity en plein écran (voir celle-ci). */
+    @JavascriptInterface
+    public String hideNav() {
+        try {
+            Intent i = new Intent(activity, SettingsVoiceActivity.class).putExtra("hideNav746", true)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            GpsDock.HiddenApi.exemptAll();
+            ActivityOptions o = ActivityOptions.makeBasic();
+            String how = "plein écran demandé";
+            try { Method m = ActivityOptions.class.getMethod("setLaunchWindowingMode", int.class); m.invoke(o, 1); }
+            catch (Throwable t) { how = "plein écran refusé : " + t.getClass().getSimpleName(); }
+            startOnUi(i, o.toBundle());
+            return new JSONObject().put("ok", true).put("mode", how).toString();
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
     /** 7.46 : remet l'accueil au premier plan ; la fenêtre libre de Waze passe derrière (vidéo du 25/11). */
     @JavascriptInterface
     public String front() { bringSelfToFront(); return "{\"ok\":true}"; }
