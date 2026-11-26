@@ -36,6 +36,7 @@
  <div class="card" id="verif" hidden>
   <b style="font-size:19px">Vérifie les chiffres lus</b>
   <p class="petit" style="margin:0" id="verifInfo">Corrige-les si besoin : ils rempliront le plein sur l’autoradio.</p>
+  <label>Date du plein<input id="vD" type="date" class="champ"></label>
   <label>Litres<input id="vL" inputmode="decimal" class="champ"></label>
   <label>Prix au litre (€)<input id="vP" inputmode="decimal" class="champ"></label>
   <label>Total payé (€)<input id="vE" inputmode="decimal" class="champ"></label>
@@ -90,7 +91,15 @@
   if (!total && litres && per) total = Math.round(litres * per * 100) / 100;
   if (!per && litres && total) per = Math.round(total / litres * 1000) / 1000;
   if (!litres && total && per) litres = Math.round(total / per * 100) / 100;
-  return { litres, total, per };
+  // Date du ticket : 26/11/2026, 26-11-26, 26.11.2026… (jamais dans le futur, au plus 2 ans en arrière).
+  let date = null;
+  for (const d of t.matchAll(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})\b/g)) {
+   const dd = +d[1], mm = +d[2], yy = d[3].length === 2 ? 2000 + +d[3] : +d[3];
+   if (dd < 1 || dd > 31 || mm < 1 || mm > 12) continue;
+   const iso = yy + '-' + String(mm).padStart(2, '0') + '-' + String(dd).padStart(2, '0'), ms = Date.parse(iso + 'T12:00:00');
+   if (Number.isFinite(ms) && ms <= Date.now() + 864e5 && Date.now() - ms < 730 * 864e5) { date = iso; break; }
+  }
+  return { litres, total, per, date };
  }
  function loadOcr() {
   if (window.Tesseract) return Promise.resolve();
@@ -112,7 +121,7 @@
   show('erreur', false); show('choix', false); show('fini', false); show('lecture', true);
   const data = await shrink(file);
   pending = data;
-  let v = { litres: null, total: null, per: null };
+  let v = { litres: null, total: null, per: null, date: null };
   try {
    $('lectureTxt').textContent = 'Lecture du ticket… (la première fois, téléchargement d’environ 15 Mo)';
    await loadOcr();
@@ -120,18 +129,20 @@
    v = parseTicket(r && r.data && r.data.text);
    $('verifInfo').textContent = v.litres || v.total ? 'Corrige-les si besoin : ils rempliront le plein sur l’autoradio.' : 'Ticket difficile à lire : tape les chiffres, ou envoie la photo seule.';
   } catch (e) { $('verifInfo').textContent = 'Lecture impossible (' + (e && e.message || e) + ') : tape les chiffres, ou envoie la photo seule.'; }
+  const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  $('vD').value = v.date || today; $('vD').max = today;
   $('vL').value = v.litres != null ? String(v.litres).replace('.', ',') : '';
   $('vP').value = v.per != null ? String(v.per).replace('.', ',') : '';
   $('vE').value = v.total != null ? String(v.total).replace('.', ',') : '';
   show('lecture', false); show('verif', true);
  }
  $('bEnvoyer').addEventListener('click', () => {
-  const L = num($('vL').value), P = num($('vP').value), E = num($('vE').value), K = num($('vK').value);
+  const L = num($('vL').value), P = num($('vP').value), E = num($('vE').value), K = num($('vK').value), D = /^\d{4}-\d{2}-\d{2}$/.test($('vD').value) ? $('vD').value.replace(/-/g, '') : '';
   const ok = x => x != null && x > 0;
   if (ok(L) && (L > 500)) { $('verifInfo').textContent = 'Les litres semblent faux (500 maximum).'; return; }
   if (ok(E) && E > 5000) { $('verifInfo').textContent = 'Le total semble faux.'; return; }
   // Les chiffres voyagent dans le nom du fichier : l'autoradio les lit sans rien d'autre.
-  const tag = (ok(L) ? '_L' + L.toFixed(2) : '') + (ok(P) ? '_P' + P.toFixed(3) : '') + (ok(E) ? '_E' + E.toFixed(2) : '') + (ok(K) && K < 3000000 ? '_K' + Math.round(K) : '');
+  const tag = (ok(L) ? '_L' + L.toFixed(2) : '') + (ok(P) ? '_P' + P.toFixed(3) : '') + (ok(E) ? '_E' + E.toFixed(2) : '') + (ok(K) && K < 3000000 ? '_K' + Math.round(K) : '') + (D ? '_D' + D : '');
   show('verif', false); upload(pending, 'ticket' + tag + '.jpg');
  });
  $('bSans').addEventListener('click', () => { show('verif', false); upload(pending, 'ticket.jpg'); });
