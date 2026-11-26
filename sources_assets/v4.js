@@ -9,10 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.51';
+const APP_VERSION = '7.52';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
- ['7.51','Novembre 2026',['Toutes les applications : appui long sur une appli → Désinstaller', 'Fonds : 18 fonds d’espace animés, Ciel réel, Fond qui suit la journée ; Voie lactée dans le décor', 'Trajets → Mes stats : temps perdu dans les bouchons, carte de chaleur, zones explorées, frais kilométriques au barème (PDF), classement de tes stations', 'Éco-conduite : classement de la famille du mois', 'Alertes : ZFE avec ta vignette Crit’Air, tunnel (feux), aires de repos et leurs services, commerce à la prochaine sortie, alertes regroupées', 'Décor : monuments à l’horizon, trafic réel, panneau de limitation planté, panneau d’entrée de département', 'Onglet Jeux : plaques, devine la ville, blind test, jeux sur le téléphone des passagers (QR)', 'Musique : pochette en fond, égaliseur animé, logos des radios, mode concert à l’arrêt', 'Entretien : Pneus (usure), Factures (photo) ; Pleins : lire un ticket', 'Réglages en 5 rubriques, taille du widget route, fluidité du décor, nettoyage et sauvegarde automatiques chaque semaine']],
+ ['7.52','Novembre 2026',['Retour à la 7.50 : la 7.51 bloquait l’écran. Les nouveautés reviendront une par une, testées à chaque fois.']],
  ['7.50','Novembre 2026',['Nouveautés à tester (Système) : chaque nouveauté s’active, se coupe ou se marque « Je n’aime pas » pour être supprimée','Mise à jour téléchargée en roulant, installation proposée au prochain arrêt','Ménage : barre du bas sans doublons, plus de pastille rouge, plus de bouton Dicter, plus de choix Wi-Fi pour l’envoi, ancien cadre encastré abandonné, pages techniques rangées dans le rapport, nouveautés : 3 dernières versions']],
  ['7.49','Novembre 2026',['Waze rangé sur Trajets, Entretien, Réglages grâce à l’appli compagnon « Accueil 2008 Masque » (à installer une fois : GPS et navigation → Cacher Waze hors de l’accueil) : le système de l’autoradio ne range Waze que quand une autre appli passe devant']],
  ['7.48','Novembre 2026',['Waze caché sur Trajets, Entretien, Réglages, même s’il était déjà ouvert avant le démarrage de l’appli ; la page qui le fait passer derrière est maintenant opaque (un bref écran noir)']],
@@ -123,14 +123,13 @@ function dateTxt(c, now) {
 
 // ---------- barre du haut ----------
 const tripSubs = [['hist', 'Historique'], ['charts', 'Graphiques'], ['eco', 'Éco-conduite']];
-const svcSubs = [['plan', 'Plan constructeur'], ['pleins', 'Pleins'], ['bilan', 'Bilan'], ['log', 'Mon carnet']];   // 7.51 : liste modifiable (Pneus, Factures)
 let tripSub = 'hist', svcSub = 'plan';
 window.header = function (p) {
   if (p.noChrome) return '';
   const name = profiles()[profIdx()];
   const uiTab = tab === 'eco' || tab === 'tracks' ? 'trips' : tab;
   const tabs = TABS.map(([id, l]) => `<button data-act="tab:${id}" style="height:42px;padding:0 16px;border-radius:${Math.max(6, p.r - 10)}px;font-size:15px;font-weight:600;${uiTab === id ? `background:${p.acc};color:${p.onAcc}` : `color:${p.onmut}`}">${l}</button>`).join('');
-  const subL = uiTab === 'trips' ? tripSubs.map(([k, l]) => ['tsub:' + k, l, tripSub === k && tab !== 'tracks']) : uiTab === 'service' ? svcSubs.map(([k, l]) => ['ssub:' + k, l, svcSub === k]) : (window.Games751 && uiTab === 'games' ? Games751.subs() : null);
+  const subL = uiTab === 'trips' ? tripSubs.map(([k, l]) => ['tsub:' + k, l, tripSub === k && tab !== 'tracks']) : uiTab === 'service' ? [['ssub:plan', 'Plan constructeur', svcSub === 'plan'], ['ssub:pleins', 'Pleins', svcSub === 'pleins'], ['ssub:bilan', 'Bilan', svcSub === 'bilan'], ['ssub:log', 'Mon carnet', svcSub === 'log']] : null;
   const sub = subL ? `<div style="display:flex;gap:2px;background:${p.card2};border-radius:${Math.max(8, p.r - 8)}px;padding:2px">${subL.map(([a, l, on]) => `<button data-act="${a}" style="height:38px;padding:0 ${subL.length > 3 ? 9 : 12}px;border-radius:${Math.max(6, p.r - 10)}px;font-size:13.5px;font-weight:600;${on ? `background:${p.txt};color:${p.card}` : `color:${p.mut}`}">${l}</button>`).join('')}</div>` : '';
   const c = clk(), cs = CLK_SIZE[c.size] || CLK_SIZE.m;
   const ff = c.font ? `font-family:'${c.font}',Inter,sans-serif;` : '';
@@ -363,8 +362,7 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
     if(pace.prev){const d=now-pace.prev;if(d>5&&d<pace.period*1.5)pace.period+=(d-pace.period)*.05;}
     pace.prev=now;
     // Tolérance d'une demi-image : 16,66 ms ne doit plus être refusé face à 16,7 ms.
-    const step751=window.Fluid751?Fluid751.step(pace.step):pace.step;   // 7.51 : Économie / Normal / Fluide
-    if (lastDraw&&now-lastDraw<step751*pace.period-pace.period*.5){queue();return;}
+    if (lastDraw&&now-lastDraw<pace.step*pace.period-pace.period*.5){queue();return;}
     const drawStarted=performance.now();
     // Retard réel (y compris le rendu du canevas hors JavaScript), ignoré pendant les
     // premières images après un démarrage, une reprise ou une reconstruction de l'écran.
@@ -834,7 +832,7 @@ const SETCATS = [
       const tile = (id, label, extra) => `<button data-act="wall:${id}" style="aspect-ratio:16/9;border-radius:10px;overflow:hidden;position:relative;background:${p.card2};outline:${cur === id ? `3px solid ${p.acc}` : 'none'};outline-offset:2px;${extra || ''}">${id && id !== 'photo' ? `<img data-wall="${id}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">` : ''}<span style="position:absolute;left:6px;bottom:4px;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 3px #000">${label || ''}</span></button>`;
       return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div style="font-size:14px;color:${p.mut}">${WALLS.length} fonds + tes photos. Touche un fond : l'accueil change tout de suite.</div>${chipBtn(p, 'wallPick', '+ Ajouter ma photo', true)}<input id="wallFile" type="file" accept="image/*" style="display:none"></div>
         <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:10px">${tile('', 'Couleur du thème')}${store.get('wallPhoto', '') ? tile('photo', 'Ma photo', `background:url(${store.get('wallPhoto', '')}) center/cover`) : ''}</div>
-        ${cats.map((c) => `${secT(p, c + ' · ' + WALLS.filter((w) => w.cat === c).length)}<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">${WALLS.filter((w) => w.cat === c).map((w) => tile(w.id, w.name)).join('')}</div>`).join('')}
+        ${cats.map((c) => `${secT(p, c + ' · ' + WALLS.filter((w) => w.cat === c).length)}<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">${WALLS.filter((w) => w.cat === c).map((w) => tile(w.id)).join('')}</div>`).join('')}
         ${secT(p, 'Réglages')}${setRow(p, 'Assombrir le fond', 'Pour que les widgets restent lisibles.', [0, 15, 30, 45, 60].map((d) => chipBtn(p, 'wallDim:' + d, d + ' %', pv('wallDim', 30) === d)).join(''))}
         ${setRow(p, 'Cartes transparentes', 'Laisse voir le fond derrière les widgets.', togBtn(p, 'toggleGlass', !!custom(profIdx(), themeIdFor(profIdx())).glass))}`;
     }],

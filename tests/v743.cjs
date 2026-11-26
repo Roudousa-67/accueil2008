@@ -12,8 +12,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(index.indexOf('src="display743.js"')>index.indexOf('src="diag738.js"')&&index.indexOf('src="display743.js"')<index.indexOf('src="settings738.js"'),'chargé par index.html au bon endroit');
  assert(fs.readFileSync(path.join(__dirname,'../module_GPS_java/java/fr/gtline/accueil2008/GpsDockInit.java'),'utf8').includes('"Display743Native"'),'pont natif branché');
  const layout=JSON.parse(run('JSON.stringify(Settings738.layout())'));
- assert(!layout.some(([c,subs])=>c==='Système'&&subs.includes('Rechercher l’affichage')),'page retirée des réglages en 7.51 (Waze se cache bien)');
- run("SETCATS.find(c=>c[0]==='Système')[1].push(['Rechercher l’affichage',Display743.page])");  // page retirée en 7.51, module encore testé
+ assert(layout.some(([c,subs])=>c==='Système'&&subs.includes('Rechercher l’affichage')),'page dans Réglages → Système');
  const screen=()=>run("document.querySelector('#screen').textContent");
  run("openSet('Système','Rechercher l’affichage');render();");
  assert(screen().includes('Lancer la recherche')&&screen().includes('Essai 2 : ouverture en plein écran'),'page affichée');

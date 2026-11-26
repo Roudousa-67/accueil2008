@@ -168,7 +168,7 @@ function drawRoad(){
 function oncoming(q,lane,id){const p=P(q,lane),s=88*q;if(p.y>H+90)return;ellipse(p.x,p.y,s*.52,s*.1,'#0003');for(const sg of [-1,1])rect(p.x+sg*s*.37-s*.035,p.y-s*.3,s*.07,s*.23,'#19252e');const col=['#9caebc','#ab625b','#718aa6'][mod(id,3)];poly([[p.x-s*.48,p.y-s*.08],[p.x-s*.45,p.y-s*.47],[p.x-s*.28,p.y-s*.69],[p.x+s*.28,p.y-s*.69],[p.x+s*.45,p.y-s*.47],[p.x+s*.48,p.y-s*.08]],col);poly([[p.x-s*.3,p.y-s*.61],[p.x+s*.3,p.y-s*.61],[p.x+s*.36,p.y-s*.42],[p.x-s*.36,p.y-s*.42]],'#263e50');rect(p.x-s*.24,p.y-s*.19,s*.48,s*.065,'#344453');for(const sg of [-1,1]){rect(p.x+sg*s*.34-s*.085,p.y-s*.3,s*.17,s*.055,night?'#fff4bd':'#d8e7e1');if(night)light(p.x+sg*s*.34,p.y-s*.28,s*.2,'#ffefb33a')}rect(p.x-s*.12,p.y-s*.095,s*.24,s*.04,'#c7cfcd')}
 function barriers(){if(scene!=='autoroute')return;
  const d=distance();for(const k of [-1.12,-.09,.09,1.12]){const pts=[];for(let j=0;j<30;j++){const q=j/29,p=P(q,k);pts.push([p.x,p.y-q*20])}line(pts,night?'#8a9aa2':'#b7c3c6',3);for(let n=Math.floor((d-30)/9);n<Math.floor((d-30)/9)+50;n++){const z=n*9-d;if(z<-25||z>400)continue;const q=depthQ(z),p=P(q,k);line([[p.x,p.y],[p.x,p.y-q*20]],night?'#6a7a84':'#879da5',Math.max(.6,q*3))}}
- const trafficDistance=d*2.25;const cars=[];let dens751=1;try{dens751=Math.max(1,Math.min(3,+ext751.density()||1));}catch(e){}const nCars=Math.round(12*dens751),gap=80/dens751;for(let n=0;n<nCars;n++){const z=60+n*gap-mod(trafficDistance,gap*nCars);if(z>-32&&z<420)cars.push({q:depthQ(z),lane:n%2?-.34:-.82,id:n})}if(dens751>1.4){const slow=d*.6;for(let n=0;n<Math.round(6*dens751);n++){const z=70+n*(110/dens751)-mod(slow,110/dens751*Math.round(6*dens751));if(z>20&&z<420)cars.push({q:depthQ(z),lane:n%2?.34:.82,id:n+40});}}cars.sort((a,b)=>a.q-b.q);for(const car of cars)oncoming(car.q,car.lane,car.id);
+ const trafficDistance=d*2.25;const cars=[];for(let n=0;n<12;n++){const z=60+n*80-trafficDistance;if(z>-32&&z<420)cars.push({q:depthQ(z),lane:n%2?-.34:-.82,id:n})}cars.sort((a,b)=>a.q-b.q);for(const car of cars)oncoming(car.q,car.lane,car.id);
 }
 function gantry(){if(scene!=='autoroute')return;const q=worldQ(150);if(q<.05||q>1.8)return;
  const a=P(q,.09),b=P(q,1.14),top=HZ-170*q,bottom=HZ-72*q;
@@ -1481,7 +1481,6 @@ function skyBodies738(){
  }
  const cloudy=wx==='nuages';
  if(night&&!cloudy)for(const st of skyCache738.stars){c.globalAlpha=st.a*(.75+.25*Math.sin(t*1.7+st.x));c.fillStyle='#e8eeff';c.fillRect(st.x,st.y,1.1,1.1);}
- if(night&&!cloudy&&window.Milky751)Milky751(c,W,TOP,HZ,t);   // 7.51 : Voie lactée
  c.globalAlpha=1;
  // Le canevas n'a pas la même échelle en largeur et en hauteur : compenser pour des disques ronds.
  const m=c.getTransform(),k=m.d?m.a/m.d:1;
@@ -1563,7 +1562,6 @@ function sky738(){
  }
  skyBodies738();
  clouds738(w,s);
- horizon751();
 }
 // Nuages sur deux plans, dessinés une fois dans une image puis déplacés lentement.
 const cloudSprites738=new Map();
@@ -2365,18 +2363,6 @@ function gantryMode738(z){
 // 7.39 : panneaux placés à la vraie distance. Chaque seuil (5 km, 4 km… ou 2 km, 1 km, 500 m)
 // fait apparaître un portique 600 m devant : on le passe quand la sortie est vraiment à cette distance.
 const ev739={signs:[],done:new Set(),log:[]};
-// 7.51 : panneaux et silhouettes ajoutés par d'autres modules (limitation, département, monuments, trafic).
-const ext751={draw:{},horizon:[],density:()=>1};
-const api751=()=>({c,W,H,TOP,HZ,BOT,t,night,scene,mp,P,worldQ,rect,line,poly,ellipse,sign,fit:fitText738,hud:hudBox741});
-window.Decor751={
- sign(kind,data,ahead){ev739.signs.push({S:roadTravel+(ahead||250),kind,T:0,ext:true,data:Object.assign({},data)});if(ev739.signs.length>60)ev739.signs.shift();},
- draw(kind,fn){ext751.draw[kind]=fn;},
- horizon(fn){ext751.horizon.push(fn);},
- density(fn){ext751.density=fn;},
- get scene(){return scene;},get night(){return night;},
- signs:()=>ev739.signs.filter(g=>g.ext)
-};
-function horizon751(){for(const f of ext751.horizon){try{f(api751());}catch(e){}}}
 function prefs739(){return window.Highway738&&Highway738.prefs?Highway738.prefs():null;}
 function sync739(){const pr=prefs739();return !!(pr&&(pr.exits||pr.stations)&&Highway738.signs&&Highway738.signs());}
 function syncSigns739(main){
@@ -2409,7 +2395,7 @@ function syncSigns739(main){
  if(ev739.done.size>400)ev739.done.clear();
 }
 function drawSyncSigns739(){
- for(const g of ev739.signs){const z=distance()+(g.S-roadTravel);if(!mvisible(z,650))continue;if(g.ext){const f=ext751.draw[g.kind];if(f){try{f(z,g.data,api751());}catch(e){}}continue;}if(g.kind==='post'||g.kind==='dist')mpanel744(z,g.kind,g.data);else mgantry(z,[g.kind,Object.assign({},g.data,{d:g.T})]);}
+ for(const g of ev739.signs){const z=distance()+(g.S-roadTravel);if(!mvisible(z,650))continue;if(g.kind==='post'||g.kind==='dist')mpanel744(z,g.kind,g.data);else mgantry(z,[g.kind,Object.assign({},g.data,{d:g.T})]);}
 }
 // Petit panneau dès que la sortie (ou la station) est à 500 m : affiché tout de suite en haut à
 // droite de l'image, distance mise à jour, jusqu'au passage.

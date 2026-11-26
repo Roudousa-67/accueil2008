@@ -40,19 +40,4 @@ while p < len(b):
             break
     p += csz
 assert done == 2
-# 7.51 : « Désinstaller » depuis le tiroir d'applis. Android 9+ exige REQUEST_DELETE_PACKAGES ; la permission
-# INJECT_EVENTS (réservée au système, jamais accordée ici) est remplacée par celle-ci dans la liste des chaînes.
-REPL = {'android.permission.INJECT_EVENTS': 'android.permission.REQUEST_DELETE_PACKAGES'}
-if not utf8 and any(k in strs for k in REPL):
-    new_strs = [REPL.get(getstr(i)[0], getstr(i)[0]) for i in range(cnt)]  # relu : versionName déjà modifié
-    data = bytearray(); new_offs = []
-    for x in new_strs:
-        new_offs.append(len(data)); data += struct.pack('<H', len(x)) + x.encode('utf-16le') + b'\0\0'
-    while len(data) % 4: data += b'\0'
-    assert scnt == 0 and sstart == hs + cnt * 4
-    pool = bytearray(b[off:off + hs]) + struct.pack('<%dI' % cnt, *new_offs) + data
-    struct.pack_into('<I', pool, 4, len(pool))
-    b = bytearray(b[:off]) + pool + b[off + sz:]
-    struct.pack_into('<I', b, 4, len(b))
-    print('permission ajoutée : REQUEST_DELETE_PACKAGES')
 open(dst,'wb').write(b)
