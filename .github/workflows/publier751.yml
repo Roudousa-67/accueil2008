@@ -67,12 +67,13 @@ jobs:
           apk="$RUNNER_TEMP/Accueil2008GT_v7.51.apk"
           aapt="$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)"
           "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='121' versionName='7.51'"
+          "$aapt" dump permissions "$apk" | grep -F "android.permission.REQUEST_DELETE_PACKAGES"
           sha256sum "$apk"
           if gh release view v7.51 >/dev/null 2>&1; then
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.51 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.51" --notes "Version 7.51 : outil pour analyser le lanceur d’origine (Thème). Essais sur autoradio à effectuer."
+          gh release create v7.51 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.51" --notes "Version 7.51 : désinstaller par appui long, 18 fonds d’espace animés, ciel réel, fond qui suit la journée, Voie lactée dans le décor. Essais sur autoradio à effectuer."
           mkdir -p "$RUNNER_TEMP/check"
           gh release download v7.51 --pattern Accueil2008GT_v7.51.apk --dir "$RUNNER_TEMP/check"
           cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.51.apk"

@@ -1,4 +1,10 @@
 # Mise à jour 7.51
 
-## Analyser le lanceur d’origine
-Réglages → Système → Analyser le lanceur d’origine : liste l’appli « Thème » et les lanceurs du poste, extrait pour chacun le manifeste, le code (classes*.dex, .odex/.vdex), les petits fichiers assets et une fiche des composants (activités, services, récepteurs, permissions) dans `Téléchargements/Accueil2008/code-launcher-*.zip` (23 Mo max), puis ouvre l’e-mail. Natif : `Display743Native.themeCandidates()` et `exportCode(paquets, email)`. But : comprendre comment le lanceur d’origine cache et rouvre l’appli du petit carré, avant de séparer l’appli en deux.
+## Désinstaller par appui long
+Toutes les applications : appui long sur une appli → menu Désinstaller / Ajouter à la barre du bas / Mettre sur l’accueil. « Désinstaller » ouvre la fenêtre Android ; une appli du système ouvre sa fiche (Désactiver). Natif : `Display743Native.uninstall(pkg)`, `installed(pkg)`. Manifeste : `outils/axml.py` remplace la permission INJECT_EVENTS (jamais accordée) par REQUEST_DELETE_PACKAGES, obligatoire depuis Android 9. Vérifié dans publier751.yml (`aapt dump permissions`).
+
+## Fonds d’espace et ciel (`wall751.js`)
+18 fonds d’espace animés, « Ciel réel » (SunCalc : soleil, lune avec phase, étoiles qui tournent), « Fond qui suit la journée ». Couche canvas 640×360 sous le contenu de #stage (z-index -1), 8 images/s seulement sur l’Accueil, coupée en arrière-plan ; réglage Lente / Fixe dans Fond d’écran. Voie lactée dans le décor de la route la nuit (`Milky751`, appelé depuis decors726.js).
+
+## Ménage
+Page « Rechercher l’affichage » retirée des réglages (Waze se cache bien avec le compagnon).

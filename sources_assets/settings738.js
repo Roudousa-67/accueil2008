@@ -90,8 +90,6 @@
    ['Sauvegarde', P('Système', 'Sauvegarde')],
    ['Rapport de diagnostic', join(P('Système', 'Rapport de diagnostic'), p => `<details style="margin-top:16px"><summary style="cursor:pointer;color:${p.mut}">Avancé : performances et écran d’accueil du poste</summary><div style="margin-top:10px">${run(P('Système', 'Diagnostic · Performances'), p)}${run(P('Système', 'Écran d\'accueil'), p)}</div></details>`)],
    ['Nouveautés à tester', P('Système', 'Nouveautés à tester')],
-   ['Rechercher l’affichage', P('Système', 'Rechercher l’affichage')],
-   ['Analyser le lanceur d’origine', P('Système', 'Analyser le lanceur d’origine')],
    ['Mises à jour', join(P('Mises à jour', 'Version'), clean(P('Mises à jour', 'Téléchargement et vérification')))],
    ['Nouveautés', p => window.V750 ? V750.changelog(p) : run(P('Mises à jour', 'Nouveautés et historique'), p)],
    ['Stockage et nettoyage', clean(P('Mises à jour', 'Stockage et nettoyage'))],
@@ -102,7 +100,7 @@
  const used = new Set(['Navigation/Appli GPS', 'Navigation/Cadre GPS et alignement', 'Navigation/Vue conducteur', 'Navigation/Alerte de vitesse', 'Navigation/Zones de danger', 'Navigation/Assistant', 'Navigation/Adresses', 'Navigation/Parcours', 'Navigation/Stations essence',
   'Écran d\'accueil/Disposition', 'Écran d\'accueil/Hauteur de la barre Accueil', 'Écran d\'accueil/Barre d’applications', 'Écran d\'accueil/Barre de raccourcis',
   'Widgets/Barre des raccourcis', 'Widgets/Toutes les applications', 'Widgets/Vue voiture et route', 'Widgets/Multimédia', 'Véhicule/Apprentissage automatique', 'Véhicule/Apprendre ma voiture', 'Véhicule/Données CAN', 'Véhicule/Réglages voiture', 'Véhicule/Alertes', 'Véhicule/Tension batterie', 'Véhicule/Carburant',
-  'Système/Écran d\'accueil', 'Système/Autorisations', 'Système/Sauvegarde', 'Système/Rapport de diagnostic', 'Système/Diagnostic · Performances', 'Profils/Profils', 'Mises à jour/Version', 'Mises à jour/Téléchargement et vérification', 'Mises à jour/Nouveautés et historique', 'Mises à jour/Stockage et nettoyage', 'À propos/À propos',
+  'Système/Écran d\'accueil', 'Système/Rechercher l’affichage', 'Système/Autorisations', 'Système/Sauvegarde', 'Système/Rapport de diagnostic', 'Système/Diagnostic · Performances', 'Profils/Profils', 'Mises à jour/Version', 'Mises à jour/Téléchargement et vérification', 'Mises à jour/Nouveautés et historique', 'Mises à jour/Stockage et nettoyage', 'À propos/À propos',
   'Trajets et carburant/Organisation et données', 'Trajets et carburant/Transfert depuis le téléphone', 'Météo/Actualisation', 'Météo/Affichage et vigilance', 'Entretien/Rappels', 'Entretien/Le point au démarrage',
   ...['Thèmes', 'Fond d\'écran', 'Icônes', 'Police', 'Heure et date', 'Nuit, luminosité, pause', 'Barre du haut', 'Voiture affichée'].map(s => 'Affichage et personnalisation/' + s)]);
  const target = { 'Affichage et personnalisation': 'Accueil et affichage', 'Écran d\'accueil': 'Accueil et affichage', 'Navigation': 'GPS et navigation', 'Profils': 'Système', 'Mises à jour': 'Système', 'À propos': 'Système' };
