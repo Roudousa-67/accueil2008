@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.54';
+const APP_VERSION = '7.55';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.55','Novembre 2026',['Fond d’écran : 18 fonds d’espace animés, Ciel réel (soleil, lune, étoiles à leur vraie place) et Fond qui suit la journée ; animation Lente ou Fixe (passe seule en Fixe si l’autoradio est trop juste)','Décor de la route : Voie lactée la nuit par temps clair']],
  ['7.54','Novembre 2026',['Barre d’applis du bas : taille « Barre » de nouveau possible (Modifier l’accueil), remise à sa place si elle avait disparu, bouton ✎ pour changer les applis directement depuis l’accueil']],
  ['7.53','Novembre 2026',['Toutes les applications : appui long sur une appli → Désinstaller','Revenir comme avant : « Tout couper » dans Nouveautés à tester, mode secours (relance l’appli 3 fois en 3 minutes) et coupure à distance']],
  ['7.52','Novembre 2026',['Retour à la 7.50 : la 7.51 bloquait l’écran. Les nouveautés reviendront une par une, testées à chaque fois.']],
@@ -834,7 +835,7 @@ const SETCATS = [
       const tile = (id, label, extra) => `<button data-act="wall:${id}" style="aspect-ratio:16/9;border-radius:10px;overflow:hidden;position:relative;background:${p.card2};outline:${cur === id ? `3px solid ${p.acc}` : 'none'};outline-offset:2px;${extra || ''}">${id && id !== 'photo' ? `<img data-wall="${id}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">` : ''}<span style="position:absolute;left:6px;bottom:4px;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 3px #000">${label || ''}</span></button>`;
       return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div style="font-size:14px;color:${p.mut}">${WALLS.length} fonds + tes photos. Touche un fond : l'accueil change tout de suite.</div>${chipBtn(p, 'wallPick', '+ Ajouter ma photo', true)}<input id="wallFile" type="file" accept="image/*" style="display:none"></div>
         <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:10px">${tile('', 'Couleur du thème')}${store.get('wallPhoto', '') ? tile('photo', 'Ma photo', `background:url(${store.get('wallPhoto', '')}) center/cover`) : ''}</div>
-        ${cats.map((c) => `${secT(p, c + ' · ' + WALLS.filter((w) => w.cat === c).length)}<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">${WALLS.filter((w) => w.cat === c).map((w) => tile(w.id)).join('')}</div>`).join('')}
+        ${cats.map((c) => `${secT(p, c + ' · ' + WALLS.filter((w) => w.cat === c).length)}<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">${WALLS.filter((w) => w.cat === c).map((w) => tile(w.id, w.name)).join('')}</div>`).join('')}
         ${secT(p, 'Réglages')}${setRow(p, 'Assombrir le fond', 'Pour que les widgets restent lisibles.', [0, 15, 30, 45, 60].map((d) => chipBtn(p, 'wallDim:' + d, d + ' %', pv('wallDim', 30) === d)).join(''))}
         ${setRow(p, 'Cartes transparentes', 'Laisse voir le fond derrière les widgets.', togBtn(p, 'toggleGlass', !!custom(profIdx(), themeIdFor(profIdx())).glass))}`;
     }],

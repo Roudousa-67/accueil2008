@@ -7,3 +7,6 @@ node_modules/
 **/work/
 __pycache__/
 !distribution/Accueil2008GT_v*.apk
+
+# captures d’essai locales
+all/
