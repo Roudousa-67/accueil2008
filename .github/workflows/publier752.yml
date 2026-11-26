@@ -67,13 +67,12 @@ jobs:
           apk="$RUNNER_TEMP/Accueil2008GT_v7.52.apk"
           aapt="$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)"
           "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='122' versionName='7.52'"
-          "$aapt" dump permissions "$apk" | grep -F "android.permission.REQUEST_DELETE_PACKAGES"
           sha256sum "$apk"
           if gh release view v7.52 >/dev/null 2>&1; then
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.52 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.52" --notes "Version 7.52 : correctif de l’accueil (l’égaliseur poussait les widgets vers le bas)."
+          gh release create v7.52 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.52" --notes "Version 7.52 : retour à la 7.50 (la 7.51 bloquait l’écran)."
           mkdir -p "$RUNNER_TEMP/check"
           gh release download v7.52 --pattern Accueil2008GT_v7.52.apk --dir "$RUNNER_TEMP/check"
           cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.52.apk"

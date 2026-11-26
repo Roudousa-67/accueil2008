@@ -1,3 +1,3 @@
 # Mise à jour 7.52
 
-Correctif : l’égaliseur du widget musique (7.51) était inséré dans le texte du widget et l’agrandissait d’une ligne ; la grille de l’accueil dépassait alors 720 px et les widgets du bas sortaient de l’écran. Il est maintenant posé par-dessus le widget (`.eqw751`, position absolue) : aucune place prise.
+Retour au code de la 7.50 (sources, pont natif, tests et manifeste identiques au tag v7.50), publié en 7.52 (122) pour qu’Android accepte la mise à jour. La 7.51 affichait l’écran mais plus rien ne répondait sur l’autoradio. Les nouveautés de la 7.51 reviendront une par une.
