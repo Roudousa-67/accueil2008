@@ -58,6 +58,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("act('gb:stop')");
  // Égaliseur et mode concert
  run("tab='home';render();paint();");assert(run("!!document.querySelector('#screen .eq751.on751')"),'égaliseur animé pendant la lecture');
+ assert(run("[...document.querySelectorAll('#screen .eq751')].every(e=>e.classList.contains('eqw751'))&&!document.querySelector('#screen [data-k=\"mArtist\"] ~ .eq751:not(.eqw751)')"),'égaliseur posé par-dessus, sans pousser l’accueil (7.52)');
  stop();run("Games751.concert(media)");t.advance(16000);stop();run("Games751.concert(media)");assert(run("!!document.getElementById('concert751')"),'mode concert à l’arrêt');go();run("Games751.concert(media)");assert(!run("!!document.getElementById('concert751')"),'concert fermé en roulant');
  console.log('OK jeux : onglet, pause en roulant, plaques, ville, téléphones, blind test, égaliseur, concert');
  // ---------- Entretien ----------

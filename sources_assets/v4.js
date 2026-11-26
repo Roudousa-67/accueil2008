@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.51';
+const APP_VERSION = '7.52';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.52','Novembre 2026',['Accueil remis d’aplomb : l’égaliseur animé ne pousse plus les widgets vers le bas']],
  ['7.51','Novembre 2026',['Toutes les applications : appui long sur une appli → Désinstaller', 'Fonds : 18 fonds d’espace animés, Ciel réel, Fond qui suit la journée ; Voie lactée dans le décor', 'Trajets → Mes stats : temps perdu dans les bouchons, carte de chaleur, zones explorées, frais kilométriques au barème (PDF), classement de tes stations', 'Éco-conduite : classement de la famille du mois', 'Alertes : ZFE avec ta vignette Crit’Air, tunnel (feux), aires de repos et leurs services, commerce à la prochaine sortie, alertes regroupées', 'Décor : monuments à l’horizon, trafic réel, panneau de limitation planté, panneau d’entrée de département', 'Onglet Jeux : plaques, devine la ville, blind test, jeux sur le téléphone des passagers (QR)', 'Musique : pochette en fond, égaliseur animé, logos des radios, mode concert à l’arrêt', 'Entretien : Pneus (usure), Factures (photo) ; Pleins : lire un ticket', 'Réglages en 5 rubriques, taille du widget route, fluidité du décor, nettoyage et sauvegarde automatiques chaque semaine']],
  ['7.50','Novembre 2026',['Nouveautés à tester (Système) : chaque nouveauté s’active, se coupe ou se marque « Je n’aime pas » pour être supprimée','Mise à jour téléchargée en roulant, installation proposée au prochain arrêt','Ménage : barre du bas sans doublons, plus de pastille rouge, plus de bouton Dicter, plus de choix Wi-Fi pour l’envoi, ancien cadre encastré abandonné, pages techniques rangées dans le rapport, nouveautés : 3 dernières versions']],
  ['7.49','Novembre 2026',['Waze rangé sur Trajets, Entretien, Réglages grâce à l’appli compagnon « Accueil 2008 Masque » (à installer une fois : GPS et navigation → Cacher Waze hors de l’accueil) : le système de l’autoradio ne range Waze que quand une autre appli passe devant']],
