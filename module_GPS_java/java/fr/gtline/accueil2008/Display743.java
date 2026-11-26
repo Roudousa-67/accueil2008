@@ -486,6 +486,32 @@ public final class Display743 {
     }
 
     /** L'APK, et le code précompilé à côté (oat/<arch>/*.odex, *.vdex) des applis système. */
+    // ---------- 7.53 : désinstaller une appli depuis le tiroir (appui long) ----------
+    /** Ouvre la fenêtre Android « Désinstaller cette appli ? ». Les applis du système ne se désinstallent pas :
+     *  on ouvre alors leur fiche (Désactiver / Forcer l'arrêt). */
+    @JavascriptInterface
+    public String uninstall(String pkg) {
+        try {
+            if (pkg == null || pkg.isEmpty() || pkg.equals(activity.getPackageName())) return "{\"ok\":false,\"erreur\":\"interdit\"}";
+            ApplicationInfo ai = activity.getPackageManager().getApplicationInfo(pkg, 0);
+            if (system(ai) && (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0) {
+                Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(i);
+                return "{\"ok\":true,\"systeme\":true}";
+            }
+            Intent i = new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity.startActivity(i);
+            return "{\"ok\":true,\"systeme\":false}";
+        } catch (Throwable t) {
+            return "{\"ok\":false,\"erreur\":" + JSONObject.quote(String.valueOf(t)) + "}";
+        }
+    }
+
+    @JavascriptInterface
+    public boolean installed(String pkg) {
+        try { activity.getPackageManager().getApplicationInfo(pkg, 0); return true; } catch (Throwable t) { return false; }
+    }
+
     private static List<File> codeFiles(String apk) {
         List<File> out = new ArrayList<>();
         if (apk == null) return out;
