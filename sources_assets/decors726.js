@@ -1481,6 +1481,7 @@ function skyBodies738(){
  }
  const cloudy=wx==='nuages';
  if(night&&!cloudy)for(const st of skyCache738.stars){c.globalAlpha=st.a*(.75+.25*Math.sin(t*1.7+st.x));c.fillStyle='#e8eeff';c.fillRect(st.x,st.y,1.1,1.1);}
+ if(night&&!cloudy&&window.Milky755){try{Milky755(c,W,TOP,HZ,t);}catch(e){}}   // 7.55 : Voie lactée
  c.globalAlpha=1;
  // Le canevas n'a pas la même échelle en largeur et en hauteur : compenser pour des disques ronds.
  const m=c.getTransform(),k=m.d?m.a/m.d:1;
