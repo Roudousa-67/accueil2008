@@ -14,6 +14,16 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  const bar=JSON.parse(run("JSON.stringify(fCfg().pages[0].find(x=>(x.b||[]).includes('apps')))"));
  assert.deepEqual([bar.x,bar.y,bar.w,bar.h],[5,5,7,1],'en bas à droite, en barre');
  assert.equal(run('Bar754.restore()'),false,'une seule fois');
+ // Place prise par le cadre GPS agrandi jusqu'en bas → le cadre perd une case, la barre revient.
+ run("const c2=fClone();c2.pages[0]=c2.pages[0].filter(x=>!(x.b||[]).includes('apps'));const g=c2.pages[0].find(x=>(x.b||[]).includes('gpsbox'));g.h=6;fSave(c2);store.set('bar754_'+profIdx(),false);");
+ assert.equal(run('Bar754.restore()'),true,'barre remise même si la place était prise');
+ const pg2=JSON.parse(run('JSON.stringify(fCfg().pages[0])'));
+ assert.equal(pg2.find(x=>(x.b||[]).includes('gpsbox')).h,5,'cadre GPS réduit d’une case');
+ const b2=pg2.find(x=>(x.b||[]).includes('apps'));assert.deepEqual([b2.x,b2.y,b2.w,b2.h],[5,5,7,1],'barre en bas à droite');
+ // Restée en grille → repassée en barre.
+ run("const c3=fClone();const a3=c3.pages[0].find(x=>(x.b||[]).includes('apps'));const g3=c3.pages[0].find(x=>(x.b||[]).includes('gpsbox'));g3.h=4;a3.y=4;a3.h=2;fSave(c3);store.set('bar754_'+profIdx(),false);");
+ assert.equal(run('Bar754.restore()'),true,'grille repassée en barre');
+ assert.equal(JSON.parse(run("JSON.stringify(fCfg().pages[0].find(x=>(x.b||[]).includes('apps')))")).h,1,'1 case de haut');
  // Grille puis retour à la barre depuis « Modifier l'accueil ».
  run(`fEnterEdit('${bar.id}');act('h2:sz:4:2');act('h2:sz:7:1');act('h2:done');tab='home';render();`);
  const back=JSON.parse(run("JSON.stringify(fCfg().pages[0].find(x=>(x.b||[]).includes('apps')))"));assert.equal(back.h,1,'retour à la barre possible');

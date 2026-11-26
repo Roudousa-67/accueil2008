@@ -13,19 +13,31 @@
   const fs0 = window.fSizes;
   window.fSizes = function (id) { if (id === 'apps' && on()) return [['Barre', 7, 1], ['Barre courte', 5, 1], ['Grille', 4, 2], ['Grande grille', 6, 3]]; return fs0.apply(this, arguments); };
  }
- // Barre remise à sa place une fois par profil, seulement si elle n'est plus du tout sur l'accueil et que la
- // place en bas à droite est libre (rien de ce que tu as rangé n'est déplacé).
+ // Après la mise à jour, une fois par profil : la barre est mise sur l'accueil (page 1), en bas à droite.
+ // - déjà en grille sur la page 1 → repassée en barre ;
+ // - absente → posée en bas à droite ; si la place est prise par un widget qui descend jusqu'en bas (cadre GPS
+ //   agrandi, par exemple), ce widget perd une case de haut pour lui laisser la place.
+ const isBar = it => it && it.t === 'w' && (it.b || []).includes('apps');
+ const overlap = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
  function restore() {
   if (!on() || typeof fClone !== 'function') return false;
   const key = 'bar754_' + safe(() => profIdx(), 0); if (store.get(key, false)) return false;
   store.set(key, true);
   const c = fClone(); if (!c || !Array.isArray(c.pages) || !c.pages.length) return false;
-  const has = c.pages.some(pg => (pg || []).some(it => it.t === 'w' && (it.b || []).includes('apps')));
-  if (has) return false;
-  const pg = c.pages[0], spots = [{ x: 5, y: 5, w: 7, h: 1 }, { x: 0, y: 5, w: 7, h: 1 }, { x: 5, y: 5, w: 5, h: 1 }];
-  const r = spots.find(s => safe(() => fFits(pg, s, null), false)) || safe(() => fFree(pg, 7, 1, null), null);
-  if (!r) return false;
-  pg.push(Object.assign({ id: nid(), t: 'w', b: ['apps'] }, r)); fSave(c);
+  const pg = c.pages[0], cur = pg.find(isBar);
+  if (cur && cur.h <= 1 && cur.w >= 3) return false;                       // déjà en barre : rien à faire
+  if (cur) pg.splice(pg.indexOf(cur), 1);                                   // en grille : on la repose en barre
+  for (const p2 of c.pages.slice(1)) { const i = p2.findIndex(isBar); if (i >= 0 && !cur) p2.splice(i, 1); }
+  const fits = r => safe(() => fFits(pg, r, null), false);
+  let r = [{ x: 5, y: 5, w: 7, h: 1 }, { x: 0, y: 5, w: 7, h: 1 }].find(fits) || null;
+  if (!r) {
+   const want = { x: 5, y: 5, w: 7, h: 1 }, hit = pg.filter(it => overlap(it, want));
+   if (hit.length && hit.every(it => it.y + it.h === 6 && it.h >= 2)) { hit.forEach(it => { it.h -= 1; }); r = want; }
+  }
+  if (!r) r = safe(() => fFree(pg, 7, 1, null), null) || safe(() => fFree(pg, 5, 1, null), null) || safe(() => fFree(pg, 3, 1, null), null);
+  if (!r) { store.set(key, false); return false; }
+  pg.push(Object.assign({ id: (cur && cur.id) || nid(), t: 'w', b: ['apps'] }, r)); fSave(c);
+  safe(() => toast('Barre d’applis remise en bas de l’accueil. ✎ pour changer les applis.'));
   return true;
  }
  // Bouton ✎ sur la barre (hors mode modification).
