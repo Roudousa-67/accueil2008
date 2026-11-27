@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.58';
+const APP_VERSION = '7.59';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.59','Novembre 2026',['Trajets → Bilan : temps perdu dans les bouchons, carte de chaleur de tes routes, zones explorées, frais kilométriques au barème (PDF), classement de tes stations','Éco : classement de la famille du mois','Pleins → « Conso par plein »']],
  ['7.58','Novembre 2026',['La page ne remonte plus en haut quand tu touches une option (réglages, Trajets, Entretien…)','Trajets rangé : Trajets · Stats · Éco · Pleins · Conso · Tickets · Stations ; Entretien garde l’entretien ; réglages « Trajets » et « Carburant et tickets » séparés','Barre d’applis : la fenêtre « Remplacer par… » répond enfin et affiche les vrais logos','Musique : pochette floutée en fond, égaliseur animé, logo des radios, mode concert après 30 s à l’arrêt']],
  ['7.57','Novembre 2026',['Ticket lu automatiquement : le téléphone lit le ticket (date, litres, prix au litre, total), tu vérifies, et l’autoradio remplit le plein']],
  ['7.56','Novembre 2026',['Tickets reçus du téléphone : bouton « Joindre au plein » dans Transfert depuis le téléphone, et rappel « Ticket non enregistré » si un ticket n’a pas été rattaché à un plein']],

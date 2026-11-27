@@ -15,7 +15,8 @@
  const J = () => window.Journeys733 && Journeys733.state;
  const FUEL = { pleins: 'fills', tickets: 'tickets', stations: 'stations' };
  const OLD_TRIP = safe(() => tripSubs.map(x => x.slice()), []);
- const NEW_TRIP = [['hist', 'Trajets'], ['stats', 'Stats'], ['eco', 'Éco'], ['pleins', 'Pleins'], ['conso', 'Conso'], ['tickets', 'Tickets'], ['stations', 'Stations']];
+ // 7.59 : « Bilan » (bouchons, chaleur, frais km…) prend la place de « Conso », qui passe en bouton dans Pleins.
+ const NEW_TRIP = [['hist', 'Trajets'], ['stats', 'Stats'], ['bilan', 'Bilan'], ['eco', 'Éco'], ['pleins', 'Pleins'], ['tickets', 'Tickets'], ['stations', 'Stations']];
  function applyTabs() { if (typeof tripSubs === 'undefined') return; tripSubs.splice(0, tripSubs.length, ...(on() ? NEW_TRIP : OLD_TRIP).map(x => x.slice())); }
  applyTabs();
  // Sous-onglet qui correspond à la vue carburant affichée.
@@ -30,11 +31,16 @@
   if (on()) {
    const s = J();
    if (tripSub === 'fuel') tripSub = subFor(s && s.fuelView);          // ancienne entrée (ticket reçu, liens)
-   if (tripSub === 'conso' && typeof pagePleins === 'function') return pagePleins(p);
    if (s && FUEL[tripSub]) { s.view = 'fuel'; const want = FUEL[tripSub]; if (!(tripSub === 'pleins' && s.fuelView === 'charts') && s.fuelView !== want) s.fuelView = want; }
    else if (s && (tripSub === 'hist' || tripSub === 'stats') && s.view === 'fuel') s.view = tripSub === 'stats' ? 'stats' : 'history';
    // Les boutons « Stations » et « Tickets et import » font doublon avec les onglets du haut.
-   if (s && FUEL[tripSub]) return String(pt0.apply(this, arguments)).replace(/<button data-act="journey733:(?:fuel:stations|receipts)"[^>]*>[\s\S]*?<\/button>/g, '');
+   if (s && FUEL[tripSub]) {
+    let html = String(pt0.apply(this, arguments)).replace(/<button data-act="journey733:(?:fuel:stations|receipts)"[^>]*>[\s\S]*?<\/button>/g, '');
+    // « Conso par plein » juste après « Mes pleins ».
+    if (tripSub === 'pleins') html = html.replace(/(<button data-act="journey733:fuel:fills"[^>]*>[\s\S]*?<\/button>)/, '$1' + chipBtn(p, 'tsub:conso', 'Conso par plein'));
+    return html;
+   }
+   if (tripSub === 'conso' && typeof pagePleins === 'function') return String(pagePleins(p)).replace(/(<div style="min-height:0;display:flex;flex-direction:column">)/, '$1<div style="margin-bottom:8px">' + chipBtn(p, 'tsub:pleins', '← Retour aux pleins') + '</div>');
   }
   return pt0.apply(this, arguments);
  };

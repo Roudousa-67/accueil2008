@@ -41,7 +41,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("tab='trips';tripSub='pleins';render();const d=document.querySelector('#screen details');if(d)d.open=true;render();");
  assert(run("[...document.querySelectorAll('#screen details')].some(d=>d.open)"),'section ouverte restée ouverte');
  // ---------- Rangement ----------
- assert.deepEqual(JSON.parse(run('JSON.stringify(tripSubs.map(x=>x[1]))')),['Trajets','Stats','Éco','Pleins','Conso','Tickets','Stations'],'sous-onglets de Trajets');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(tripSubs.map(x=>x[1]))')),['Trajets','Stats','Bilan','Éco','Pleins','Tickets','Stations'],'sous-onglets de Trajets');
  run("act('tsub:tickets')");assert.equal(run('Journeys733.state.fuelView'),'tickets','Tickets');
  run("act('tsub:stations')");assert.equal(run('Journeys733.state.fuelView'),'stations','Stations');
  run("act('tsub:pleins')");assert.equal(run('Journeys733.state.fuelView'),'fills','Pleins');assert(!run("!!document.querySelector('#screen [data-act=\"journey733:receipts\"]')"),'pas de doublon Tickets dans Pleins');
