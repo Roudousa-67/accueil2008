@@ -110,7 +110,7 @@
   const name = target[c] || c, cat = layout.find(x => x[0] === name);
   if (cat) cat[1].push([s, f]); else layout.push([name, [[s, f]]]);
  }
- for (const cat of layout) cat[1] = cat[1].filter(([, f]) => typeof f === 'function');
+ for (const cat of layout) { const seen = new Set(); cat[1] = cat[1].filter(([n, f]) => typeof f === 'function' && !seen.has(n) && seen.add(n)); }   // 7.64 : plus de rubrique en double
  SETCATS.splice(0, SETCATS.length, ...layout.filter(c => c[1].length));
 
  // Anciens emplacements → nouveaux (boutons « Réglages » ailleurs dans l'appli, anciens liens).

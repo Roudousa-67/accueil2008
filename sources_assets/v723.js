@@ -147,11 +147,22 @@ window.Help723={
   });
   body.querySelectorAll('input,select,textarea').forEach(input=>{
    if(input.closest('[data-setting-row]'))return;
-   const name=input.getAttribute('aria-label')||input.getAttribute('placeholder')||input.getAttribute('name')||'Champ de '+section;
+   const name=input.getAttribute('aria-label')||Help723.nearLabel(input)||input.getAttribute('placeholder')||input.getAttribute('name')||'Champ de '+section;
    const key=String(++this.count),preview=input.cloneNode(true);preview.disabled=true;preview.removeAttribute('id');preview.removeAttribute('data-set');
-   this.rows.set(key,{name,section,desc:'Champ de la rubrique '+section+'. La valeur est enregistrée lorsque tu la modifies dans la page de réglages.',choices:[],preview:preview.outerHTML});
+   this.rows.set(key,{name,section,desc:(name.startsWith('Champ de ')?'Champ de la rubrique '+section:'« '+name+' » ('+section+')')+'. La valeur est enregistrée dès que tu la modifies dans la page de réglages.',choices:[],preview:preview.outerHTML});
    const button=document.createElement('button');button.textContent='ⓘ';button.setAttribute('aria-label','Informations : '+name);button.setAttribute('data-act','help723:'+key);button.style.cssText='min-width:36px;min-height:36px;background:transparent;color:inherit;border-radius:50%;border:1px solid currentColor;margin-left:4px';input.insertAdjacentElement('afterend',button);
   });
+ },
+ // 7.64 : vrai titre d'un champ (étiquette, texte juste avant, ou texte du bloc qui le contient).
+ nearLabel(input){
+  const txt=t=>t.textContent.replace(/ⓘ/g,'').replace(/\s+/g,' ').trim().replace(/\s*-?\d+([.,]\d+)?\s*(px|%|km|L|°)?$/,'').trim();
+  const clean=n=>{const t=n.cloneNode(true);t.querySelectorAll('input,select,textarea,button,option,svg,output').forEach(x=>x.remove());const kids=[...t.children].filter(k=>txt(k));if(kids.length>1){const f=txt(kids[0]);if(f.length>1&&f.length<70)return f;}return txt(t);};
+  const ok=s=>s&&s.length>1&&s.length<70&&!/^[\d\s.,:%°-]+$/.test(s);
+  const lab=input.closest('label');if(lab){const s=clean(lab);if(ok(s))return s;}
+  if(input.id){const l=document.querySelector('label[for="'+input.id+'"]');if(l){const s=clean(l);if(ok(s))return s;}}
+  let e=input.previousElementSibling;for(let i=0;i<3&&e;i++,e=e.previousElementSibling){const s=clean(e);if(ok(s))return s;}
+  let n=input.parentElement;for(let i=0;i<3&&n;i++,n=n.parentElement){if(n.matches&&n.matches('[data-setting-row],.scroll'))break;const s=clean(n);if(ok(s))return s;}
+  return '';
  },
  open(key){
   this.focus=document.activeElement;
