@@ -2,7 +2,7 @@
 // 7.61 : alertes de la route (ZFE, tunnel, aires, sortie).
 const assert=require('node:assert/strict');
 const {make}=require('./regression.cjs');
-const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','couleurs760.js','osm761.js','route761.js','stations761.js','perso761.js','info760.js','keep758.js'];
+const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','walls761.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','couleurs760.js','osm761.js','route761.js','stations761.js','perso761.js','games761.js','info760.js','keep758.js'];
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
@@ -44,6 +44,20 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(A('sortie761').includes('Sortie 12')&&A('sortie761').includes('boulangerie'),'sortie (cherchée même repérée à plus de 8 km) : '+A('sortie761'));
  // Couper une alerte
  run("act('r761:on:tunnel761:0');");at(48.0,7.5,0,25);run('Route761.tunCheck()');assert.equal(A('tunnel761'),'""','alerte coupée');
+ // 40 fonds de plus
+ assert.equal(run('Walls761.ids.length'),41,'41 nouveaux fonds');assert(run("Walls761.ids.every(id=>WALLS.some(w=>w.id===id)&&Wall760.has(id))"),'fonds branchés');
+ run("(()=>{const c=document.createElement('canvas');c.width=96;c.height=54;const g=c.getContext('2d');Walls761.ids.forEach(id=>Wall760.paint(id,g,96,54,4321))})()");
+ assert.equal(t.errors.length,0,'chaque fond se dessine\n'+t.errors.join('\n'));
+ assert(run("WALLS.some(w=>w.cat==='Abstraits animés')"),'catégorie Abstraits animés');
+ // Onglet Jeux
+ assert(run("TABS.some(x=>x[0]==='games')"),'onglet Jeux');
+ run("curSpeed=()=>({v:0,src:'test'});loc.spd=0;tab='games';render();");assert(run("document.getElementById('screen').textContent").includes('Jeu des plaques'),'page Jeux affichée (plus l’accueil)');
+ run("act('gsub:plates');act('gp:67');");assert(run("!!Games751.found()['67']"),'plaque 67 trouvée');
+ run("act('gsub:city');act('gc:pick:'+Games751.G.city.choices[0]);");assert(run('Games751.G.city.played')>=1,'devine la ville joué');
+ run("act('gsub:phone');render();");assert(run("!!document.querySelector('#screen svg')"),'QR des passagers');
+ run("curSpeed=()=>({v:60,src:'test'});act('gsub:plates');render();");assert(run("document.getElementById('screen').textContent").includes('pause'),'jeux en pause en roulant');
+ run("curSpeed=()=>({v:0,src:'test'});act('gsub:eco');");assert.equal(run('tab'),'trips','éco-conduite mène aux Trajets');
+ run("tab='home';render();");
  assert(run("Route761.reportLines().join('\\n')").includes('Alertes de la route 7.61'),'rapport');
  // Stations : rentable ou pas, logos, services, filtres
  run("loc={lat:48.58,lon:7.75,spd:0,acc:5,brg:0,alt:0,ts:Date.now()};curSpeed=()=>({v:0,src:'test'});store.set('fuel','E10');store.set('fuelConsAuto',false);store.set('fuelCons',6);const D=Stations738.demo();D[0].services=['Toilettes publiques','Boutique alimentaire','Station de lavage'];D[1].tags={brand:'E.Leclerc',compressed_air:'yes'};Stations738.state.all=D;");
@@ -110,7 +124,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(pz('close'));assert(!run("!!document.getElementById('perso761')"),'fermé');assert(!run("document.getElementById('stage').style.transform").includes('translate'),'accueil remis en plein écran');
  run("curSpeed=()=>({v:50,src:'test'});act('perso761:open')");assert(!run("!!document.getElementById('perso761')"),'pas en roulant');run("curSpeed=()=>({v:0,src:'test'})");
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- console.log('OK alertes de la route : ZFE (pas au démarrage dedans, en entrant, devant), tunnel devant, aire et services, commerce à la sortie, coupure, réglages ; miroirs OpenStreetMap ; stations rentables (€ ou litres, plus proche et moins chère), logos, services, filtre enseigne, préférées, déjà utilisées, vrais logos ; personnalisation façon iPhone');
+ console.log('OK alertes de la route : ZFE (pas au démarrage dedans, en entrant, devant), tunnel devant, aire et services, commerce à la sortie, coupure, réglages ; miroirs OpenStreetMap ; stations rentables (€ ou litres, plus proche et moins chère), logos, services, filtre enseigne, préférées, déjà utilisées, vrais logos ; personnalisation façon iPhone ; 41 fonds de plus ; onglet Jeux');
  console.log('Tests 7.61 réussis.');
  process.exit(0);
 })().catch(e=>{console.error(e);process.exit(1);});

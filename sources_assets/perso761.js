@@ -22,7 +22,7 @@
  const S = { open: false, i: 0, cat: 'Espace animé', keep: null, gridBackup: null, layer: null };
 
  // ---------- Données des choix ----------
- const GROUPS = [['Espace animé', w => w.k === 'sp751' && /Espace animé/.test(w.cat)], ['Paysages animés', w => w.cat === 'Paysages animés'], ['Ciel', w => w.cat === 'Ciel'], ['Espace', w => w.cat === 'Espace'], ['Paysages', w => /Paysages de nuit|Aurores/.test(w.cat)], ['Dégradés', w => /Dégradés|Abstraits|Carbone/.test(w.cat)]];
+ const GROUPS = [['Espace animé', w => w.k === 'sp751' && /Espace animé/.test(w.cat)], ['Paysages animés', w => w.cat === 'Paysages animés'], ['Abstraits animés', w => w.cat === 'Abstraits animés'], ['Ciel', w => w.cat === 'Ciel'], ['Espace', w => w.cat === 'Espace'], ['Paysages', w => /Paysages de nuit|Aurores/.test(w.cat)], ['Dégradés', w => /Dégradés|Abstraits|Carbone/.test(w.cat)]];
  const walls = cat => { const g = GROUPS.find(x => x[0] === cat); return safe(() => WALLS.filter(w => g && g[1](w)), []); };
  const DOCK = [['', 'D’origine'], ['rond', 'Ronds colorés'], ['carre', 'Carrés colorés'], ['neon', 'Néon'], ['mini', 'Minimal'], ['vraies', 'Vrais logos']];
  // Dispositions de l'accueil (grille 12 × 6) ; les widgets déjà là gardent leurs réglages (ex. applis de la barre).

@@ -39,7 +39,7 @@
  // ---------- Assistant ----------
  const S = { step: 1, cat: 'Espace animé', prev: '', prevKey: '' };
  const STEPS = ['Fond', 'Couleurs', 'Police', 'Icônes', 'Enregistrer'];
- const GROUPS = [['Couleur', w => false], ['Espace animé', w => w.k === 'sp751' && /Espace animé/.test(w.cat)], ['Paysages animés', w => w.cat === 'Paysages animés'], ['Ciel', w => w.cat === 'Ciel'], ['Espace fixe', w => w.cat === 'Espace'], ['Paysages fixes', w => /Paysages de nuit|Aurores/.test(w.cat)], ['Dégradés', w => /Dégradés|Abstraits|Carbone/.test(w.cat)], ['Mes photos', w => false]];
+ const GROUPS = [['Couleur', w => false], ['Espace animé', w => w.k === 'sp751' && /Espace animé/.test(w.cat)], ['Paysages animés', w => w.cat === 'Paysages animés'], ['Abstraits animés', w => w.cat === 'Abstraits animés'], ['Ciel', w => w.cat === 'Ciel'], ['Espace fixe', w => w.cat === 'Espace'], ['Paysages fixes', w => /Paysages de nuit|Aurores/.test(w.cat)], ['Dégradés', w => /Dégradés|Abstraits|Carbone/.test(w.cat)], ['Mes photos', w => false]];
  const sig = () => [safe(() => pv('wall', ''), ''), JSON.stringify(store.get('tint760_' + safe(() => profIdx(), 0), null)), safe(() => themeIdFor(profIdx()), ''), store.get('appFont', ''), store.get('iconFam', ''), store.get('dockStyle760', ''), safe(() => JSON.stringify(custom(profIdx(), themeIdFor(profIdx()))), '')].join('|');
  function refreshPreview() {
   const k = sig(); if (k === S.prevKey && S.prev) return;
