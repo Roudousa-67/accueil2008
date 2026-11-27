@@ -126,11 +126,11 @@
  }
  function paint(id, c, w, h, t, d) {
   c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
-  if (id === 'sky') drawSky(c, w, h, t, d); else if (id === 'day') drawDay(c, w, h, t, d); else draw(+id.slice(2), c, w, h, t);
+  if (window.Wall760 && Wall760.has(id)) Wall760.paint(id, c, w, h, t, d); else if (id === 'sky') drawSky(c, w, h, t, d); else if (id === 'day') drawDay(c, w, h, t, d); else draw(+id.slice(2), c, w, h, t);   // 7.60 : fonds en plus
   c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
  }
  const IDS = NAMES.map((_, k) => 'sp' + k).concat(['sky', 'day']);
- const ours = id => IDS.includes(id);
+ const ours = id => IDS.includes(id) || !!(window.Wall760 && Wall760.has(id));
  // Ajout aux fonds de l'appli (aperçus et image fixe sous l'animation).
  if (typeof WALLS !== 'undefined' && !WALLS.some(x => x.id === 'sp0')) {
   NAMES.forEach((n, k) => WALLS.push({ id: 'sp' + k, k: 'sp751', pi: 0, cat: 'Espace animé', name: n }));
