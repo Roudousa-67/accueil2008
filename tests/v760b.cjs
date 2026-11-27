@@ -2,7 +2,7 @@
 // 7.60 (suite) : page Apparence par étapes, thèmes 1/2/3, barre de gauche, aperçus dans les ⓘ, photos des conducteurs, nouveaux fonds.
 const assert=require('node:assert/strict');
 const {make}=require('./regression.cjs');
-const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','info760.js','keep758.js'];
+const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','couleurs760.js','info760.js','keep758.js'];
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
@@ -27,9 +27,21 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  // Barre de gauche
  for(const k of ['rond','carre','neon','mini','vraies']){run(`act('ap760:dock:${k}');tab='home';render();`);assert.equal(run("store.get('dockStyle760','')"),k);}
  run("act('ap760:dock:');tab='settings';render();");
+ // Couleurs assorties au fond
+ run("act('wall:');render();act('wall:x7lavande');render();");
+ const tl=run('JSON.stringify(Couleurs760.get())');assert(tl.includes('x7lavande')&&run('!!Couleurs760.get().t'),'couleurs assorties calculées : '+tl);
+ assert.equal(run('palette().acc'),run('Couleurs760.get().t.acc'),'accent du fond appliqué');
+ const hue=run("(()=>{const h=Couleurs760.get().t.acc.slice(1).match(/../g).map(x=>parseInt(x,16));return h[2]>h[1]&&h[0]>h[1]})()");assert(hue,'lavande → violet');
+ run("act('ap760:step:1');render();");assert(run("!!document.querySelector('#screen [data-col760]')"),'bandeau couleurs assorties');
+ const lav=run('Couleurs760.get().t.acc'),before0=run("JSON.stringify(Couleurs760.get())");run("act('col760:undo');render();");assert.notEqual(run("(Couleurs760.get().t||{}).acc"),lav,'annuler remet les couleurs d’avant');
+ run("act('col760:match');render();");assert(run('!!Couleurs760.get().t'),'réassortir');
+ run("act('acc:#00FF00');render();");assert.equal(run('palette().acc'),'#00FF00','couleur choisie à la main passe devant');
+ run("act('theme:01');render();");assert.equal(run('Couleurs760.get().t'),null,'thème choisi à la main passe devant');
+ run("act('col760:auto:0');act('wall:x7n2');render();");assert.equal(run('Couleurs760.get().t'),null,'Auto coupé : rien ne change');
+ run("act('col760:auto:1');act('wall:x7lavande');render();");
  // Thème 1
  run("openSet('Accueil et affichage','Apparence');Apparence760.S.step=5;render();act('ap760:save:0');render();");
- const sl=run('JSON.stringify(Apparence760.slots()[0]||null)');assert(sl&&sl.includes('x7montagnes'),'Thème 1 garde le fond');
+ const sl=run('JSON.stringify(Apparence760.slots()[0]||null)');assert(sl&&sl.includes('x7lavande'),'Thème 1 garde le fond');assert(sl.includes('tint760'),'Thème 1 garde les couleurs assorties');
  assert(run("document.querySelector('#screen').textContent").includes('Thème 1'),'cases Thème 1/2/3');
  // Aperçus ⓘ
  run("openSet('Widgets','Pochette et mode concert');render();");
@@ -47,7 +59,7 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(run("document.querySelector('#screen').textContent").includes('Photos des conducteurs'),'section Photos dans Profils');
  run("act('ph760:del:'+profIdx())");assert.equal(run('Photo760.get(profIdx())'),'','photo retirée');
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- console.log('OK Apparence par étapes (5 étapes, thème 1), barre de gauche, aperçus ⓘ, photos, '+n+' nouveaux fonds');
+ console.log('OK Apparence par étapes (5 étapes, thème 1), couleurs assorties au fond, barre de gauche, aperçus ⓘ, photos, '+n+' nouveaux fonds');
  console.log('Tests 7.60 (suite) réussis.');
  process.exit(0);
 })().catch(e=>{console.error(e);process.exit(1);});

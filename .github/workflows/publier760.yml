@@ -73,7 +73,7 @@ jobs:
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.60 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.60" --notes "Version 7.60 : bienvenue (2008 GT Line, profils, photos), visites guidées, page Apparence par étapes (Thème 1/2/3), 24 nouveaux fonds animés, styles d’icônes de la barre de gauche, aperçus dans les ⓘ."
+          gh release create v7.60 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.60" --notes "Version 7.60 : bienvenue (2008 GT Line, profils, photos), visites guidées, page Apparence par étapes (Thème 1/2/3, couleurs assorties au fond), 24 nouveaux fonds animés, styles d’icônes de la barre de gauche, aperçus dans les ⓘ."
           mkdir -p "$RUNNER_TEMP/check"
           gh release download v7.60 --pattern Accueil2008GT_v7.60.apk --dir "$RUNNER_TEMP/check"
           cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.60.apk"

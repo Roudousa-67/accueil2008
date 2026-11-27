@@ -2,7 +2,7 @@
 // 7.60 : bienvenue (2008 GT Line, bonjour/bon après-midi/bonsoir, profils) et visites guidées.
 const assert=require('node:assert/strict');
 const {make}=require('./regression.cjs');
-const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','info760.js','keep758.js'];
+const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','couleurs760.js','info760.js','keep758.js'];
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{w,run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
