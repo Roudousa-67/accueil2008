@@ -45,12 +45,12 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(run("document.querySelector('#screen').textContent").includes('Thème 1'),'cases Thème 1/2/3');
  // Aperçus ⓘ
  run("openSet('Widgets','Pochette et mode concert');render();");
- const before=run("String(store.get('coverBg758',true))");
+ const before=run("String(store.get('coverBg758',false))");
  const k=run("(()=>{const b=document.querySelectorAll('#screen [data-act^=\"help723:\"]');for(const e of b){const a=e.dataset.act;if(a!=='help723:close'&&a!=='help723:section'){act(a);return a}}return ''})()");
  assert(k,'un ⓘ');
  t.timers.filter(x=>x.ms===30).forEach(x=>x.fn());
  assert(run('!!Help723.current&&!!Help723.current.previews'),'aperçus préparés');
- assert.equal(run("String(store.get('coverBg758',true))"),before,'réglage remis comme avant');
+ assert.equal(run("String(store.get('coverBg758',false))"),before,'réglage remis comme avant');
  run("act('help723:close')");
  // Photo
  run("Photo760.set(profIdx(),'data:image/png;base64,iVBORw0KGgo=');tab='home';render();");

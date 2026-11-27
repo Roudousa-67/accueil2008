@@ -39,7 +39,7 @@
  // Pochette en fond : l'accueil prend les couleurs du disque en cours.
  let coverEl = null;
  function coverBg(m) {
-  const want = on('cover758') && store.get('coverBg758', true) !== false && tab === 'home' && m && m.playing && m.art;
+  const want = on('cover758') && store.get('coverBg758', false) === true && tab === 'home' && m && m.playing && m.art;
   const st = safe(() => $('stage'), null); if (!st) return;
   if (!want) { if (coverEl) { coverEl.remove(); coverEl = null; } return; }
   // Cadre à la taille exacte de l'écran (rien ne déborde) ; l'image floutée, plus grande, est rognée dedans.
@@ -47,12 +47,13 @@
   const img = coverEl.firstChild, u = 'url("' + String(m.art).replace(/"/g, '%22') + '")'; if (img.style.backgroundImage !== u) img.style.backgroundImage = u;
  }
  // Mode concert : à l'arrêt depuis 30 s, musique en cours, sur l'accueil.
- const DELAY = 30000;
+ const DELAY0 = 120000, DELAYS = [[30000, '30 s'], [60000, '1 min'], [120000, '2 min'], [300000, '5 min'], [600000, '10 min']];
+ const delayNow = () => { const v = Number(store.get('concertDelay762', DELAY0)); return DELAYS.some(d => d[0] === v) ? v : DELAY0; };   // 7.62 : réglable (2 min par défaut)
  let still = 0, concertEl = null, concertOff = 0;
  function concert(m) {
   const v = safe(() => curSpeed().v, 0) || 0, now = Date.now();
   if (v > 3) still = 0; else if (!still) still = now;
-  const want = on('concert758') && store.get('concert758', true) !== false && tab === 'home' && m && m.playing && still && now - still > DELAY && now > concertOff;
+  const want = on('concert758') && store.get('concert758', true) !== false && tab === 'home' && m && m.playing && still && now - still > delayNow() && now > concertOff;
   if (!want) { if (concertEl) { concertEl.remove(); concertEl = null; } return; }
   const st = safe(() => $('stage'), null); if (!st) return;
   if (!concertEl || !concertEl.isConnected) { concertEl = document.createElement('div'); concertEl.id = 'concert758'; concertEl.setAttribute('data-act', 'mu758:off'); st.appendChild(concertEl); }
@@ -62,13 +63,14 @@
    concertEl.innerHTML = `<div class="bg" style="background-image:${m.art ? 'url(&quot;' + esc(m.art) + '&quot;)' : 'none'};background-color:#111"></div><div style="width:380px;height:380px;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px #000a;background:#222;display:flex;align-items:center;justify-content:center;font-size:120px">${m.art ? `<img src="${esc(m.art)}" alt="" style="width:100%;height:100%;object-fit:cover">` : '🎵'}</div><div style="max-width:560px"><div style="font-size:46px;font-weight:800;line-height:1.1">${esc(m.title || '')}</div><div style="font-size:26px;opacity:.8;margin:12px 0 24px">${esc(m.artist || '')}</div><span class="eqc">${'<i></i>'.repeat(9)}</span><div style="font-size:14px;opacity:.6;margin-top:22px">Touche l’écran pour revenir · disparaît en roulant</div></div>`;
   }
  }
- setInterval(() => safe(() => { if (concertEl || (still && Date.now() - still > DELAY)) concert(typeof media !== 'undefined' ? media : null); else { const v = safe(() => curSpeed().v, 0) || 0; if (v > 3) still = 0; else if (!still) still = Date.now(); } }), 1000);
+ setInterval(() => safe(() => { if (concertEl || (still && Date.now() - still > delayNow())) concert(typeof media !== 'undefined' ? media : null); else { const v = safe(() => curSpeed().v, 0) || 0; if (v > 3) still = 0; else if (!still) still = Date.now(); } }), 1000);
  // Réglages : avec Multimédia.
  const mcat = SETCATS.find(c => /multim|média|musique/i.test(c[0])) || SETCATS.find(c => c[1].some(x => /multim/i.test(x[0])));
- const yn = (p, k) => chipBtn(p, 'mu758:set:' + k + ':1', 'Oui', store.get(k, true) !== false) + chipBtn(p, 'mu758:set:' + k + ':0', 'Non', store.get(k, true) === false);
- if (mcat && !mcat[1].some(s => s[0] === 'Pochette et mode concert')) mcat[1].push(['Pochette et mode concert', p => setRow(p, 'Pochette en fond de l’accueil', 'Pendant la lecture, la pochette floutée remplace le fond.', yn(p, 'coverBg758')) + setRow(p, 'Mode concert à l’arrêt', 'Après 30 s à l’arrêt avec de la musique : pochette, titre et égaliseur en grand. Un appui le ferme pour 10 minutes.', yn(p, 'concert758'))]);
+ const yn = (p, k, d = true) => chipBtn(p, 'mu758:set:' + k + ':1', 'Oui', store.get(k, d) === true || (d && store.get(k, d) !== false)) + chipBtn(p, 'mu758:set:' + k + ':0', 'Non', store.get(k, d) === false);
+ if (mcat && !mcat[1].some(s => s[0] === 'Pochette et mode concert')) mcat[1].push(['Pochette et mode concert', p => setRow(p, 'Pochette en fond de l’accueil', 'Pendant la lecture, la pochette floutée remplace le fond.', yn(p, 'coverBg758', false)) + setRow(p, 'Mode concert à l’arrêt', 'À l’arrêt avec de la musique : pochette, titre et égaliseur en grand. Un appui le ferme pour 10 minutes.', yn(p, 'concert758')) + setRow(p, 'Mode concert : au bout de', 'Temps à l’arrêt avant qu’il s’affiche (un feu rouge dure souvent moins d’1 min).', DELAYS.map(([ms, l]) => chipBtn(p, 'mu762:delay:' + ms, l, delayNow() === ms)).join(''))]);
  const act0 = window.act;
  window.act = function (a) {
+  if (typeof a === 'string' && a.startsWith('mu762:delay:')) { store.set('concertDelay762', Number(a.slice(12))); render(); return; }
   if (a === 'mu758:off') { concertOff = Date.now() + 10 * 60000; if (concertEl) { concertEl.remove(); concertEl = null; } return; }
   if (typeof a === 'string' && a.startsWith('mu758:set:')) { const [, , k, v] = a.split(':'); store.set(k, v === '1'); render(); return; }
   return act0.apply(this, arguments);
