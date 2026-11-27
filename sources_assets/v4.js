@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.57';
+const APP_VERSION = '7.58';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.58','Novembre 2026',['La page ne remonte plus en haut quand tu touches une option (réglages, Trajets, Entretien…)','Trajets rangé : Trajets · Stats · Éco · Pleins · Conso · Tickets · Stations ; Entretien garde l’entretien ; réglages « Trajets » et « Carburant et tickets » séparés','Barre d’applis : la fenêtre « Remplacer par… » répond enfin et affiche les vrais logos','Musique : pochette floutée en fond, égaliseur animé, logo des radios, mode concert après 30 s à l’arrêt']],
  ['7.57','Novembre 2026',['Ticket lu automatiquement : le téléphone lit le ticket (date, litres, prix au litre, total), tu vérifies, et l’autoradio remplit le plein']],
  ['7.56','Novembre 2026',['Tickets reçus du téléphone : bouton « Joindre au plein » dans Transfert depuis le téléphone, et rappel « Ticket non enregistré » si un ticket n’a pas été rattaché à un plein']],
  ['7.55','Novembre 2026',['Fond d’écran : 18 fonds d’espace animés, Ciel réel (soleil, lune, étoiles à leur vraie place) et Fond qui suit la journée ; animation Lente ou Fixe (passe seule en Fixe si l’autoradio est trop juste)','Décor de la route : Voie lactée la nuit par temps clair']],
@@ -128,13 +129,14 @@ function dateTxt(c, now) {
 
 // ---------- barre du haut ----------
 const tripSubs = [['hist', 'Historique'], ['charts', 'Graphiques'], ['eco', 'Éco-conduite']];
+const svcSubs = [['plan', 'Plan constructeur'], ['pleins', 'Pleins'], ['bilan', 'Bilan'], ['log', 'Mon carnet']];   // 7.58 : liste modifiable
 let tripSub = 'hist', svcSub = 'plan';
 window.header = function (p) {
   if (p.noChrome) return '';
   const name = profiles()[profIdx()];
   const uiTab = tab === 'eco' || tab === 'tracks' ? 'trips' : tab;
   const tabs = TABS.map(([id, l]) => `<button data-act="tab:${id}" style="height:42px;padding:0 16px;border-radius:${Math.max(6, p.r - 10)}px;font-size:15px;font-weight:600;${uiTab === id ? `background:${p.acc};color:${p.onAcc}` : `color:${p.onmut}`}">${l}</button>`).join('');
-  const subL = uiTab === 'trips' ? tripSubs.map(([k, l]) => ['tsub:' + k, l, tripSub === k && tab !== 'tracks']) : uiTab === 'service' ? [['ssub:plan', 'Plan constructeur', svcSub === 'plan'], ['ssub:pleins', 'Pleins', svcSub === 'pleins'], ['ssub:bilan', 'Bilan', svcSub === 'bilan'], ['ssub:log', 'Mon carnet', svcSub === 'log']] : null;
+  const subL = uiTab === 'trips' ? tripSubs.map(([k, l]) => ['tsub:' + k, l, tripSub === k && tab !== 'tracks']) : uiTab === 'service' ? svcSubs.map(([k, l]) => ['ssub:' + k, l, svcSub === k]) : null;
   const sub = subL ? `<div style="display:flex;gap:2px;background:${p.card2};border-radius:${Math.max(8, p.r - 8)}px;padding:2px">${subL.map(([a, l, on]) => `<button data-act="${a}" style="height:38px;padding:0 ${subL.length > 3 ? 9 : 12}px;border-radius:${Math.max(6, p.r - 10)}px;font-size:13.5px;font-weight:600;${on ? `background:${p.txt};color:${p.card}` : `color:${p.mut}`}">${l}</button>`).join('')}</div>` : '';
   const c = clk(), cs = CLK_SIZE[c.size] || CLK_SIZE.m;
   const ff = c.font ? `font-family:'${c.font}',Inter,sans-serif;` : '';
