@@ -898,7 +898,7 @@ function paint() {
   const J = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   setK('dateTxt', `${J[now.getDay()]} ${now.getDate()} ${M[now.getMonth()]}`);
   const name = profiles()[profIdx()];
-  setK('hello', (now.getHours() >= 18 || now.getHours() < 5 ? 'Bonsoir ' : 'Bonjour ') + name);
+  setK('hello', (window.greet760 ? greet760() + ' ' : (now.getHours() >= 18 || now.getHours() < 5 ? 'Bonsoir ' : 'Bonjour ')) + name);   // 7.60 : bonjour / bon après-midi / bonsoir
   setK('avatar', name.charAt(0).toUpperCase());
   // vitesse
   const s = curSpeed(), tol = parseInt(store.get('tol', 3), 10) || 0;
