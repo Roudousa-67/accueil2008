@@ -1,6 +1,6 @@
 {
   "version": "7.61",
   "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.61/Accueil2008GT_v7.61.apk",
-  "sha256": "",
+  "sha256": "2b55c0c8254cfda82ecd9b1eb2576f660cce85f4858c99450a30ef7bfafeaad4",
   "notes": "Onglet « Jeux » (plaques, devine la ville, blind test, jeux sur le téléphone des passagers). 41 nouveaux fonds animés. Nouveau « Personnaliser mon écran » façon iPhone : ton accueil en direct à côté, une étape à la fois (fond, couleurs, écriture, disposition, icônes). Stations : ce que tu gagnes ou perds en allant à chaque station (trajet compris, en vert ou rouge), vrais logos des enseignes, services (WC, boutique, lavage…), filtre par enseigne, préférées et déjà utilisées. OpenStreetMap plus fiable (serveurs de secours). Alertes de la route (GPS et navigation › Alertes de la route) : zones à faibles émissions avec ta vignette Crit’Air, tunnel devant (allume tes feux), prochaine aire d’autoroute et ses services, commerce utile à la prochaine sortie. Chaque alerte se coupe."
 }

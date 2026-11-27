@@ -1,6 +1,6 @@
 {
-  "version": "7.60",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.60/Accueil2008GT_v7.60.apk",
-  "sha256": "4ab2998b6bca148c4fc2fea5ad726192780c165c340cd2b3b1d8cd621a5d414a",
-  "notes": "Bienvenue dans ta 2008 GT Line : choisis ou crée le conducteur, puis une visite guidée sur le vrai écran (flèches, explications, comment couper chaque chose). À relancer quand tu veux, par catégorie : Réglages › Système › Aide et visites guidées. Bonjour, bon après-midi ou bonsoir selon l’heure. Photo de chaque conducteur. Nouvelle page Apparence par étapes (fond, couleurs, police, icônes) avec Thème 1, 2, 3 ; les couleurs s’accordent toutes seules au fond choisi. 24 nouveaux fonds animés (espace et paysages). 6 styles d’icônes pour la barre de gauche, dont les vrais logos. Chaque ⓘ des réglages montre l’accueil avec chaque choix."
+  "version": "7.61",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.61/Accueil2008GT_v7.61.apk",
+  "sha256": "2b55c0c8254cfda82ecd9b1eb2576f660cce85f4858c99450a30ef7bfafeaad4",
+  "notes": "Onglet « Jeux » (plaques, devine la ville, blind test, jeux sur le téléphone des passagers). 41 nouveaux fonds animés. Nouveau « Personnaliser mon écran » façon iPhone : ton accueil en direct à côté, une étape à la fois (fond, couleurs, écriture, disposition, icônes). Stations : ce que tu gagnes ou perds en allant à chaque station (trajet compris, en vert ou rouge), vrais logos des enseignes, services (WC, boutique, lavage…), filtre par enseigne, préférées et déjà utilisées. OpenStreetMap plus fiable (serveurs de secours). Alertes de la route (GPS et navigation › Alertes de la route) : zones à faibles émissions avec ta vignette Crit’Air, tunnel devant (allume tes feux), prochaine aire d’autoroute et ses services, commerce utile à la prochaine sortie. Chaque alerte se coupe."
 }
