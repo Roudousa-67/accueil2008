@@ -2621,7 +2621,7 @@ document.addEventListener('pointerup', (e) => { if (e.target.closest && e.target
 { const wd0 = welDraw; welDraw = function () { wd0.apply(this, arguments); if (!welEl) return;
   const now = new Date(), H = now.getHours(), name = profiles()[profIdx()], J = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
   const wt = (document.querySelector('#screen [data-k="wTemp"]') || {}).textContent || '';
-  const t = [...welEl.querySelectorAll('div')].find((d) => d.textContent === 'Bienvenue'); if (t) t.textContent = `${H >= 18 || H < 5 ? 'Bonsoir' : 'Bonjour'} ${name}`;
+  const t = [...welEl.querySelectorAll('div')].find((d) => d.textContent === 'Bienvenue'); if (t) t.textContent = `${window.greet760 ? greet760() : (H >= 18 || H < 5 ? 'Bonsoir' : 'Bonjour')} ${name}`;
   const s2 = [...welEl.querySelectorAll('div')].find((d) => d.textContent === 'Choisissez l\'utilisateur');
   if (s2) s2.textContent = `${J[now.getDay()]} ${now.getDate()} · ${fmtTime(now)}${wt && wt !== '--°' ? ' · ' + wt : ''} — touche ton profil si ce n'est pas toi`; }; }
 { const ws0 = welShow; welShow = function () { ws0.apply(this, arguments); if (welEl && welLeft > 8) { welLeft = 8; welDraw(); } }; }
