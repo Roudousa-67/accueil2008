@@ -45,8 +45,8 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  // Couper une alerte
  run("act('r761:on:tunnel761:0');");at(48.0,7.5,0,25);run('Route761.tunCheck()');assert.equal(A('tunnel761'),'""','alerte coupée');
  assert(run("Route761.reportLines().join('\\n')").includes('Alertes de la route 7.61'),'rapport');
- // Stations : rentable ou pas
- run("loc={lat:48.58,lon:7.75,spd:0,acc:5,brg:0,alt:0,ts:Date.now()};curSpeed=()=>({v:0,src:'test'});store.set('fuel','E10');store.set('fill761',40);store.set('fuelConsAuto',false);store.set('fuelCons',6);Stations738.state.all=Stations738.demo();");
+ // Stations : rentable ou pas, logos, services, filtres
+ run("loc={lat:48.58,lon:7.75,spd:0,acc:5,brg:0,alt:0,ts:Date.now()};curSpeed=()=>({v:0,src:'test'});store.set('fuel','E10');store.set('fuelConsAuto',false);store.set('fuelCons',6);const D=Stations738.demo();D[0].services=['Toilettes publiques','Boutique alimentaire','Station de lavage'];D[1].tags={brand:'E.Leclerc',compressed_air:'yes'};Stations738.state.all=D;");
  run("getJSON=async u=>{__req761.push(u);if(u.includes('project-osrm')){const n=u.split('/driving/')[1].split('?')[0].split(';').length;return {code:'Ok',distances:[Array.from({length:n},(_,i)=>i?i*4000:0)],durations:[Array.from({length:n},(_,i)=>i*300)]}}return {elements:[]}};");
  run("tab='trips';act('tsub:stations');render();");
  assert(run("!!document.querySelector('#screen .st738')"),'page Stations');
@@ -55,18 +55,37 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  assert(rows.length>=4,'gain ou perte à côté du prix : '+rows.length);
  assert(rows.some(x=>x.includes('🏆')),'meilleur choix');assert(rows.some(x=>x.includes('la + proche')),'plus proche');
  assert(rows.every(x=>x.length<24),'liste pas chargée : '+rows.join(' | '));
- assert(run("[...document.querySelectorAll('#screen .st738-row .rent761')].every(e=>/#2f9e44|#e03131|#8a94a3|rgb/.test(e.getAttribute('style')))"),'vert ou rouge');
- run("act(document.querySelector('#screen .st738-row').dataset.act);render();");
- const det=run("(document.querySelector('#screen .st738-card .rent761')||{}).textContent||''");
- assert(/Plein [0-9,]+ \+ trajet [0-9,]+ = [0-9,]+\s€.*aller-retour/.test(det),'calcul dans la fiche : '+det);
+ assert(run("[...document.querySelectorAll('#screen .st738-row .rent761')].every(e=>/#2f9e44|#e03131|#8a94a3/.test(e.getAttribute('style')))"),'vert ou rouge');
  assert(run("__req761.some(u=>u.includes('project-osrm'))"),'distances par la route demandées');
- assert(run("document.querySelector('#screen .rent761-bar').textContent").includes('par la route'),'distances par la route utilisées');
- const C=run("JSON.stringify(Rent761.compute(Stations738.rows()))"),c=JSON.parse(C),best=c.out[c.best];
- assert(Math.abs(best.total-(best.fillCost+best.trip))<1e-9&&Math.abs(best.fillCost-40*run(`Stations738.rows().find(s=>s.id===${JSON.stringify(c.best)}).p`))<1e-9,'total = plein + trajet');
- run("act('rent761:fill:20');render();");assert.equal(run('Rent761.fill()'),20,'litres réglables');
- assert(run("document.querySelector('#screen .rent761-bar').textContent").includes('6 L/100'),'conso affichée');
+ // En euros (par défaut 50 €)
+ assert.equal(run("Rent761.amt().u"),'eur','montant en € par défaut');
+ run("act(document.querySelector('#screen .st738-row').dataset.act);render();");
+ let det=run("(document.querySelector('#screen .st738-card .rent761')||{}).textContent||''");
+ assert(/Pour 50,00 € : [0-9,]+ L achetés − [0-9,]+ L brûlés pour l’aller-retour = [0-9,]+ L utiles/.test(det),'calcul en € dans la fiche : '+det);
+ assert(det.includes('la moins chère'),'comparé aussi à la moins chère');
+ const C=JSON.parse(run("JSON.stringify(Rent761.compute(Stations738.rows()))")),o=C.out[C.best],ref=C.out[C.near];
+ assert(Math.abs(o.diff-((ref.net-o.net)*ref.p))<1e-9&&o.diff<=0,'gain = litres utiles en plus × prix de la plus proche');
+ // En litres
+ run("act('rent761:unit:l');act('rent761:amt:l:40');render();");
+ det=run("(document.querySelector('#screen .st738-card .rent761')||{}).textContent||''");
+ assert(/Plein 40,0 L : [0-9,]+ € \+ trajet [0-9,]+ € = [0-9,]+ €/.test(det),'calcul en litres : '+det);
+ run("act('rent761:unit:eur');render();");
+ // Logos et services
+ assert(run("document.querySelectorAll('#screen .st738-row .lg761').length")>=4,'logos dans la liste');
+ assert(run("[...document.querySelectorAll('#screen .st738-row .lg761 img')].some(i=>i.src.includes('totalenergies.fr'))"),'logo TotalEnergies');
+ assert.equal(run("Rent761.brandOf({name:'Station de Geispolsheim',tags:{brand:'E.Leclerc'}}).key"),'E.Leclerc','enseigne lue dans OpenStreetMap');
+ const sv=run("[...document.querySelectorAll('#screen .st738-row .sv761')].map(e=>e.textContent).join(' / ')");
+ assert(sv.includes('WC')&&sv.includes('Boutique')&&sv.includes('Lavage')&&sv.includes('Gonflage'),'services : '+sv);
+ // Filtre enseigne, préférées, déjà utilisées
+ run("store.set('stBrand761','ARAL');render();");assert(run("Stations738.rows().every(s=>Rent761.brandOf(s).key==='ARAL')")&&run("Stations738.rows().length")>=1,'filtre par enseigne');
+ run("store.set('stBrand761','fav');render();");assert.equal(run("Stations738.rows().length"),0,'aucune préférée');
+ run("store.set('stBrand761','all');render();const s=Stations738.rows()[2];act('st738:pick:'+s.id);act('rent761:fav:'+s.id);store.set('stBrand761','fav');render();");
+ assert.equal(run("Stations738.rows().length"),1,'une préférée');assert(run("document.querySelector('#screen .st738-row').textContent").includes('★'),'étoile dans la liste');
+ run("store.set('stBrand761','all');Rent761.watchFills();const st=Stations738.state.all[1];loc={lat:st.lat,lon:st.lon,spd:0,acc:5,brg:0,alt:0,ts:Date.now()};store.set('fuelLog',(store.get('fuelLog',[])||[]).concat([{t:Date.now(),l:30,e:50,k:0,s:''}]));Rent761.watchFills();store.set('stBrand761','used');render();");
+ assert.equal(run("Stations738.rows().length"),1,'déjà utilisée après un plein');
+ run("store.set('stBrand761','all');render();");
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- console.log('OK alertes de la route : ZFE (pas au démarrage dedans, en entrant, devant), tunnel devant, aire et services, commerce à la sortie, coupure, réglages ; miroirs OpenStreetMap ; stations rentables (plein + trajet A/R par la route)');
+ console.log('OK alertes de la route : ZFE (pas au démarrage dedans, en entrant, devant), tunnel devant, aire et services, commerce à la sortie, coupure, réglages ; miroirs OpenStreetMap ; stations rentables (€ ou litres, plus proche et moins chère), logos, services, filtre enseigne, préférées, déjà utilisées');
  console.log('Tests 7.61 réussis.');
  process.exit(0);
 })().catch(e=>{console.error(e);process.exit(1);});
