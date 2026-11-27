@@ -14,7 +14,7 @@
  const H = Help723;
  const strip = h => String(h || '').replace(/ src="[^"]*"/g, '').replace(/\s+/g, ' ');
  const prefix = a => String(a).replace(/[^:]*$/, '');
- const OFF = /^(non|désactivé|desactive|off|aucun|jamais|coupé|caché|masqué)$/i, ONL = /^(oui|activé|active|on|affiché|visible)$/i;
+ const OFF = /^(non|désactivée?|desactivee?|off|aucun|jamais|coupée?|cachée?|masquée?|détection désactivée)$/i, ONL = /^(oui|activée?|active|on|affichée?|visible|détection activée)$/i;
  // Les choix à essayer : un interrupteur, ou les boutons d'un même groupe que le choix actuel.
  function choices(item) {
   const acts = item.acts || [], cur = acts.find(a => a.on);

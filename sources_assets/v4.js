@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.64';
+const APP_VERSION = '7.65';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.65','Novembre 2026',['Barre de raccourcis : une seule liste au lieu de deux ; chaque bouton montre l’appli qu’il ouvre, avec « Choisir l’appli », ▲ ▼ pour l’ordre et « Retirer »']],
  ['7.64','Novembre 2026',['Réglages : plus de rubrique en double, et chaque champ a un vrai titre (fini les « Champ de… »)','Widget route : taille (petit, moyen, grand) et fluidité (économie, normal, fluide) dans Widgets › Vue voiture et route','Copie de sécurité chaque semaine, à récupérer sur ton téléphone par QR (Système › Sauvegarde)','Nettoyage automatique chaque semaine (Système › Stockage et nettoyage)']],
  ['7.63','Novembre 2026',['Chaque ⓘ des réglages montre maintenant deux images, « Activé » et « Désactivé » (ou une par choix), et le bouton pour passer de l’un à l’autre ; aussi pour les interrupteurs, qui n’en avaient pas']],
  ['7.62','Novembre 2026',['Pochette floutée en fond de l’accueil : coupée par défaut (à remettre dans Réglages › Widgets › Pochette et mode concert)','Mode concert : délai réglable (30 s, 1, 2, 5 ou 10 min), 2 min par défaut pour ne plus s’afficher au feu rouge','Décor ville : plus de grosse barre rouge (toboggan des parcs) qui traversait la route']],
