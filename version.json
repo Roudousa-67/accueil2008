@@ -1,6 +1,6 @@
 {
-  "version": "7.64",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.64/Accueil2008GT_v7.64.apk",
-  "sha256": "cccbf22f8b3d13d9d4b9cf4cb8e5541a2ae53901d08a4b8548a5bed1023ca93a",
-  "notes": "Réglages rangés : plus de doublon, chaque champ a un vrai titre. Widget route : taille et fluidité réglables. Copie de sécurité chaque semaine, à récupérer sur ton téléphone. Nettoyage automatique chaque semaine."
+  "version": "7.65",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.65/Accueil2008GT_v7.65.apk",
+  "sha256": "b93da71e40e248c4fef78d8ded2cb750807297f2db2f94aa34f4ddfb756cdd89",
+  "notes": "Barre de raccourcis : une seule liste au lieu de deux. Chaque bouton montre l’appli qu’il ouvre, avec « Choisir l’appli », ▲ ▼ pour l’ordre et « Retirer »."
 }
