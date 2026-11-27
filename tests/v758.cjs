@@ -21,11 +21,14 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  const eq=run("[...document.querySelectorAll('#screen .eq758')].length");assert(eq>=1,'égaliseur posé');
  assert(run("[...document.querySelectorAll('#screen .eq758')].every(e=>e.parentElement.lastElementChild===e)"),'égaliseur en dernier, par-dessus (pas dans le texte)');
  assert(run("!!document.querySelector('#screen .eq758.on758')"),'égaliseur animé pendant la lecture');
+ assert(!run("!!document.getElementById('cover758')"),'7.62 : pochette en fond coupée par défaut');
+ run("store.set('coverBg758',true);paint();");
  assert(run("!!document.getElementById('cover758')")&&run("getComputedStyle(document.getElementById('cover758')).pointerEvents")==='none','pochette en fond, sans capter les appuis');
  stop();run("Music758.concert(media)");assert(!run("!!document.getElementById('concert758')"),'pas de concert tout de suite');
- t.advance(31000);stop();run("Music758.concert(media)");assert(run("!!document.getElementById('concert758')"),'concert après 30 s à l’arrêt');
+ t.advance(61000);stop();run("Music758.concert(media)");assert(!run("!!document.getElementById('concert758')"),'7.62 : pas après 1 min (feu rouge)');
+ t.advance(60000);stop();run("Music758.concert(media)");assert(run("!!document.getElementById('concert758')"),'concert après 2 min à l’arrêt (par défaut)');
  run("act('mu758:off')");assert(!run("!!document.getElementById('concert758')"),'un appui le ferme');
- t.advance(11*60000);stop();run("Music758.concert(media)");t.advance(31000);stop();run("Music758.concert(media)");assert(run("!!document.getElementById('concert758')"),'revient plus tard');
+ run("act('mu762:delay:30000')");t.advance(11*60000);stop();run("Music758.concert(media)");t.advance(31000);stop();run("Music758.concert(media)");assert(run("!!document.getElementById('concert758')"),'délai réglable (30 s) et revient plus tard');
  go();run("Music758.concert(media)");assert(!run("!!document.getElementById('concert758')"),'disparaît en roulant');
  // Logo de radio
  w.getJSON=async()=>[{name:'France Bleu Alsace',favicon:'https://exemple.fr/logo.png'}];
