@@ -95,11 +95,11 @@
    for (let i = 0; i < osm.length; i++) { const d = hav(s.lat, s.lon, osm[i].lat, osm[i].lon); if (d < bd) { bd = d; best = i; } }
    if (best < 0) continue;
    used.add(best); const o = osmInfo(osm[best].tags);
-   s.osm = true; if (!s.name && o.brand) s.name = o.brand;
+   s.osm = true; s.tags = osm[best].tags; if (!s.name && o.brand) s.name = o.brand;
    if (s.cash == null) s.cash = o.cash; if (s.card == null) s.card = o.card; if (s.adblue == null) s.adblue = o.adblue; s.hours = o.hours;
   }
   const extra = osm.filter((o, i) => !used.has(i)).map(o => { const x = osmInfo(o.tags);
-   return { c: 'OSM', id: 'osm' + o.lat.toFixed(5) + o.lon.toFixed(5), name: x.brand, city: o.tags['addr:city'] || '', addr: [[o.tags['addr:street'], o.tags['addr:housenumber']].filter(Boolean).join(' '), o.tags['addr:city']].filter(Boolean).join(', '), lat: o.lat, lon: o.lon, prices: {}, maj: {}, services: [], out: [], auto24: null, card: x.card, cash: x.cash, adblue: x.adblue, highway: false, osm: true, hours: x.hours }; });
+   return { c: 'OSM', tags: o.tags, id: 'osm' + o.lat.toFixed(5) + o.lon.toFixed(5), name: x.brand, city: o.tags['addr:city'] || '', addr: [[o.tags['addr:street'], o.tags['addr:housenumber']].filter(Boolean).join(' '), o.tags['addr:city']].filter(Boolean).join(', '), lat: o.lat, lon: o.lon, prices: {}, maj: {}, services: [], out: [], auto24: null, card: x.card, cash: x.cash, adblue: x.adblue, highway: false, osm: true, hours: x.hours }; });
   const all = stations.concat(extra);
   for (const s of all) if (!s.name) s.name = s.city ? 'Station de ' + title(s.city) : 'Station';
   return all;
@@ -168,7 +168,7 @@
    .filter(s => adblue ? s.adblue === true : s.p > 0)
    .filter(s => f.pay === 'card' ? (s.card === true || s.auto24) : f.pay === 'cash' ? s.cash === true : f.pay === 'auto' ? !!s.auto24 : true);
   const key = f.sort === 'price' && !adblue ? 'p' : 'dist';
-  return out.sort((a, b) => (a.closed ? 1 : 0) - (b.closed ? 1 : 0) || a[key] - b[key]);
+  return (window.St761 && St761.filter ? St761.filter(out) : out).sort((a, b) => (a.closed ? 1 : 0) - (b.closed ? 1 : 0) || a[key] - b[key]);
  }
  function color(s, low, high) { if (!(s.p > 0)) return '#5f6b78'; const r = high > low ? (s.p - low) / (high - low) : 0; return `hsl(${Math.round(125 - r * 125)},62%,${36 + Math.round(r * 4)}%)`; }
  function badges(s, fuel) {
@@ -221,7 +221,7 @@
   }
   for (const s of list) {
    const on = s.id === S.pickId, text = s.p > 0 ? price3(s.p) : 'AdBlue';
-   const icon = L.divIcon({ className: 'st738-pin', html: `<div class="st738-bub${on ? ' on' : ''}${s.closed ? ' off' : ''}" style="--c:${color(s, low, high)}"><b>${esc(text)}</b><small>${esc(String(s.name).slice(0, 14))}</small></div>`, iconSize: null, iconAnchor: [0, 0] });
+   const icon = L.divIcon({ className: 'st738-pin', html: `<div class="st738-bub${on ? ' on' : ''}${s.closed ? ' off' : ''}" style="--c:${color(s, low, high)}">${window.St761 ? St761.logo(s, 18) : ''}<b>${esc(text)}</b><small>${esc(String(s.name).slice(0, 14))}</small></div>`, iconSize: null, iconAnchor: [0, 0] });
    L.marker([s.lat, s.lon], { icon, zIndexOffset: on ? 1000 : Math.round(-s.dist * 10) }).addTo(layer).on('click', () => window.act('st738:pick:' + s.id));
   }
   const fk = JSON.stringify(list.map(s => s.id));
