@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.57';
+const APP_VERSION = '7.58';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.58','Novembre 2026',['Barre d’applis : la fenêtre « Remplacer par… » répond enfin (choisir, Fermer, toucher à côté) et affiche les vrais logos des applis','Musique : pochette floutée en fond, égaliseur animé sur le widget, logo des radios, mode concert après 30 s à l’arrêt']],
  ['7.57','Novembre 2026',['Ticket lu automatiquement : le téléphone lit le ticket (date, litres, prix au litre, total), tu vérifies, et l’autoradio remplit le plein']],
  ['7.56','Novembre 2026',['Tickets reçus du téléphone : bouton « Joindre au plein » dans Transfert depuis le téléphone, et rappel « Ticket non enregistré » si un ticket n’a pas été rattaché à un plein']],
  ['7.55','Novembre 2026',['Fond d’écran : 18 fonds d’espace animés, Ciel réel (soleil, lune, étoiles à leur vraie place) et Fond qui suit la journée ; animation Lente ou Fixe (passe seule en Fixe si l’autoradio est trop juste)','Décor de la route : Voie lactée la nuit par temps clair']],
