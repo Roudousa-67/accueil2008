@@ -1,6 +1,6 @@
 {
-  "version": "7.59",
-  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.59/Accueil2008GT_v7.59.apk",
-  "sha256": "3e82eba931916eeffa959057e488ba43124134d11c30de3b520152ce62d10cea",
-  "notes": "Trajets → Bilan : temps perdu dans les bouchons, carte de chaleur de tes routes, zones explorées, frais kilométriques au barème officiel (PDF par e-mail), classement de tes stations. Éco : classement de la famille du mois. Pleins : bouton « Conso par plein »."
+  "version": "7.60",
+  "apk": "https://github.com/Roudousa-67/accueil2008/releases/download/v7.60/Accueil2008GT_v7.60.apk",
+  "sha256": "4ab2998b6bca148c4fc2fea5ad726192780c165c340cd2b3b1d8cd621a5d414a",
+  "notes": "Bienvenue dans ta 2008 GT Line : choisis ou crée le conducteur, puis une visite guidée sur le vrai écran (flèches, explications, comment couper chaque chose). À relancer quand tu veux, par catégorie : Réglages › Système › Aide et visites guidées. Bonjour, bon après-midi ou bonsoir selon l’heure. Photo de chaque conducteur. Nouvelle page Apparence par étapes (fond, couleurs, police, icônes) avec Thème 1, 2, 3 ; les couleurs s’accordent toutes seules au fond choisi. 24 nouveaux fonds animés (espace et paysages). 6 styles d’icônes pour la barre de gauche, dont les vrais logos. Chaque ⓘ des réglages montre l’accueil avec chaque choix."
 }
