@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.63';
+const APP_VERSION = '7.64';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.64','Novembre 2026',['Réglages : plus de rubrique en double, et chaque champ a un vrai titre (fini les « Champ de… »)','Widget route : taille (petit, moyen, grand) et fluidité (économie, normal, fluide) dans Widgets › Vue voiture et route','Copie de sécurité chaque semaine, à récupérer sur ton téléphone par QR (Système › Sauvegarde)','Nettoyage automatique chaque semaine (Système › Stockage et nettoyage)']],
  ['7.63','Novembre 2026',['Chaque ⓘ des réglages montre maintenant deux images, « Activé » et « Désactivé » (ou une par choix), et le bouton pour passer de l’un à l’autre ; aussi pour les interrupteurs, qui n’en avaient pas']],
  ['7.62','Novembre 2026',['Pochette floutée en fond de l’accueil : coupée par défaut (à remettre dans Réglages › Widgets › Pochette et mode concert)','Mode concert : délai réglable (30 s, 1, 2, 5 ou 10 min), 2 min par défaut pour ne plus s’afficher au feu rouge','Décor ville : plus de grosse barre rouge (toboggan des parcs) qui traversait la route']],
  ['7.61','Novembre 2026',['Nouvel onglet « Jeux » : jeu des plaques, devine la ville, blind test, et les passagers jouent sur leur téléphone (QR) ; en pause quand tu roules','41 nouveaux fonds animés : espace (galaxie, Saturne, comète, hyperespace…), paysages (fjord, chalet sous la neige, phare, route au coucher…) et une nouvelle catégorie « Abstraits animés » (synthwave, néon, plasma…)','« Personnaliser mon écran » façon iPhone : en plein écran, ton accueil en direct à gauche, une étape à la fois à droite (fond, couleurs, écriture, disposition des widgets, icônes), puis Thème 1, 2 ou 3','Stations : à côté du prix, ce que tu gagnes ou perds (vert / rouge) en y allant depuis ta position, trajet aller-retour compris ; le calcul complet dans la fiche (en € ou en litres, comparé à la plus proche et à la moins chère)','Stations : vrai logo de chaque enseigne (liste, fiche, carte), services (WC, boutique, lavage, gonflage, café, DAB…), filtre par enseigne, ★ préférées et stations déjà utilisées','OpenStreetMap plus fiable : serveurs de secours quand le principal est saturé (paiement, AdBlue, sorties, alertes)','Alertes de la route (GPS et navigation › Alertes de la route) : zones à faibles émissions avec ta vignette Crit’Air, tunnel devant (allume tes feux), prochaine aire d’autoroute et ses services, commerce utile à la prochaine sortie (boulangerie, McDo, pharmacie ou supermarché)']],
@@ -407,6 +408,7 @@ function paintCar360() { const pos = car360Pos() + ' 0'; document.querySelectorA
     if(pace.late>1.35&&pace.step<4){want=Math.max(want,pace.step+1);pace.hold=now-pace.downAt<8000?Math.min(60000,pace.hold*2):6000;pace.holdUntil=now+pace.hold;}
     if(want>pace.step){if(!pace.slowSince)pace.slowSince=now;if(now-pace.slowSince>=300){pace.step=want;pace.slowSince=0;pace.late=1;}}else pace.slowSince=0;
     if(want<pace.step&&now>=pace.holdUntil&&pace.late<1.15){if(!pace.fastSince)pace.fastSince=now;if(now-pace.fastSince>=2000){pace.step--;pace.downAt=now;pace.fastSince=0;pace.late=1;}}else pace.fastSince=0;
+    if(window.Fluid764)pace.step=Math.max(1,Math.min(4,Fluid764.step(pace.step)));   // 7.64 : fluidité choisie
     if(animate())queue();else {last=0;lastDraw=0;}
   }
   function draw(cv) {

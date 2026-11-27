@@ -1,8 +1,8 @@
-name: Construire et publier APK 7.63
+name: Construire et publier APK 7.64
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publier763.yml', 'sources_assets/**', 'module_GPS_java/**', 'outils/preparer_apk728.py', 'tests/**', 'distribution/release763.json']
+    paths: ['.github/workflows/publier764.yml', 'sources_assets/**', 'module_GPS_java/**', 'outils/preparer_apk728.py', 'tests/**', 'distribution/release764.json']
   workflow_dispatch:
 permissions:
   contents: write
@@ -50,7 +50,7 @@ jobs:
           "$DEX_COMPILER" --release --min-api 24 --lib "$PLATFORM" --output "$RUNNER_TEMP/pont/dex" "$RUNNER_TEMP/pont/pont.jar"
           mv "$RUNNER_TEMP/pont/dex/classes.dex" "$RUNNER_TEMP/pont/classes3.dex"
           sha256sum "$RUNNER_TEMP/pont/classes3.dex"
-      - name: Construire et signer 7.63
+      - name: Construire et signer 7.64
         env:
           ACCUEIL_SIGNING_PASSWORD: ${{ secrets.ACCUEIL_SIGNING_PASSWORD }}
           ACCUEIL_KEY_PASSWORD: ${{ secrets.ACCUEIL_KEY_PASSWORD }}
@@ -58,39 +58,39 @@ jobs:
           set -euo pipefail
           signer="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
           test -n "$signer"
-          python3 outils/preparer_apk728.py --version 7.63 --native-dex "$RUNNER_TEMP/pont/classes3.dex" --keystore "$RUNNER_TEMP/accueil-original.p12" --apksigner "$signer" --output "$RUNNER_TEMP/Accueil2008GT_v7.63.apk"
+          python3 outils/preparer_apk728.py --version 7.64 --native-dex "$RUNNER_TEMP/pont/classes3.dex" --keystore "$RUNNER_TEMP/accueil-original.p12" --apksigner "$signer" --output "$RUNNER_TEMP/Accueil2008GT_v7.64.apk"
       - name: Vérifier les métadonnées et publier le vrai APK
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          apk="$RUNNER_TEMP/Accueil2008GT_v7.63.apk"
+          apk="$RUNNER_TEMP/Accueil2008GT_v7.64.apk"
           aapt="$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)"
-          "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='133' versionName='7.63'"
+          "$aapt" dump badging "$apk" | grep -F "package: name='fr.gtline.accueil2008' versionCode='134' versionName='7.64'"
           "$aapt" dump permissions "$apk" | grep -F "android.permission.REQUEST_DELETE_PACKAGES"
           sha256sum "$apk"
-          if gh release view v7.63 >/dev/null 2>&1; then
+          if gh release view v7.64 >/dev/null 2>&1; then
             echo 'La release existe déjà : ne pas écraser un APK publié.'
             exit 1
           fi
-          gh release create v7.63 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.63" --notes "Version 7.63 : images Activé / Désactivé dans chaque ⓘ des réglages."
+          gh release create v7.64 "$apk" --target "$GITHUB_SHA" --title "Accueil 2008 GT 7.64" --notes "Version 7.64 : réglages sans doublon et champs titrés, taille et fluidité du widget route, copie de sécurité hebdomadaire, nettoyage automatique."
           mkdir -p "$RUNNER_TEMP/check"
-          gh release download v7.63 --pattern Accueil2008GT_v7.63.apk --dir "$RUNNER_TEMP/check"
-          cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.63.apk"
+          gh release download v7.64 --pattern Accueil2008GT_v7.64.apk --dir "$RUNNER_TEMP/check"
+          cmp "$apk" "$RUNNER_TEMP/check/Accueil2008GT_v7.64.apk"
       - name: Annoncer uniquement le fichier réellement téléchargeable
         run: |
           python3 - <<'PY'
           import json,hashlib,os,pathlib
-          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'Accueil2008GT_v7.63.apk'
-          j=json.loads(pathlib.Path('distribution/release763.json').read_text())
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'Accueil2008GT_v7.64.apk'
+          j=json.loads(pathlib.Path('distribution/release764.json').read_text())
           j['sha256']=hashlib.sha256(p.read_bytes()).hexdigest()
-          for name in ('version.json','distribution/release763.json'):
+          for name in ('version.json','distribution/release764.json'):
               pathlib.Path(name).write_text(json.dumps(j,ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add version.json distribution/release763.json
-          git commit -m 'Annoncer APK 7.63 signé et téléchargé avec empreinte vérifiée'
+          git add version.json distribution/release764.json
+          git commit -m 'Annoncer APK 7.64 signé et téléchargé avec empreinte vérifiée'
           git pull --rebase origin main
           git push origin HEAD:main
       - name: Effacer la copie temporaire de la clé
