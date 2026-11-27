@@ -88,25 +88,44 @@
 
  // ---------- Logos des enseignes ----------
  const BR = [
-  [/total ?energies|^total\b|total access|\belan\b/i, 'TotalEnergies', 'totalenergies.fr', '#e30613'], [/\besso\b/i, 'Esso', 'esso.fr', '#e2001a'], [/\bshell\b/i, 'Shell', 'shell.fr', '#f2b705'],
-  [/^bp\b|\bbp\b/i, 'BP', 'bp.com', '#009b3a'], [/\baral\b/i, 'ARAL', 'aral.de', '#0063ad'], [/\bjet\b/i, 'JET', 'jet-tankstellen.de', '#f5c400'], [/\bavia\b/i, 'Avia', 'avia-france.fr', '#e2001a'],
-  [/\bagip\b|\beni\b/i, 'Eni', 'eni.com', '#e0b000'], [/leclerc/i, 'E.Leclerc', 'e.leclerc', '#0066b3'], [/carrefour/i, 'Carrefour', 'carrefour.fr', '#004e9f'],
-  [/intermarch|mousquetaires/i, 'Intermarché', 'intermarche.com', '#e2001a'], [/auchan/i, 'Auchan', 'auchan.fr', '#e2001a'], [/super ?u\b|hyper ?u\b|syst[eè]me ?u|\bu express|magasins u/i, 'Système U', 'magasins-u.com', '#e2001a'],
-  [/casino|g[ée]ant/i, 'Casino', 'supercasino.fr', '#00703c'], [/dyneff/i, 'Dyneff', 'dyneff.fr', '#e30613'], [/\bnetto\b/i, 'Netto', 'netto.fr', '#d9b300'], [/\bcora\b/i, 'Cora', 'cora.fr', '#e2001a'],
-  [/\bstar\b/i, 'Star', 'star.de', '#e2001a'], [/\bhem\b/i, 'HEM', 'hem-tankstelle.de', '#00843d'], [/\bomv\b/i, 'OMV', 'omv.de', '#003c71'], [/westfalen/i, 'Westfalen', 'westfalen.com', '#e2001a'],
-  [/orlen/i, 'ORLEN', 'orlen.de', '#e2001a'], [/raiffeisen/i, 'Raiffeisen', 'raiffeisen.com', '#00843d'], [/\bbft\b/i, 'bft', 'bft.de', '#e2001a'], [/globus/i, 'Globus', 'globus.de', '#e2001a'],
-  [/tamoil/i, 'Tamoil', 'tamoil.de', '#e2001a'], [/\bq1\b/i, 'Q1', 'q1.eu', '#e2001a'], [/\bhoyer\b/i, 'Hoyer', 'hoyer.de', '#00843d'], [/markenfrei|freie tankstelle/i, 'Indépendante', '', '#6b7685'],
+  [/total ?energies|^total\b|total access|\belan\b/i, 'TotalEnergies', 'totalenergies.fr', '#e30613', 'Q154037'], [/\besso\b/i, 'Esso', 'esso.fr', '#e2001a', 'Q867662'], [/\bshell\b/i, 'Shell', 'shell.fr', '#f2b705', 'Q110716465'],
+  [/^bp\b|\bbp\b/i, 'BP', 'bp.com', '#009b3a', 'Q152057'], [/\baral\b/i, 'ARAL', 'aral.de', '#0063ad', 'Q565734'], [/\bjet\b/i, 'JET', 'jet-tankstellen.de', '#f5c400', ''], [/\bavia\b/i, 'Avia', 'avia-france.fr', '#e2001a', 'Q300147'],
+  [/\bagip\b|\beni\b/i, 'Eni', 'eni.com', '#e0b000', 'Q377915'], [/leclerc/i, 'E.Leclerc', 'e.leclerc', '#0066b3', 'Q1273376'], [/carrefour/i, 'Carrefour', 'carrefour.fr', '#004e9f', 'Q217599'],
+  [/intermarch|mousquetaires/i, 'Intermarché', 'intermarche.com', '#e2001a', ''], [/auchan/i, 'Auchan', 'auchan.fr', '#e2001a', 'Q758603'], [/super ?u\b|hyper ?u\b|syst[eè]me ?u|\bu express|magasins u/i, 'Système U', 'magasins-u.com', '#e2001a', 'Q2529029'],
+  [/casino|g[ée]ant/i, 'Casino', 'supercasino.fr', '#00703c', 'Q89029184'], [/dyneff/i, 'Dyneff', 'dyneff.fr', '#e30613', ''], [/\bnetto\b/i, 'Netto', 'netto.fr', '#d9b300', ''], [/\bcora\b/i, 'Cora', 'cora.fr', '#e2001a', ''],
+  [/\bstar\b/i, 'Star', 'star.de', '#e2001a', 'Q89432390'], [/\bhem\b/i, 'HEM', 'hem-tankstelle.de', '#00843d', ''], [/\bomv\b/i, 'OMV', 'omv.de', '#003c71', ''], [/westfalen/i, 'Westfalen', 'westfalen.com', '#e2001a', 'Q1411209'],
+  [/orlen/i, 'ORLEN', 'orlen.de', '#e2001a', ''], [/raiffeisen/i, 'Raiffeisen', 'raiffeisen.com', '#00843d', ''], [/\bbft\b/i, 'bft', 'bft.de', '#e2001a', 'Q1009104'], [/globus/i, 'Globus', 'globus.de', '#e2001a', ''],
+  [/tamoil/i, 'Tamoil', 'tamoil.de', '#e2001a', 'Q706793'], [/\bq1\b/i, 'Q1', 'q1.eu', '#e2001a', ''], [/\bhoyer\b/i, 'Hoyer', 'hoyer.de', '#00843d', ''], [/markenfrei|freie tankstelle/i, 'Indépendante', '', '#6b7685', ''],
  ];
  function brandOf(s) {
   const txt = [s.name, s.tags && s.tags.brand, s.tags && s.tags.operator, s.tags && s.tags.name].filter(Boolean).join(' ');
   const b = BR.find(x => x[0].test(txt));
-  return b ? { key: b[1], label: b[1], domain: b[2], col: b[3] } : { key: 'Autres', label: 'Autre station', domain: '', col: '#5f6b78' };
+  const qid = String((s.tags && s.tags['brand:wikidata']) || (b && b[4]) || '').trim();
+  return b ? { key: b[1], label: b[1], domain: b[2], col: b[3], qid } : { key: 'Autres', label: String((s.tags && s.tags.brand) || 'Autre station'), domain: '', col: '#5f6b78', qid };
  }
  const escA = x => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+ // Vrai logo : celui de la marque sur Wikidata / Wikimedia Commons (propriété « logo », P154), trouvé par
+ // l'autoradio puis gardé ; sinon l'icône du site de la marque ; sinon les initiales sur la couleur de la marque.
+ const LG = { busy: new Set(), queue: [], redraw: 0 };
+ const lgKey = q => 'logo761_' + q;
+ function lgFile(q) { if (!q) return null; const v = store.get(lgKey(q), null); if (typeof v === 'string' && v.startsWith('-|') && Date.now() - Number(v.slice(2)) > 7 * 864e5) return null; return v; }
+ function lgFetch() {
+  if (LG.running || !LG.queue.length) return;
+  const ids = LG.queue.splice(0, 40); LG.running = true;
+  getJSON('https://www.wikidata.org/w/api.php?action=wbgetentities&props=claims&format=json&origin=*&ids=' + ids.join('|'))
+   .then(j => { if (!j || !j.entities) throw Error('réponse Wikidata vide'); for (const q of ids) { const c = j && j.entities && j.entities[q] && j.entities[q].claims && j.entities[q].claims.P154; const f = c && c[0] && c[0].mainsnak && c[0].mainsnak.datavalue && c[0].mainsnak.datavalue.value; store.set(lgKey(q), f ? String(f) : '-|' + Date.now()); } })
+   .catch(() => { ids.forEach(q => LG.busy.delete(q)); })
+   .finally(() => { LG.running = false; clearTimeout(LG.redraw); LG.redraw = setTimeout(() => safe(() => { if (tab === 'trips' && document.querySelector('#screen .st738')) render(); }), 300); if (LG.queue.length) setTimeout(lgFetch, 500); });
+ }
+ function lgWant(q) { if (!q || !/^Q\d+$/.test(q) || lgFile(q) != null || LG.busy.has(q)) return; LG.busy.add(q); LG.queue.push(q); setTimeout(lgFetch, 0); }
+ const commons = f => 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(String(f).replace(/ /g, '_')) + '?width=96';
  function logo(s, size) {
   if (!on()) return '';
-  const b = brandOf(s), n = size || 26, ini = b.domain ? b.label.replace(/[^A-Za-zÀ-ÿ]/g, '').slice(0, 2).toUpperCase() : '⛽';
-  const img = b.domain ? `<img alt="" src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(b.domain)}&sz=64" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:1px">` : '';
+  const b = brandOf(s), n = size || 26, f = lgFile(b.qid); lgWant(b.qid);
+  const ini = b.domain || b.qid ? b.label.replace(/[^A-Za-zÀ-ÿ]/g, '').slice(0, 2).toUpperCase() : '⛽';
+  const fav = b.domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(b.domain)}&sz=64` : '';
+  const src = f && !String(f).startsWith('-') ? commons(f) : fav;
+  const img = src ? `<img alt="" src="${escA(src)}" ${src !== fav && fav ? `data-fb="${escA(fav)}" onerror="if(this.dataset.fb){this.src=this.dataset.fb;this.removeAttribute('data-fb')}else this.remove()"` : 'onerror="this.remove()"'} style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:2px">` : '';
   return `<span class="lg761" title="${escA(b.label)}" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:${n}px;height:${n}px;flex:0 0 ${n}px;border-radius:${Math.round(n / 4)}px;overflow:hidden;background:${b.col};color:#fff;font:800 ${Math.round(n * .42)}px Inter,sans-serif;vertical-align:middle">${ini}${img}</span>`;
  }
 

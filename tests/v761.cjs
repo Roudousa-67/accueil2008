@@ -2,7 +2,7 @@
 // 7.61 : alertes de la route (ZFE, tunnel, aires, sortie).
 const assert=require('node:assert/strict');
 const {make}=require('./regression.cjs');
-const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','couleurs760.js','osm761.js','route761.js','stations761.js','info760.js','keep758.js'];
+const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js','v730.js','v731.js','v732.js','journeys733.js','v734.js','v737.js','lib/qrcode-generator.js','v738.js','transfer738.js','stations738.js','highway738.js','v740.js','diag738.js','display743.js','v750.js','secours753.js','uninstall753.js','bar754.js','wall755.js','walls760.js','ticket756.js','ticket757.js','music758.js','stats759.js','tour760.js','photo760.js','settings738.js','ranger758.js','apparence760.js','couleurs760.js','osm761.js','route761.js','stations761.js','perso761.js','info760.js','keep758.js'];
 (async()=>{
  const t=make({canvas:true,extraScripts:extra}),{run}=t;
  assert.equal(t.errors.length,0,t.errors.join('\n'));
@@ -84,8 +84,33 @@ const extra=['traffic730.js','decors726.js','driver728.js','near728.js','v728.js
  run("store.set('stBrand761','all');Rent761.watchFills();const st=Stations738.state.all[1];loc={lat:st.lat,lon:st.lon,spd:0,acc:5,brg:0,alt:0,ts:Date.now()};store.set('fuelLog',(store.get('fuelLog',[])||[]).concat([{t:Date.now(),l:30,e:50,k:0,s:''}]));Rent761.watchFills();store.set('stBrand761','used');render();");
  assert.equal(run("Stations738.rows().length"),1,'déjà utilisée après un plein');
  run("store.set('stBrand761','all');render();");
+ // Vrais logos : Wikidata (logo P154) puis Wikimedia Commons
+ run("getJSON=async u=>{__req761.push(u);if(u.includes('wikidata.org')){const ids=decodeURIComponent(u.split('ids=')[1]).split('|');const e={};ids.forEach(q=>e[q]={claims:q==='Q154037'?{P154:[{mainsnak:{datavalue:{value:'TotalEnergies logo.svg'}}}]}:{}});return {entities:e}}return {elements:[]}};render();");
+ for(let k=0;k<4;k++){t.timers.splice(0).filter(x=>x.ms<=500).forEach(x=>x.fn());await new Promise(r=>setImmediate(r));await new Promise(r=>setImmediate(r));}run('render()');
+ assert(run("__req761.some(u=>u.includes('wikidata.org')&&u.includes('Q154037'))"),'logo demandé à Wikidata');
+ assert(run("[...document.querySelectorAll('#screen .st738-row .lg761 img')].some(i=>i.src.includes('commons.wikimedia.org/wiki/Special:FilePath/TotalEnergies_logo.svg'))"),'vrai logo TotalEnergies (Commons)');
+ assert(String(run("store.get('logo761_Q565734','')")).startsWith('-|'),'marque sans logo libre : notée, secours icône');
+ // Personnaliser mon écran (façon iPhone)
+ run("tab='settings';openSet('Accueil et affichage','Apparence');render();");
+ assert(run("!!document.querySelector('#screen [data-act=\"perso761:open\"]')"),'gros bouton Personnaliser');
+ run("curSpeed=()=>({v:0,src:'test'});act('perso761:open')");
+ assert(run("!!document.getElementById('perso761')"),'personnalisation ouverte');assert.equal(run('tab'),'home','accueil en direct derrière');
+ assert(run("document.getElementById('stage').style.transform").includes('scale(0.'),'accueil réduit à gauche');
+ const pz=a=>run(`(()=>{const b=document.querySelector('#perso761 [data-pz="${a}"]');if(!b)return false;b.click();return true})()`);
+ assert(pz('next'),'Commencer');assert(run("document.querySelector('#perso761').textContent").includes('Ton fond d’écran'),'étape fond');
+ assert(pz('cat:Paysages animés'));assert(pz('wall:x7lavande'));assert.equal(run("pv('wall','')"),'x7lavande','fond choisi');
+ assert(pz('next'));assert(pz('do:acc:#1D9E75'));assert.equal(run('palette().acc.toUpperCase()'),'#1D9E75','couleur des boutons');
+ assert(pz('next'));assert(pz('do:font:Orbitron'));assert.equal(run("store.get('appFont','')"),'Orbitron','écriture');
+ assert(pz('next'));assert(pz('lay:gps'));assert.equal(run('Perso761.layoutNow()'),'gps','disposition GPS en grand');
+ assert(run("fCfg().pages[0].some(it=>it.b[0]==='apps')"),'raccourcis gardés');
+ assert(pz('lay:undo'));assert.notEqual(run('Perso761.layoutNow()'),'gps','ancienne disposition remise');
+ assert(pz('next'));assert(pz('do:ap760:dock:neon'));assert.equal(run("store.get('dockStyle760','')"),'neon','icônes');
+ assert(pz('next'));assert(run("document.querySelector('#perso761').textContent").includes('C’est prêt'),'fin');
+ assert(pz('save:1'));assert(run('!!Apparence760.slots()[1]'),'Thème 2 enregistré');
+ assert(pz('close'));assert(!run("!!document.getElementById('perso761')"),'fermé');assert(!run("document.getElementById('stage').style.transform").includes('translate'),'accueil remis en plein écran');
+ run("curSpeed=()=>({v:50,src:'test'});act('perso761:open')");assert(!run("!!document.getElementById('perso761')"),'pas en roulant');run("curSpeed=()=>({v:0,src:'test'})");
  assert.equal(t.errors.length,0,t.errors.join('\n'));
- console.log('OK alertes de la route : ZFE (pas au démarrage dedans, en entrant, devant), tunnel devant, aire et services, commerce à la sortie, coupure, réglages ; miroirs OpenStreetMap ; stations rentables (€ ou litres, plus proche et moins chère), logos, services, filtre enseigne, préférées, déjà utilisées');
+ console.log('OK alertes de la route : ZFE (pas au démarrage dedans, en entrant, devant), tunnel devant, aire et services, commerce à la sortie, coupure, réglages ; miroirs OpenStreetMap ; stations rentables (€ ou litres, plus proche et moins chère), logos, services, filtre enseigne, préférées, déjà utilisées, vrais logos ; personnalisation façon iPhone');
  console.log('Tests 7.61 réussis.');
  process.exit(0);
 })().catch(e=>{console.error(e);process.exit(1);});
