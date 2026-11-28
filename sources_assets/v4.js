@@ -9,9 +9,10 @@
    - ~100 fonds d'écran + photos perso, nombre de raccourcis
    - vérification CAN au démarrage, sauvegarde / restauration, mises à jour */
 'use strict';
-const APP_VERSION = '7.65';
+const APP_VERSION = '7.66';
 const APP_AUTHOR = 'Roudoussa 67';
 const CHANGELOG = [
+ ['7.66','Novembre 2026',['Décor vivant : monuments à l’horizon en ville (cathédrale, château, tour, dans leur vraie direction), plus de voitures quand ça bouchonne, panneau de limitation planté au bord de la route quand la limite change, panneau bleu à l’entrée de chaque département','Chaque élément se coupe dans Widgets › Vue voiture et route (Décor vivant)']],
  ['7.65','Novembre 2026',['Barre de raccourcis : une seule liste au lieu de deux ; chaque bouton montre l’appli qu’il ouvre, avec « Choisir l’appli », ▲ ▼ pour l’ordre et « Retirer »']],
  ['7.64','Novembre 2026',['Réglages : plus de rubrique en double, et chaque champ a un vrai titre (fini les « Champ de… »)','Widget route : taille (petit, moyen, grand) et fluidité (économie, normal, fluide) dans Widgets › Vue voiture et route','Copie de sécurité chaque semaine, à récupérer sur ton téléphone par QR (Système › Sauvegarde)','Nettoyage automatique chaque semaine (Système › Stockage et nettoyage)']],
  ['7.63','Novembre 2026',['Chaque ⓘ des réglages montre maintenant deux images, « Activé » et « Désactivé » (ou une par choix), et le bouton pour passer de l’un à l’autre ; aussi pour les interrupteurs, qui n’en avaient pas']],
